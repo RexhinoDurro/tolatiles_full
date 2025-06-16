@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ArrowRight, 
+  Star, 
+  Zap, 
+  Shield, 
+  Award,
+  Clock,
+  CheckCircle,
+  Users,
+  Sparkles
+} from 'lucide-react';
 import { sampleImages } from '../data/gallery';
 import cover2 from '../assets/images/shower/2.jpg'
 import cover1 from '../assets/images/fireplace/1.jpg'
 import cover3 from '../assets/images/backsplash/1.jpg'
+
 interface HomePageProps {
   setCurrentPage: (page: string) => void;
 }
@@ -13,7 +26,9 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
     <div>
       <HeroSlider setCurrentPage={setCurrentPage} />
       <FeaturesSection />
+      <WhyChooseUsSection />
       <SampleWorkPreview setCurrentPage={setCurrentPage} />
+      <TestimonialSection />
     </div>
   );
 };
@@ -170,19 +185,19 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
 const FeaturesSection: React.FC = () => {
   const features = [
     {
-      icon: "⭐",
+      icon: Star,
       title: "Premium Quality",
-      description: "Only the finest materials and expert craftsmanship for lasting results"
+      description: "Only the finest materials and expert craftsmanship for lasting results that exceed expectations"
     },
     {
-      icon: "🚀",
-      title: "Fast Installation",
-      description: "Efficient project completion without compromising on quality"
+      icon: Zap,
+      title: "Expert Installation",
+      description: "Efficient project completion by certified professionals without compromising on quality"
     },
     {
-      icon: "💎",
-      title: "Lifetime Warranty",
-      description: "Comprehensive warranty coverage for your peace of mind"
+      icon: Shield,
+      title: "2-Year Warranty",
+      description: "Comprehensive warranty coverage for your complete peace of mind and protection"
     }
   ];
 
@@ -192,23 +207,84 @@ const FeaturesSection: React.FC = () => {
         <div className="text-center mb-16">
           <h3 className="text-4xl font-bold text-gray-900 mb-6">Why Choose Tola Tiles?</h3>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We bring years of experience and unmatched expertise to every tile installation project
+            We bring years of experience and unmatched expertise to every tile installation project, 
+            ensuring exceptional results that stand the test of time.
           </p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div 
-              key={index} 
-              className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group"
-            >
-              <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
-                {feature.icon}
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <div 
+                key={index} 
+                className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group"
+              >
+                <div className="bg-blue-100 p-4 rounded-full w-20 h-20 mx-auto mb-6 group-hover:bg-blue-200 transition-colors duration-300">
+                  <IconComponent className="h-12 w-12 text-blue-600 mx-auto" />
+                </div>
+                <h4 className="text-2xl font-semibold mb-4 text-gray-900">{feature.title}</h4>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
-              <h4 className="text-2xl font-semibold mb-4 text-gray-900">{feature.title}</h4>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const WhyChooseUsSection: React.FC = () => {
+  const benefits = [
+    {
+      icon: Award,
+      title: "15+ Years Experience",
+      description: "Proven track record with over 1,500 successful installations"
+    },
+    {
+      icon: Users,
+      title: "Expert Team",
+      description: "Certified professionals with ongoing training and expertise"
+    },
+    {
+      icon: Clock,
+      title: "On-Time Delivery",
+      description: "Reliable timelines and project completion as scheduled"
+    },
+    {
+      icon: CheckCircle,
+      title: "100% Satisfaction",
+      description: "Dedicated to exceeding your expectations on every project"
+    }
+  ];
+
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h3 className="text-4xl font-bold text-gray-900 mb-6">The Tola Tiles Advantage</h3>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            When you choose us, you're partnering with professionals who are committed to 
+            transforming your vision into reality with precision and care.
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {benefits.map((benefit, index) => {
+            const IconComponent = benefit.icon;
+            return (
+              <div 
+                key={index} 
+                className="text-center p-6 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
+              >
+                <div className="bg-blue-50 p-3 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-blue-100 transition-colors duration-300">
+                  <IconComponent className="h-10 w-10 text-blue-600 mx-auto" />
+                </div>
+                <h4 className="text-lg font-semibold mb-2 text-gray-900">{benefit.title}</h4>
+                <p className="text-gray-600 text-sm leading-relaxed">{benefit.description}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -217,7 +293,7 @@ const FeaturesSection: React.FC = () => {
 
 const SampleWorkPreview: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setCurrentPage }) => {
   return (
-    <section className="py-20">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h3 className="text-4xl font-bold text-gray-900 mb-6">Featured Projects</h3>
@@ -247,10 +323,69 @@ const SampleWorkPreview: React.FC<{ setCurrentPage: (page: string) => void }> = 
         <div className="text-center">
           <button 
             onClick={() => setCurrentPage('gallery')}
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
           >
+            <Sparkles className="h-5 w-5" />
             View Full Gallery
           </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const TestimonialSection: React.FC = () => {
+  const testimonials = [
+    {
+      name: "Sarah Johnson",
+      project: "Kitchen Backsplash",
+      quote: "Tola Tiles transformed our kitchen beyond our expectations. The attention to detail and craftsmanship is exceptional.",
+      rating: 5
+    },
+    {
+      name: "Mike Chen",
+      project: "Bathroom Renovation",
+      quote: "Professional, reliable, and the quality is outstanding. Our bathroom looks like a luxury spa now!",
+      rating: 5
+    },
+    {
+      name: "Lisa Rodriguez",
+      project: "Patio Installation",
+      quote: "From design to completion, the team was fantastic. They delivered exactly what they promised.",
+      rating: 5
+    }
+  ];
+
+  return (
+    <section className="py-20 bg-blue-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h3 className="text-4xl font-bold text-white mb-6">What Our Clients Say</h3>
+          <p className="text-xl text-blue-100">
+            Don't just take our word for it—hear from satisfied customers who trusted us with their projects
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <div 
+              key={index} 
+              className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="flex mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <blockquote className="text-gray-700 mb-6 leading-relaxed">
+                "{testimonial.quote}"
+              </blockquote>
+              <div>
+                <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                <div className="text-sm text-gray-600">{testimonial.project}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

@@ -114,13 +114,13 @@ export const sampleImages: SampleImages = {
   ],
   fireplaces: [
     { id: 35, src: fireplace1, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace2, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace3, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace4, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace5, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace6, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace7, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
-    { id: 35, src: fireplace8, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 36, src: fireplace2, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 37, src: fireplace3, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 38, src: fireplace4, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 39, src: fireplace5, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 40, src: fireplace6, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 41, src: fireplace7, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
+    { id: 42, src: fireplace8, title: 'Stone Fireplace Surround', description: 'Natural stone surround' },
     
   ]
 };
