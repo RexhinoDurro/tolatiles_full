@@ -1,6 +1,6 @@
 import React from 'react';
-import { sampleImages } from '../data/sampleData';
-import type { TileImage, SampleImages } from '../data/sampleData';
+import { sampleImages } from '../data/gallery';
+import type { TileImage, SampleImages } from '../data/gallery';
 
 interface GalleryPageProps {
   selectedCategory: string;

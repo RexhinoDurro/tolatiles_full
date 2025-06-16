@@ -1,5 +1,5 @@
 import React from 'react';
-import { services } from '../data/sampleData';
+import { services } from '../data/services';
 
 const ServicesPage: React.FC = () => {
   return (

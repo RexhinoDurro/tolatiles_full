@@ -94,24 +94,61 @@
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  /* Enable overlay scrollbars globally */
+  scrollbar-gutter: stable;
 }
 
-/* Custom scrollbar */
+/* Modern overlay scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2563eb transparent;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2563eb;
-  border-radius: 4px;
+  background: rgba(37, 99, 235, 0.6);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #1d4ed8;
+  background: rgba(37, 99, 235, 0.8);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Force overlay scrollbar mode */
+body {
+  overflow-x: hidden;
+  overflow-y: overlay;
+}
+
+/* For browsers that don't support overlay */
+@supports not (overflow-y: overlay) {
+  body {
+    overflow-y: auto;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: rgba(37, 99, 235, 0.4);
+  }
 }
 
 /* Navbar backdrop blur support */
@@ -120,7 +157,12 @@ html {
   -webkit-backdrop-filter: blur(12px);
 }
 
-/* Custom button hover effects */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Enhanced button hover effects */
 .btn-hover-lift {
   transition: all 0.3s ease;
 }
@@ -216,6 +258,15 @@ html {
 .gallery-item:nth-child(6) { animation-delay: 0.6s; }
 .gallery-item:nth-child(7) { animation-delay: 0.7s; }
 .gallery-item:nth-child(8) { animation-delay: 0.8s; }
+
+/* Text shadow utilities for better contrast */
+.drop-shadow-text {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.drop-shadow-text-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
 
 /* Print styles */
 @media print {

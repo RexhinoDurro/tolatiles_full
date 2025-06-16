@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { faqs } from '../data/sampleData';
+import { faqs } from '../data/faqs';
 
 const FAQsPage: React.FC = () => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);

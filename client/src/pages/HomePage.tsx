@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { sampleImages } from '../data/sampleData';
-
+import { sampleImages } from '../data/gallery';
+import cover2 from '../assets/images/shower/2.jpg'
+import cover1 from '../assets/images/fireplace/1.jpg'
+import cover3 from '../assets/images/backsplash/1.jpg'
 interface HomePageProps {
   setCurrentPage: (page: string) => void;
 }
@@ -25,7 +27,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       title: "Transform Your Space with Premium Tiles",
       subtitle: "Professional Installation • Quality Materials • Lifetime Warranty",
       description: "Expert tile installation for kitchens, bathrooms, patios, and more. Creating beautiful spaces that last a lifetime.",
-      image: "/api/placeholder/1920/1080",
+      image: cover1,
       cta: "View Our Work"
     },
     {
@@ -33,7 +35,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       title: "Luxury Bathroom Transformations",
       subtitle: "Custom Designs • Expert Craftsmanship • Modern Solutions",
       description: "From elegant marble to contemporary ceramics, we create stunning bathroom spaces tailored to your vision.",
-      image: "/api/placeholder/1920/1080",
+      image: cover2,
       cta: "See Gallery"
     },
     {
@@ -41,7 +43,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       title: "Beautiful Kitchen Backsplashes",
       subtitle: "Stylish Designs • Perfect Installation • Lasting Beauty",
       description: "Enhance your kitchen with our expertly installed backsplashes using the finest materials and innovative designs.",
-      image: "/api/placeholder/1920/1080",
+      image: cover3,
       cta: "Get Quote"
     }
   ];
