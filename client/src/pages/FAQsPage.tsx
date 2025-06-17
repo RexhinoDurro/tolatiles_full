@@ -17,7 +17,7 @@ import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import FAQSchema from '../components/FAQSchema';
 import { faqs, faqCategories } from '../data/faqs';
-import type { FAQ } from '../data/faqs';
+
 
 const iconMap = {
   HelpCircle,

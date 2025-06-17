@@ -1,7 +1,6 @@
 // src/App.tsx
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -20,39 +19,31 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const App: React.FC = () => {
   return (
-    <HelmetProvider>
-      <Router>
-        <ScrollToTop />
-        <ErrorBoundary>
-          <div className="min-h-screen bg-white">
-            <Navbar />
-            <main role="main">
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/services" element={<ServicesPage />} />
-                  <Route path="/gallery" element={<GalleryPage />} />
-                  <Route path="/gallery/:category" element={<GalleryPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/faqs" element={<FAQsPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/404" element={<NotFoundPage />} />
-                  <Route path="*" element={<Navigate to="/404" replace />} />
-                </Routes>
-              </Suspense>
-            </main>
-            <Footer />
-          </div>
-        </ErrorBoundary>
-      </Router>
-    </HelmetProvider>
+    <Router>
+      <ScrollToTop />
+      <ErrorBoundary>
+        <div className="min-h-screen bg-white">
+          <Navbar />
+          <main role="main">
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/gallery" element={<GalleryPage />} />
+                <Route path="/gallery/:category" element={<GalleryPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/faqs" element={<FAQsPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/404" element={<NotFoundPage />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
+            </Suspense>
+          </main>
+          <Footer />
+        </div>
+      </ErrorBoundary>
+    </Router>
   );
 };
 
 export default App;
-
-// src/components/LoadingSpinner.tsx
-
-
-
-

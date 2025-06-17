@@ -1,5 +1,5 @@
 // src/pages/GalleryPage.tsx
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';

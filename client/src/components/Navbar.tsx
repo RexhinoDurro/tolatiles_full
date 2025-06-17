@@ -1,6 +1,6 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import logolong from '../assets/images/logoLong.png';
 
@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
   const [isGalleryDropdownOpen, setIsGalleryDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     const handleScroll = () => {

@@ -1,6 +1,5 @@
 // src/components/ServiceSchema.tsx
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 
 interface ServiceSchemaProps {
   service: {
@@ -39,7 +38,7 @@ const ServiceSchema: React.FC<ServiceSchemaProps> = ({ service }) => {
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
       "name": service.name,
-      "itemListElement": service.features.map((feature, index) => ({
+      "itemListElement": service.features.map((feature) => ({
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
@@ -58,11 +57,9 @@ const ServiceSchema: React.FC<ServiceSchemaProps> = ({ service }) => {
   };
 
   return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(schemaData)}
-      </script>
-    </Helmet>
+    <script type="application/ld+json">
+      {JSON.stringify(schemaData)}
+    </script>
   );
 };
 

@@ -1,6 +1,5 @@
 // src/components/SEO.tsx
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 
 interface SEOProps {
   title?: string;
@@ -9,7 +8,7 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: string;
-  schemaData?: object;
+  schemaData?: object | object[];
 }
 
 const SEO: React.FC<SEOProps> = ({ 
@@ -24,7 +23,7 @@ const SEO: React.FC<SEOProps> = ({
   const fullTitle = title.includes('Tola Tiles') ? title : `${title} | Tola Tiles`;
 
   return (
-    <Helmet>
+    <>
       {/* Primary Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="title" content={fullTitle} />
@@ -51,10 +50,10 @@ const SEO: React.FC<SEOProps> = ({
       {/* Schema Data */}
       {schemaData && (
         <script type="application/ld+json">
-          {JSON.stringify(schemaData)}
+          {JSON.stringify(Array.isArray(schemaData) ? schemaData : [schemaData])}
         </script>
       )}
-    </Helmet>
+    </>
   );
 };
 

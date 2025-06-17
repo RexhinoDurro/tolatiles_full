@@ -1,6 +1,5 @@
 // src/components/BreadcrumbSchema.tsx
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 
 interface BreadcrumbItem {
   name: string;
@@ -24,11 +23,9 @@ const BreadcrumbSchema: React.FC<BreadcrumbSchemaProps> = ({ items }) => {
   };
 
   return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(schemaData)}
-      </script>
-    </Helmet>
+    <script type="application/ld+json">
+      {JSON.stringify(schemaData)}
+    </script>
   );
 };
 

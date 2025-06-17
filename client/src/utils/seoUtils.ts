@@ -1,3 +1,4 @@
+// src/utils/seoUtils.ts
 export const generateSitemap = () => {
   const pages = [
     { url: '/', priority: '1.0', changefreq: 'daily' },
@@ -132,17 +133,35 @@ export const generateBusinessStructuredData = () => {
   };
 };
 
-// Performance monitoring
+// Performance monitoring with current web-vitals API
 export const trackWebVitals = () => {
   if (typeof window !== 'undefined' && 'performance' in window) {
-    // Track Core Web Vitals
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(console.log);
-      getFID(console.log);
-      getFCP(console.log);
-      getLCP(console.log);
-      getTTFB(console.log);
+    // Track Core Web Vitals using the current API (INP replaced FID in March 2024)
+    import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
+      const reportWebVital = (metric: any) => {
+        // Send to analytics if available
+        if (window.gtag) {
+          window.gtag('event', metric.name, {
+            custom_parameter_1: metric.value,
+            custom_parameter_2: metric.rating,
+            non_interaction: true,
+          });
+        }
+
+        // Log in development for debugging
+        if (import.meta.env.DEV) {
+          console.log(`${metric.name}: ${metric.value} (${metric.rating})`);
+        }
+      };
+
+      // Current Core Web Vitals metrics
+      onCLS(reportWebVital);   // Cumulative Layout Shift
+      onINP(reportWebVital);   // Interaction to Next Paint (replaced FID)
+      onFCP(reportWebVital);   // First Contentful Paint
+      onLCP(reportWebVital);   // Largest Contentful Paint
+      onTTFB(reportWebVital);  // Time to First Byte
+    }).catch((error) => {
+      console.error('Failed to load web-vitals:', error);
     });
   }
 };
-

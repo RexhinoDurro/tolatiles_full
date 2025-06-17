@@ -1,7 +1,11 @@
 // src/components/FAQSchema.tsx
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import type { FAQ } from '../data/faqs';
+
+interface FAQ {
+  question: string;
+  answer: string;
+  category: string;
+}
 
 interface FAQSchemaProps {
   faqs: FAQ[];
@@ -22,11 +26,9 @@ const FAQSchema: React.FC<FAQSchemaProps> = ({ faqs }) => {
   };
 
   return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(schemaData)}
-      </script>
-    </Helmet>
+    <script type="application/ld+json">
+      {JSON.stringify(schemaData)}
+    </script>
   );
 };
 

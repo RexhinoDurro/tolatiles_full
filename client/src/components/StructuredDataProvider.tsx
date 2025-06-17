@@ -1,10 +1,7 @@
+// src/components/StructuredDataProvider.tsx
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useLocation } from 'react-router-dom';
 
 const StructuredDataProvider: React.FC = () => {
-  const location = useLocation();
-
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -80,14 +77,14 @@ const StructuredDataProvider: React.FC = () => {
   };
 
   return (
-    <Helmet>
+    <>
       <script type="application/ld+json">
         {JSON.stringify(websiteSchema)}
       </script>
       <script type="application/ld+json">
         {JSON.stringify(organizationSchema)}
       </script>
-    </Helmet>
+    </>
   );
 };
 

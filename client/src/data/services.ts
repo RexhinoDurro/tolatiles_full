@@ -1,4 +1,5 @@
 export interface Service {
+  name: string; // Add missing name property
   title: string;
   description: string;
   detailedDescription: string;
@@ -10,6 +11,7 @@ export interface Service {
 
 export const services: Service[] = [
   {
+    name: 'Tile Installation', // Add name field
     title: 'Tile Installation',
     description: 'Professional installation of ceramic, porcelain, and natural stone tiles for any surface.',
     detailedDescription: 'Our expert craftsmen specialize in precision tile installation for kitchens, bathrooms, foyers, and commercial spaces. Using industry-leading techniques and premium materials, we ensure every tile is perfectly aligned and securely bonded for lasting durability.',
@@ -25,6 +27,7 @@ export const services: Service[] = [
     priceRange: '$8-15 per sq ft'
   },
   {
+    name: 'Kitchen Backsplashes',
     title: 'Kitchen Backsplashes',
     description: 'Transform your kitchen with stunning backsplash designs that combine beauty and functionality.',
     detailedDescription: 'Create a focal point in your kitchen with our custom backsplash installations. From classic subway tiles to intricate mosaics, we help you choose the perfect style that complements your cabinets, countertops, and overall design aesthetic.',
@@ -40,6 +43,7 @@ export const services: Service[] = [
     priceRange: '$12-25 per sq ft'
   },
   {
+    name: 'Bathroom Remodeling',
     title: 'Bathroom Remodeling',
     description: 'Complete bathroom transformations with expert tile work for walls, floors, and shower enclosures.',
     detailedDescription: 'Turn your bathroom into a luxurious retreat with our comprehensive remodeling services. We handle everything from floor-to-ceiling tile installation to custom shower niches, ensuring every detail meets the highest standards of craftsmanship.',
@@ -55,6 +59,7 @@ export const services: Service[] = [
     priceRange: '$10-20 per sq ft'
   },
   {
+    name: 'Floor Tiling',
     title: 'Floor Tiling',
     description: 'Durable and beautiful floor installations for residential and commercial properties.',
     detailedDescription: 'From elegant marble entryways to practical porcelain floors, our flooring specialists deliver exceptional results that stand the test of time. We prepare subfloors properly and use premium adhesives for long-lasting installations.',
@@ -70,6 +75,7 @@ export const services: Service[] = [
     priceRange: '$6-18 per sq ft'
   },
   {
+    name: 'Design Consultation',
     title: 'Design Consultation',
     description: 'Expert design advice to help you choose the perfect tiles and layout for your space.',
     detailedDescription: 'Our experienced design consultants work with you to select tiles that perfectly match your vision, budget, and lifestyle needs. We provide detailed mockups, material samples, and layout options to ensure your complete satisfaction.',
@@ -85,6 +91,7 @@ export const services: Service[] = [
     priceRange: 'Free with project'
   },
   {
+    name: 'Maintenance & Repair',
     title: 'Maintenance & Repair',
     description: 'Ongoing maintenance and repair services to keep your tiles looking perfect for years to come.',
     detailedDescription: 'Protect your investment with our comprehensive maintenance services. From routine cleaning and resealing to crack repairs and tile replacement, we help maintain the beauty and integrity of your tile installations.',

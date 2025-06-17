@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Award, Users, Clock, Shield, Star, Heart, Ta
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import { teamMembers } from '../data/team';
-import type { TeamMember } from '../data/team';
+
 
 const AboutPage: React.FC = () => {
   const aboutSchema = {
