@@ -105,7 +105,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'react-helmet-async', 'lucide-react']
+    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react']
   },
   server: {
     hmr: {

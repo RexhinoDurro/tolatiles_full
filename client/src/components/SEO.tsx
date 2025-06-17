@@ -1,5 +1,4 @@
-// src/components/SEO.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface SEOProps {
   title?: string;
@@ -9,6 +8,7 @@ interface SEOProps {
   url?: string;
   type?: string;
   schemaData?: object | object[];
+  noindex?: boolean;
 }
 
 const SEO: React.FC<SEOProps> = ({ 
@@ -18,43 +18,80 @@ const SEO: React.FC<SEOProps> = ({
   image = "https://tolatiles.com/assets/og-image.jpg",
   url = "https://tolatiles.com",
   type = "website",
-  schemaData
+  schemaData,
+  noindex = false
 }) => {
   const fullTitle = title.includes('Tola Tiles') ? title : `${title} | Tola Tiles`;
 
-  return (
-    <>
-      {/* Primary Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
+  useEffect(() => {
+    // Update document title
+    document.title = fullTitle;
+    
+    // Update meta tags
+    const updateMeta = (name: string, content: string) => {
+      let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('name', name);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    const updateProperty = (property: string, content: string) => {
+      let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute('property', property);
+        document.head.appendChild(element);
+      }
+      element.setAttribute('content', content);
+    };
+
+    // Update meta tags
+    updateMeta('description', description);
+    updateMeta('keywords', keywords);
+    updateMeta('robots', noindex ? 'noindex,nofollow' : 'index,follow');
+    
+    // Update Open Graph tags
+    updateProperty('og:title', fullTitle);
+    updateProperty('og:description', description);
+    updateProperty('og:image', image);
+    updateProperty('og:url', url);
+    updateProperty('og:type', type);
+    
+    // Update Twitter tags
+    updateProperty('twitter:title', fullTitle);
+    updateProperty('twitter:description', description);
+    updateProperty('twitter:image', image);
+    updateProperty('twitter:card', 'summary_large_image');
+
+    // Update canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    // Add schema data
+    if (schemaData) {
+      const schemaId = 'dynamic-schema';
+      let existingSchema = document.getElementById(schemaId);
+      if (existingSchema) {
+        existingSchema.remove();
+      }
       
-      {/* Canonical URL */}
-      <link rel="canonical" href={url} />
-      
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
-      
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
-      <meta property="twitter:title" content={fullTitle} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={image} />
-      
-      {/* Schema Data */}
-      {schemaData && (
-        <script type="application/ld+json">
-          {JSON.stringify(Array.isArray(schemaData) ? schemaData : [schemaData])}
-        </script>
-      )}
-    </>
-  );
+      const script = document.createElement('script');
+      script.id = schemaId;
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(Array.isArray(schemaData) ? schemaData : [schemaData]);
+      document.head.appendChild(script);
+    }
+  }, [fullTitle, description, keywords, image, url, type, noindex, schemaData]);
+
+  return null; // This component doesn't render anything
 };
 
 export default SEO;
