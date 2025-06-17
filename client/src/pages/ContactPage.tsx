@@ -49,28 +49,28 @@ const ContactPage: React.FC = () => {
   };
 
   const contactSchema = {
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "mainEntity": {
-      "@type": "LocalBusiness",
-      "name": "Tola Tiles",
-      "telephone": "+1-555-123-4567",
-      "email": "info@tolatiles.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "123 Tile Street",
-        "addressLocality": "City",
-        "addressRegion": "State",
-        "postalCode": "12345",
-        "addressCountry": "US"
-      },
-      "openingHours": [
-        "Mo-Fr 08:00-18:00",
-        "Sa 09:00-16:00"
-      ],
-      "url": "https://tolatiles.com/contact"
-    }
-  };
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "mainEntity": {
+    "@type": "LocalBusiness",
+    "name": "Tola Tiles",
+    "telephone": "+1-904-210-3094",
+    "email": "Menitola@live.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "445 Hutchinson Ln",
+      "addressLocality": "Saint Augustine",
+      "addressRegion": "FL",
+      "postalCode": "32084",
+      "addressCountry": "US"
+    },
+    "openingHours": [
+      "Mo-Fr 08:00-18:00",
+      "Sa 09:00-16:00"
+    ],
+    "url": "https://tolatiles.com/contact"
+  }
+};
 
   const breadcrumbItems = [
     { name: "Home", url: "https://tolatiles.com" },
@@ -110,27 +110,27 @@ const ContactPage: React.FC = () => {
                     <div>
                       <div className="font-medium text-gray-900">Phone</div>
                       <a 
-                        href="tel:+1-555-123-4567" 
+                        href="tel:+1-904-210-3094" 
                         className="text-lg text-gray-700 hover:text-blue-600 transition-colors"
                         itemProp="telephone"
                       >
-                        (555) 123-4567
+                        (904) 210-3094
                       </a>
                     </div>
                   </div>
                   
-                  <div className="flex items-center group">
+                   <div className="flex items-center group">
                     <div className="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors duration-300">
                       <Mail className="h-6 w-6 text-blue-600" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">Email</div>
                       <a 
-                        href="mailto:info@tolatiles.com" 
+                        href="mailto:Menitola@live.com" 
                         className="text-lg text-gray-700 hover:text-blue-600 transition-colors"
                         itemProp="email"
                       >
-                        info@tolatiles.com
+                        Menitola@live.com
                       </a>
                     </div>
                   </div>
@@ -142,8 +142,8 @@ const ContactPage: React.FC = () => {
                     <div>
                       <div className="font-medium text-gray-900">Address</div>
                       <address className="text-lg text-gray-700 not-italic" itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
-                        <span itemProp="streetAddress">123 Tile Street</span><br />
-                        <span itemProp="addressLocality">City</span>, <span itemProp="addressRegion">State</span> <span itemProp="postalCode">12345</span>
+                        <span itemProp="streetAddress">445 Hutchinson Ln</span><br />
+                        <span itemProp="addressLocality">Saint Augustine</span>, <span itemProp="addressRegion">FL</span> <span itemProp="postalCode">32084</span>
                       </address>
                     </div>
                   </div>
@@ -174,19 +174,18 @@ const ContactPage: React.FC = () => {
                 <div className="mt-8 p-6 border border-gray-200 rounded-xl">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Service Areas</h3>
                   <p className="text-gray-600 mb-4">
-                    We proudly serve the greater metropolitan area within a 50-mile radius of our location.
+                    We proudly serve Saint Augustine and the greater Northeast Florida area within a 50-mile radius.
                   </p>
                   <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                    <div>• City & Surrounding Areas</div>
-                    <div>• North County</div>
-                    <div>• South County</div>
-                    <div>• East Valley</div>
-                    <div>• West Side</div>
-                    <div>• Downtown District</div>
+                    <div>• Saint Augustine</div>
+                    <div>• Ponte Vedra Beach</div>
+                    <div>• Jacksonville</div>
+                    <div>• Palm Coast</div>
+                    <div>• St. Johns County</div>
+                    <div>• Flagler County</div>
                   </div>
                 </div>
               </div>
-              
               {/* Contact Form */}
               <div className="bg-white p-8 rounded-2xl shadow-xl">
                 <h2 className="text-3xl font-semibold text-gray-900 mb-8">Request a Free Quote</h2>
@@ -339,18 +338,18 @@ const ContactPage: React.FC = () => {
 
             {/* Emergency Contact */}
             <div className="mt-16 text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-              <h2 className="text-2xl font-bold mb-4">Need Emergency Tile Repair?</h2>
-              <p className="text-blue-100 mb-6">
-                We offer emergency repair services for urgent tile and water damage issues.
-              </p>
-              <a 
-                href="tel:+1-555-123-4567"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
-              >
-                <Phone className="h-5 w-5" />
-                Call Emergency Line
-              </a>
-            </div>
+            <h2 className="text-2xl font-bold mb-4">Need Emergency Tile Repair?</h2>
+            <p className="text-blue-100 mb-6">
+              We offer emergency repair services for urgent tile and water damage issues.
+            </p>
+            <a 
+              href="tel:+1-904-210-3094"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
+            >
+              <Phone className="h-5 w-5" />
+              Call Emergency Line
+            </a>
+          </div>
           </div>
         </section>
       </div>

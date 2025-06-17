@@ -1,4 +1,4 @@
-// src/components/ServiceSchema.tsx
+// src/components/ServiceSchema.tsx - Updated provider information
 import React from 'react';
 
 interface ServiceSchemaProps {
@@ -20,20 +20,20 @@ const ServiceSchema: React.FC<ServiceSchemaProps> = ({ service }) => {
     "provider": {
       "@type": "LocalBusiness",
       "name": "Tola Tiles",
-      "telephone": "+1-555-123-4567",
-      "email": "info@tolatiles.com",
+      "telephone": "+1-904-210-3094",
+      "email": "Menitola@live.com",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "123 Tile Street",
-        "addressLocality": "City",
-        "addressRegion": "State",
-        "postalCode": "12345",
+        "streetAddress": "445 Hutchinson Ln",
+        "addressLocality": "Saint Augustine",
+        "addressRegion": "FL",
+        "postalCode": "32084",
         "addressCountry": "US"
       }
     },
     "areaServed": {
       "@type": "State",
-      "name": "State"
+      "name": "Florida"
     },
     "hasOfferCatalog": {
       "@type": "OfferCatalog",

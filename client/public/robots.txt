@@ -18,6 +18,16 @@ Allow: /about/
 Allow: /contact/
 Allow: /faqs/
 
+# Allow Google Image Bot
+User-agent: Googlebot-Image
+Allow: /assets/images/
+
+# Block AI training crawlers (optional)
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
 # Crawl delay (optional - helps prevent overwhelming the server)
 Crawl-delay: 1
 

@@ -17,9 +17,9 @@ import {
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import { sampleImages } from '../data/gallery';
-import cover2 from '../assets/images/shower/2.jpg';
-import cover1 from '../assets/images/fireplace/1.jpg';
-import cover3 from '../assets/images/backsplash/1.jpg';
+import cover2 from '../assets/images/shower/2.webp';
+import cover1 from '../assets/images/fireplace/1.webp';
+import cover3 from '../assets/images/backsplash/1.webp';
 
 const HomePage: React.FC = () => {
   const homePageSchema = {

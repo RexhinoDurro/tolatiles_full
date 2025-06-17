@@ -55,9 +55,9 @@ const Analytics: React.FC<AnalyticsProps> = ({ gtmId, gaId }) => {
           "url": "https://tolatiles.com",
           "logo": "https://tolatiles.com/assets/logo.png",
           "sameAs": [
-            "https://www.facebook.com/tolatiles",
-            "https://www.instagram.com/tolatiles",
-            "https://www.linkedin.com/company/tolatiles"
+            "https://www.facebook.com/TolaTiles/",
+            "https://www.instagram.com/tolatiles/",
+            
           ]
         })
       }} />

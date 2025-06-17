@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
             {/* Social Media */}
             <div className="flex space-x-4 mb-6">
               <a 
-                href={import.meta.env.VITE_FACEBOOK_URL || "https://www.facebook.com/tolatiles"} 
+                href={import.meta.env.VITE_FACEBOOK_URL || "https://www.facebook.com/TolaTiles"} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
@@ -42,15 +42,6 @@ const Footer: React.FC = () => {
                 aria-label="Visit our Instagram page"
               >
                 <span className="text-sm font-bold">ig</span>
-              </a>
-              <a 
-                href={import.meta.env.VITE_LINKEDIN_URL || "https://www.linkedin.com/company/tolatiles"} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-                aria-label="Visit our LinkedIn page"
-              >
-                <span className="text-sm font-bold">in</span>
               </a>
             </div>
 
@@ -180,11 +171,11 @@ const Footer: React.FC = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Call us today</div>
                   <a 
-                    href={`tel:${import.meta.env.VITE_BUSINESS_PHONE || '+1-555-123-4567'}`}
+                    href={`tel:${import.meta.env.VITE_BUSINESS_PHONE || '+1-904-210-3094'}`}
                     className="hover:text-white transition-colors font-medium"
                     itemProp="telephone"
                   >
-                    (555) 123-4567
+                    (904) 210-3094
                   </a>
                 </div>
               </div>
@@ -194,11 +185,11 @@ const Footer: React.FC = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Email us</div>
                   <a 
-                    href={`mailto:${import.meta.env.VITE_BUSINESS_EMAIL || 'info@tolatiles.com'}`}
+                    href={`mailto:${import.meta.env.VITE_BUSINESS_EMAIL || 'Menitola@live.com'}`}
                     className="hover:text-white transition-colors"
                     itemProp="email"
                   >
-                    info@tolatiles.com
+                    Menitola@live.com
                   </a>
                 </div>
               </div>
@@ -208,8 +199,8 @@ const Footer: React.FC = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Visit us</div>
                   <address className="not-italic" itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
-                    <span itemProp="streetAddress">123 Tile Street</span><br />
-                    <span itemProp="addressLocality">City</span>, <span itemProp="addressRegion">State</span> <span itemProp="postalCode">12345</span>
+                    <span itemProp="streetAddress">445 Hutchinson Ln</span><br />
+                    <span itemProp="addressLocality">Saint Augustine</span>, <span itemProp="addressRegion">FL</span> <span itemProp="postalCode">32084</span>
                   </address>
                 </div>
               </div>

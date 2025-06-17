@@ -24,15 +24,20 @@ const StructuredDataProvider: React.FC = () => {
     "@type": "LocalBusiness",
     "name": "Tola Tiles",
     "image": "https://tolatiles.com/assets/logo.png",
-    "telephone": "+1-555-123-4567",
-    "email": "info@tolatiles.com",
+    "telephone": "+1-904-210-3094",
+    "email": "Menitola@live.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "123 Tile Street",
-      "addressLocality": "City",
-      "addressRegion": "State",
-      "postalCode": "12345",
+      "streetAddress": "445 Hutchinson Ln",
+      "addressLocality": "Saint Augustine",
+      "addressRegion": "FL",
+      "postalCode": "32084",
       "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "29.901244",
+      "longitude": "-81.312434"
     },
     "openingHours": [
       "Mo-Fr 08:00-18:00",
@@ -42,8 +47,8 @@ const StructuredDataProvider: React.FC = () => {
       "@type": "GeoCircle",
       "geoMidpoint": {
         "@type": "GeoCoordinates",
-        "latitude": "40.7128",
-        "longitude": "-74.0060"
+        "latitude": "29.901244",
+        "longitude": "-81.312434"
       },
       "geoRadius": "50000"
     },
