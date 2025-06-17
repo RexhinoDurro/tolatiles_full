@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - FIXED VERSION WITH ANALYTICS ACTIVE
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -6,6 +6,10 @@ import Footer from './components/Footer';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './components/ScrollToTop';
+
+import Analytics from './components/Analytics';
+import WebVitalsReporter from './components/WebVitalsReporter';
+import { usePageTracking } from './hooks/usePageTracking';
 import './App.css';
 
 // Lazy load pages for better performance
@@ -18,10 +22,20 @@ const ContactPage = lazy(() => import('./pages/ContactPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const App: React.FC = () => {
+  // ✅ NEW: Enable automatic page tracking
+  usePageTracking();
+
   return (
     <Router>
       <ScrollToTop />
       <ErrorBoundary>
+        {/* ✅ NEW: Google Analytics & Performance Tracking */}
+        <Analytics 
+          gtmId={import.meta.env.VITE_GOOGLE_TAG_MANAGER_ID}
+          gaId={import.meta.env.VITE_GOOGLE_ANALYTICS_ID}
+        />
+        <WebVitalsReporter />
+        
         <div className="min-h-screen bg-white">
           <Navbar />
           <main role="main">
