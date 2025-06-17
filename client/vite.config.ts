@@ -89,8 +89,8 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          icons: ['lucide-react'],
-          helmet: ['react-helmet-async']
+          icons: ['lucide-react']
+          // Removed 'helmet: ['react-helmet-async']' since it's not used
         }
       }
     },
@@ -106,6 +106,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'lucide-react']
+    // Removed 'react-helmet-async' since it's not used
   },
   server: {
     hmr: {

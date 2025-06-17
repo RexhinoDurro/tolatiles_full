@@ -1,4 +1,4 @@
-// src/App.tsx - FIXED VERSION WITH ANALYTICS ACTIVE
+// src/App.tsx - FIXED VERSION WITH PAGE TRACKING INSIDE ROUTER
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -21,40 +21,48 @@ const FAQsPage = lazy(() => import('./pages/FAQsPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-const App: React.FC = () => {
-  // ✅ NEW: Enable automatic page tracking
+// Component that uses page tracking - must be inside Router
+const AppContent: React.FC = () => {
+  // ✅ FIXED: Now usePageTracking is called inside Router context
   usePageTracking();
 
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main role="main">
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/gallery/:category" element={<GalleryPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/faqs" element={<FAQsPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/404" element={<NotFoundPage />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+const App: React.FC = () => {
   return (
     <Router>
       <ScrollToTop />
       <ErrorBoundary>
-        {/* ✅ NEW: Google Analytics & Performance Tracking */}
+        {/* ✅ Analytics & Performance Tracking */}
         <Analytics 
           gtmId={import.meta.env.VITE_GOOGLE_TAG_MANAGER_ID}
           gaId={import.meta.env.VITE_GOOGLE_ANALYTICS_ID}
         />
         <WebVitalsReporter />
         
-        <div className="min-h-screen bg-white">
-          <Navbar />
-          <main role="main">
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/services" element={<ServicesPage />} />
-                <Route path="/gallery" element={<GalleryPage />} />
-                <Route path="/gallery/:category" element={<GalleryPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/faqs" element={<FAQsPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/404" element={<NotFoundPage />} />
-                <Route path="*" element={<Navigate to="/404" replace />} />
-              </Routes>
-            </Suspense>
-          </main>
-          <Footer />
-        </div>
+        {/* ✅ FIXED: AppContent with page tracking is now inside Router */}
+        <AppContent />
       </ErrorBoundary>
     </Router>
   );
