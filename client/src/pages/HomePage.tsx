@@ -1,4 +1,6 @@
+// src/pages/HomePage.tsx
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -12,28 +14,64 @@ import {
   Users,
   Sparkles
 } from 'lucide-react';
+import SEO from '../components/SEO';
+import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import { sampleImages } from '../data/gallery';
-import cover2 from '../assets/images/shower/2.jpg'
-import cover1 from '../assets/images/fireplace/1.jpg'
-import cover3 from '../assets/images/backsplash/1.jpg'
+import cover2 from '../assets/images/shower/2.jpg';
+import cover1 from '../assets/images/fireplace/1.jpg';
+import cover3 from '../assets/images/backsplash/1.jpg';
 
-interface HomePageProps {
-  setCurrentPage: (page: string) => void;
-}
+const HomePage: React.FC = () => {
+  const homePageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Tola Tiles",
+    "url": "https://tolatiles.com",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://tolatiles.com/gallery?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
 
-const HomePage: React.FC<HomePageProps> = ({ setCurrentPage }) => {
+  const heroSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "Tola Tiles - Premium Tile Installation",
+    "description": "Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured.",
+    "url": "https://tolatiles.com",
+    "telephone": "+1-555-123-4567",
+    "priceRange": "$8-25 per sq ft",
+    "serviceType": "Tile Installation",
+    "areaServed": "Greater Metropolitan Area"
+  };
+
   return (
-    <div>
-      <HeroSlider setCurrentPage={setCurrentPage} />
-      <FeaturesSection />
-      <WhyChooseUsSection />
-      <SampleWorkPreview setCurrentPage={setCurrentPage} />
-      <TestimonialSection />
-    </div>
+    <>
+      <SEO 
+        title="Tola Tiles - Premium Tile Installation Services | Kitchen, Bathroom & Patio Tiles"
+        description="Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured. Free estimates. Call (555) 123-4567"
+        keywords="tile installation, kitchen backsplash, bathroom tiles, patio tiles, flooring, ceramic tiles, porcelain tiles, natural stone, tile contractor, home renovation"
+        url="https://tolatiles.com"
+        schemaData={[homePageSchema, heroSchema]}
+      />
+      
+      <BreadcrumbSchema items={[
+        { name: "Home", url: "https://tolatiles.com" }
+      ]} />
+
+      <div>
+        <HeroSlider />
+        <FeaturesSection />
+        <WhyChooseUsSection />
+        <SampleWorkPreview />
+        <TestimonialSection />
+      </div>
+    </>
   );
 };
 
-const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setCurrentPage }) => {
+const HeroSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -43,7 +81,8 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       subtitle: "Professional Installation • Quality Materials • Lifetime Warranty",
       description: "Expert tile installation for kitchens, bathrooms, patios, and more. Creating beautiful spaces that last a lifetime.",
       image: cover1,
-      cta: "View Our Work"
+      cta: "View Our Work",
+      alt: "Beautiful fireplace tile installation by Tola Tiles"
     },
     {
       id: 2,
@@ -51,7 +90,8 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       subtitle: "Custom Designs • Expert Craftsmanship • Modern Solutions",
       description: "From elegant marble to contemporary ceramics, we create stunning bathroom spaces tailored to your vision.",
       image: cover2,
-      cta: "See Gallery"
+      cta: "See Gallery",
+      alt: "Luxury bathroom shower tile installation"
     },
     {
       id: 3,
@@ -59,14 +99,15 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       subtitle: "Stylish Designs • Perfect Installation • Lasting Beauty",
       description: "Enhance your kitchen with our expertly installed backsplashes using the finest materials and innovative designs.",
       image: cover3,
-      cta: "Get Quote"
+      cta: "Get Quote",
+      alt: "Modern kitchen backsplash tile installation"
     }
   ];
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(timer);
   }, [slides.length]);
@@ -80,7 +121,9 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden" role="banner">
+      <h1 className="sr-only">Tola Tiles - Premium Tile Installation Services</h1>
+      
       {/* Slides */}
       {slides.map((slide, index) => (
         <div
@@ -89,12 +132,16 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
             index === currentSlide ? 'transform translate-x-0' : 
             index < currentSlide ? 'transform -translate-x-full' : 'transform translate-x-full'
           }`}
+          aria-hidden={index !== currentSlide}
         >
           {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${slide.image})` }}
-          >
+          <div className="absolute inset-0">
+            <img
+              src={slide.image}
+              alt={slide.alt}
+              className="w-full h-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+            />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
           </div>
 
@@ -103,11 +150,11 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
               <div className="max-w-3xl">
                 <div className="overflow-hidden">
-                  <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 transform transition-transform duration-1000 delay-300 ${
+                  <h2 className={`text-5xl md:text-7xl font-bold text-white mb-6 transform transition-transform duration-1000 delay-300 ${
                     index === currentSlide ? 'translate-y-0' : 'translate-y-full'
                   }`}>
                     {slide.title}
-                  </h1>
+                  </h2>
                 </div>
                 
                 <div className="overflow-hidden">
@@ -130,19 +177,20 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
                   <div className={`flex flex-col sm:flex-row gap-4 transform transition-transform duration-1000 delay-1000 ${
                     index === currentSlide ? 'translate-y-0' : 'translate-y-full'
                   }`}>
-                    <button 
-                      onClick={() => setCurrentPage('gallery')}
+                    <Link 
+                      to="/gallery"
                       className="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center group transform hover:scale-105"
+                      aria-label={`${slide.cta} - View our tile installation gallery`}
                     >
                       {slide.cta} 
                       <ArrowRight className="ml-2 h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
-                    </button>
-                    <button 
-                      onClick={() => setCurrentPage('contact')}
-                      className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 transform hover:scale-105"
+                    </Link>
+                    <Link 
+                      to="/contact"
+                      className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 transform hover:scale-105 text-center"
                     >
                       Get Free Quote
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -155,6 +203,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       <button
         onClick={prevSlide}
         className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group"
+        aria-label="Previous slide"
       >
         <ChevronLeft className="h-6 w-6 transform group-hover:-translate-x-1 transition-transform" />
       </button>
@@ -162,6 +211,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
       <button
         onClick={nextSlide}
         className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group"
+        aria-label="Next slide"
       >
         <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform" />
       </button>
@@ -175,6 +225,7 @@ const HeroSlider: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setC
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
             }`}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
@@ -191,7 +242,7 @@ const FeaturesSection: React.FC = () => {
     },
     {
       icon: Zap,
-      title: "Expert Installation",
+      title: "Expert Installation", 
       description: "Efficient project completion by certified professionals without compromising on quality"
     },
     {
@@ -202,30 +253,32 @@ const FeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50" aria-labelledby="features-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h3 className="text-4xl font-bold text-gray-900 mb-6">Why Choose Tola Tiles?</h3>
+        <header className="text-center mb-16">
+          <h2 id="features-heading" className="text-4xl font-bold text-gray-900 mb-6">
+            Why Choose Tola Tiles?
+          </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             We bring years of experience and unmatched expertise to every tile installation project, 
             ensuring exceptional results that stand the test of time.
           </p>
-        </div>
+        </header>
         
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div 
+              <article 
                 key={index} 
                 className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group"
               >
                 <div className="bg-blue-100 p-4 rounded-full w-20 h-20 mx-auto mb-6 group-hover:bg-blue-200 transition-colors duration-300">
-                  <IconComponent className="h-12 w-12 text-blue-600 mx-auto" />
+                  <IconComponent className="h-12 w-12 text-blue-600 mx-auto" aria-hidden="true" />
                 </div>
-                <h4 className="text-2xl font-semibold mb-4 text-gray-900">{feature.title}</h4>
+                <h3 className="text-2xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -259,30 +312,32 @@ const WhyChooseUsSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white" aria-labelledby="advantages-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h3 className="text-4xl font-bold text-gray-900 mb-6">The Tola Tiles Advantage</h3>
+        <header className="text-center mb-16">
+          <h2 id="advantages-heading" className="text-4xl font-bold text-gray-900 mb-6">
+            The Tola Tiles Advantage
+          </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             When you choose us, you're partnering with professionals who are committed to 
             transforming your vision into reality with precision and care.
           </p>
-        </div>
+        </header>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {benefits.map((benefit, index) => {
             const IconComponent = benefit.icon;
             return (
-              <div 
+              <article 
                 key={index} 
                 className="text-center p-6 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg transition-all duration-300 group"
               >
                 <div className="bg-blue-50 p-3 rounded-full w-16 h-16 mx-auto mb-4 group-hover:bg-blue-100 transition-colors duration-300">
-                  <IconComponent className="h-10 w-10 text-blue-600 mx-auto" />
+                  <IconComponent className="h-10 w-10 text-blue-600 mx-auto" aria-hidden="true" />
                 </div>
-                <h4 className="text-lg font-semibold mb-2 text-gray-900">{benefit.title}</h4>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900">{benefit.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{benefit.description}</p>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -291,43 +346,50 @@ const WhyChooseUsSection: React.FC = () => {
   );
 };
 
-const SampleWorkPreview: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setCurrentPage }) => {
+const SampleWorkPreview: React.FC = () => {
+  const previewImages = Object.values(sampleImages).flat().slice(0, 6);
+
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-gray-50" aria-labelledby="projects-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h3 className="text-4xl font-bold text-gray-900 mb-6">Featured Projects</h3>
+        <header className="text-center mb-16">
+          <h2 id="projects-heading" className="text-4xl font-bold text-gray-900 mb-6">
+            Featured Projects
+          </h2>
           <p className="text-xl text-gray-600">Take a look at some of our recent tile installations</p>
-        </div>
+        </header>
         
         <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {Object.values(sampleImages).flat().slice(0, 6).map((image) => (
-            <div key={image.id} className="group cursor-pointer">
+          {previewImages.map((image) => (
+            <article key={image.id} className="group cursor-pointer">
               <div className="relative overflow-hidden rounded-xl shadow-lg">
                 <img 
                   src={image.src} 
-                  alt={image.title}
+                  alt={`${image.title} - ${image.description}`}
                   className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
+                  width="400"
+                  height="320"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
                   <div className="text-white p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <h4 className="font-semibold text-lg mb-2">{image.title}</h4>
+                    <h3 className="font-semibold text-lg mb-2">{image.title}</h3>
                     <p className="text-sm text-gray-200">{image.description}</p>
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
         
         <div className="text-center">
-          <button 
-            onClick={() => setCurrentPage('gallery')}
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
+          <Link 
+            to="/gallery"
+            className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto w-fit"
           >
-            <Sparkles className="h-5 w-5" />
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
             View Full Gallery
-          </button>
+          </Link>
         </div>
       </div>
     </section>
@@ -356,38 +418,63 @@ const TestimonialSection: React.FC = () => {
     }
   ];
 
+  const testimonialSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Tola Tiles",
+    "review": testimonials.map(testimonial => ({
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": testimonial.name
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": testimonial.rating,
+        "bestRating": "5"
+      },
+      "reviewBody": testimonial.quote
+    }))
+  };
+
   return (
-    <section className="py-20 bg-blue-600">
+    <section className="py-20 bg-blue-600" aria-labelledby="testimonials-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h3 className="text-4xl font-bold text-white mb-6">What Our Clients Say</h3>
+        <header className="text-center mb-16">
+          <h2 id="testimonials-heading" className="text-4xl font-bold text-white mb-6">
+            What Our Clients Say
+          </h2>
           <p className="text-xl text-blue-100">
             Don't just take our word for it—hear from satisfied customers who trusted us with their projects
           </p>
-        </div>
+        </header>
         
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div 
+            <article 
               key={index} 
               className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
-              <div className="flex mb-4">
+              <div className="flex mb-4" role="img" aria-label={`${testimonial.rating} out of 5 stars`}>
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" aria-hidden="true" />
                 ))}
               </div>
               <blockquote className="text-gray-700 mb-6 leading-relaxed">
                 "{testimonial.quote}"
               </blockquote>
-              <div>
+              <footer>
                 <div className="font-semibold text-gray-900">{testimonial.name}</div>
                 <div className="text-sm text-gray-600">{testimonial.project}</div>
-              </div>
-            </div>
+              </footer>
+            </article>
           ))}
         </div>
       </div>
+      
+      <script type="application/ld+json">
+        {JSON.stringify(testimonialSchema)}
+      </script>
     </section>
   );
 };

@@ -1,16 +1,15 @@
+// src/components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
-import logolong from '../assets/images/logoLong.png'
-interface NavbarProps {
-  currentPage: string;
-  setCurrentPage: (page: string) => void;
-  setSelectedCategory: (category: string) => void;
-}
+import logolong from '../assets/images/logoLong.png';
 
-const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelectedCategory }) => {
+const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGalleryDropdownOpen, setIsGalleryDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,29 +30,35 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
     };
   }, [isMobileMenuOpen]);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsGalleryDropdownOpen(false);
+  }, [location]);
+
   const navigationItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'services', label: 'Services' },
-    { id: 'gallery', label: 'Gallery', hasDropdown: true },
-    { id: 'about', label: 'About' },
-    { id: 'faqs', label: 'FAQs' },
-    { id: 'contact', label: 'Contact Us' }
+    { id: '/', label: 'Home', href: '/' },
+    { id: '/services', label: 'Services', href: '/services' },
+    { id: '/gallery', label: 'Gallery', href: '/gallery', hasDropdown: true },
+    { id: '/about', label: 'About', href: '/about' },
+    { id: '/faqs', label: 'FAQs', href: '/faqs' },
+    { id: '/contact', label: 'Contact Us', href: '/contact' }
   ];
 
   const galleryCategories = [
-    { id: 'all', label: 'All Projects' },
-    { id: 'backsplashes', label: 'Backsplashes' },
-    { id: 'patios', label: 'Patios' },
-    { id: 'showers', label: 'Showers' },
-    { id: 'flooring', label: 'Flooring' },
-    { id: 'fireplaces', label: 'Fireplaces' }
+    { id: 'all', label: 'All Projects', href: '/gallery' },
+    { id: 'backsplashes', label: 'Backsplashes', href: '/gallery/backsplashes' },
+    { id: 'patios', label: 'Patios', href: '/gallery/patios' },
+    { id: 'showers', label: 'Showers', href: '/gallery/showers' },
+    { id: 'flooring', label: 'Flooring', href: '/gallery/flooring' },
+    { id: 'fireplaces', label: 'Fireplaces', href: '/gallery/fireplaces' }
   ];
 
-  const handleGalleryNavigation = (category: string) => {
-    setSelectedCategory(category);
-    setCurrentPage('gallery');
-    setIsGalleryDropdownOpen(false);
-    setIsMobileMenuOpen(false);
+  const isActiveRoute = (href: string) => {
+    if (href === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(href);
   };
 
   return (
@@ -65,16 +70,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <div 
-            className="flex items-center space-x-3 cursor-pointer group"
-            onClick={() => setCurrentPage('home')}
+          <Link 
+            to="/" 
+            className="flex items-center space-x-3 group"
+            aria-label="Tola Tiles - Go to homepage"
           >
-            <img src={logolong}></img>
-            
-          </div>
+            <img 
+              src={logolong} 
+              alt="Tola Tiles Logo" 
+              className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
+              width="200"
+              height="48"
+            />
+          </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8" role="navigation" aria-label="Main navigation">
             {navigationItems.map((item) => (
               <div key={item.id} className="relative group">
                 {item.hasDropdown ? (
@@ -85,7 +96,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
                         isScrolled 
                           ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
                           : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
-                      } ${currentPage === item.id ? (isScrolled ? 'text-blue-600 bg-blue-50' : 'text-blue-300 bg-white/10') : ''}`}
+                      } ${isActiveRoute(item.href) ? (isScrolled ? 'text-blue-600 bg-blue-50' : 'text-blue-300 bg-white/10') : ''}`}
+                      aria-expanded={isGalleryDropdownOpen}
+                      aria-haspopup="true"
                     >
                       {item.label}
                       <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-300 ${
@@ -95,34 +108,32 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
                     {isGalleryDropdownOpen && (
                       <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 opacity-0 animate-fadeIn">
                         {galleryCategories.map((category) => (
-                          <button
+                          <Link
                             key={category.id}
-                            onClick={() => handleGalleryNavigation(category.id)}
+                            to={category.href}
                             className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                            onClick={() => setIsGalleryDropdownOpen(false)}
                           >
                             {category.label}
-                          </button>
+                          </Link>
                         ))}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setCurrentPage(item.id);
-                      setIsMobileMenuOpen(false);
-                    }}
+                  <Link
+                    to={item.href}
                     className={`font-medium transition-all duration-300 transform hover:scale-105 relative px-3 py-2 rounded-lg ${
                       isScrolled 
                         ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
                         : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
-                    } ${currentPage === item.id ? (isScrolled ? 'text-blue-600 bg-blue-50' : 'text-blue-300 bg-white/10') : ''}`}
+                    } ${isActiveRoute(item.href) ? (isScrolled ? 'text-blue-600 bg-blue-50' : 'text-blue-300 bg-white/10') : ''}`}
                   >
                     {item.label}
                     <span className={`absolute bottom-0 left-3 right-3 h-0.5 bg-blue-600 transition-all duration-300 ${
-                      currentPage === item.id ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
+                      isActiveRoute(item.href) ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
                     }`}></span>
-                  </button>
+                  </Link>
                 )}
               </div>
             ))}
@@ -136,6 +147,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
                 ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
                 : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
             }`}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -145,7 +158,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 top-20 bg-white/95 backdrop-blur-md z-40 overflow-y-auto shadow-xl">
-          <nav className="px-4 py-6 space-y-4">
+          <nav className="px-4 py-6 space-y-4" role="navigation" aria-label="Mobile navigation">
             {navigationItems.map((item) => (
               <div key={item.id}>
                 {item.hasDropdown ? (
@@ -155,28 +168,25 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, setCurrentPage, setSelecte
                     </div>
                     <div className="ml-4 mt-2 space-y-2">
                       {galleryCategories.map((category) => (
-                        <button
+                        <Link
                           key={category.id}
-                          onClick={() => handleGalleryNavigation(category.id)}
+                          to={category.href}
                           className="block w-full text-left py-2 px-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 rounded-lg"
                         >
                           {category.label}
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => {
-                      setCurrentPage(item.id);
-                      setIsMobileMenuOpen(false);
-                    }}
+                  <Link
+                    to={item.href}
                     className={`block w-full text-left py-3 px-3 font-medium transition-all duration-200 rounded-lg ${
-                      currentPage === item.id ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                      isActiveRoute(item.href) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
                     }`}
                   >
                     {item.label}
-                  </button>
+                  </Link>
                 )}
               </div>
             ))}
