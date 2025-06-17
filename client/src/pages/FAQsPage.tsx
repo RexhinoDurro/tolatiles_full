@@ -18,7 +18,6 @@ import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import FAQSchema from '../components/FAQSchema';
 import { faqs, faqCategories } from '../data/faqs';
 
-
 const iconMap = {
   HelpCircle,
   Hammer,
@@ -277,11 +276,11 @@ const FAQsPage: React.FC = () => {
                   <h3 className="font-semibold mb-2">Call Us</h3>
                   <p className="text-blue-100 text-sm mb-3">Speak directly with our experts</p>
                   <a 
-                    href="tel:+1-555-123-4567" 
+                    href="tel:+1-904-210-3094" 
                     className="text-white hover:text-blue-200 font-medium"
-                    aria-label="Call Tola Tiles at (555) 123-4567"
+                    aria-label="Call Tola Tiles at (904) 210-3094"
                   >
-                    (555) 123-4567
+                    (904) 210-3094
                   </a>
                 </div>
                 
@@ -290,11 +289,11 @@ const FAQsPage: React.FC = () => {
                   <h3 className="font-semibold mb-2">Email Us</h3>
                   <p className="text-blue-100 text-sm mb-3">Get detailed answers via email</p>
                   <a 
-                    href="mailto:info@tolatiles.com" 
+                    href="mailto:menitola@tolatiles.com" 
                     className="text-white hover:text-blue-200 font-medium"
-                    aria-label="Email Tola Tiles at info@tolatiles.com"
+                    aria-label="Email Tola Tiles at menitola@tolatiles.com"
                   >
-                    info@tolatiles.com
+                    menitola@tolatiles.com
                   </a>
                 </div>
                 

@@ -25,7 +25,7 @@ const StructuredDataProvider: React.FC = () => {
     "name": "Tola Tiles",
     "image": "https://tolatiles.com/assets/logo.png",
     "telephone": "+1-904-210-3094",
-    "email": "Menitola@live.com",
+    "email": "menitola@tolatiles.com",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "445 Hutchinson Ln",

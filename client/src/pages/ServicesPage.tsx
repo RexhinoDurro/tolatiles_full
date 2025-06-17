@@ -12,7 +12,9 @@ import {
   DollarSign,
   CheckCircle,
   ArrowRight,
-  Star
+  Star,
+  Mail,
+  Phone
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
@@ -36,13 +38,13 @@ const ServicesPage: React.FC = () => {
       "@type": "LocalBusiness",
       "name": "Tola Tiles",
       "url": "https://tolatiles.com",
-      "telephone": "+1-555-123-4567",
+      "telephone": "+1-904-210-3094",
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "123 Tile Street",
-        "addressLocality": "City",
-        "addressRegion": "State",
-        "postalCode": "12345",
+        "streetAddress": "445 Hutchinson Ln",
+        "addressLocality": "Saint Augustine",
+        "addressRegion": "FL",
+        "postalCode": "32084",
         "addressCountry": "US"
       }
     },
@@ -69,6 +71,29 @@ const ServicesPage: React.FC = () => {
     { name: "Home", url: "https://tolatiles.com" },
     { name: "Services", url: "https://tolatiles.com/services" }
   ];
+
+  // Function to create mailto link for quote requests
+  const createQuoteEmailLink = (serviceName: string) => {
+    const subject = encodeURIComponent(`Quote Request - ${serviceName}`);
+    const body = encodeURIComponent(`
+Hello Tola Tiles,
+
+I would like to request a quote for ${serviceName}.
+
+Project Details:
+- Service: ${serviceName}
+- Location: 
+- Timeline: 
+- Budget Range: 
+- Additional Notes: 
+
+Please contact me to discuss this project further.
+
+Thank you,
+    `.trim());
+    
+    return `mailto:menitola@tolatiles.com?subject=${subject}&body=${body}`;
+  };
 
   return (
     <>
@@ -180,14 +205,24 @@ const ServicesPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <Link
-                        to="/contact"
-                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg"
-                        aria-label={`Get quote for ${service.title}`}
-                      >
-                        Get Quote for {service.title}
-                        <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link
+                          to="/contact"
+                          className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg"
+                          aria-label={`Get quote for ${service.title}`}
+                        >
+                          Get Quote for {service.title}
+                          <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                        <a
+                          href={createQuoteEmailLink(service.title)}
+                          className="px-4 py-3 border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center"
+                          aria-label={`Email quote request for ${service.title}`}
+                          title="Send email quote request"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </a>
+                      </div>
                     </div>
                   </article>
                 );
@@ -236,10 +271,22 @@ const ServicesPage: React.FC = () => {
                   Schedule Free Consultation
                 </Link>
                 <a 
-                  href="tel:+1-555-123-4567"
-                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105"
+                  href="tel:+1-904-210-3094"
+                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                 >
-                  Call (555) 123-4567
+                  <Phone className="h-5 w-5" />
+                  Call (904) 210-3094
+                </a>
+              </div>
+              
+              {/* Email CTA */}
+              <div className="mt-6">
+                <a 
+                  href="mailto:menitola@tolatiles.com?subject=General%20Inquiry%20-%20Tile%20Installation&body=Hello%20Tola%20Tiles%2C%0A%0AI%20would%20like%20to%20learn%20more%20about%20your%20tile%20installation%20services.%0A%0APlease%20contact%20me%20to%20discuss%20my%20project.%0A%0AThank%20you%2C"
+                  className="text-blue-200 hover:text-white transition-colors text-sm flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Or email us directly at menitola@tolatiles.com
                 </a>
               </div>
               

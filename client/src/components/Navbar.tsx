@@ -1,7 +1,7 @@
 // src/components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import logolong from '../assets/images/logoLong.png';
 
 const Navbar: React.FC = () => {
@@ -9,7 +9,6 @@ const Navbar: React.FC = () => {
   const [isGalleryDropdownOpen, setIsGalleryDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,13 +61,14 @@ const Navbar: React.FC = () => {
   };
 
   return (
+    <>
     <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${
       isScrolled 
         ? 'bg-white/95 backdrop-blur-md shadow-lg border-gray-200/50' 
         : 'bg-gradient-to-b from-black/30 via-black/20 to-transparent backdrop-blur-sm shadow-lg border-white/10'
     } border-b`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link 
             to="/" 
@@ -78,9 +78,9 @@ const Navbar: React.FC = () => {
             <img 
               src={logolong} 
               alt="Tola Tiles Logo" 
-              className="h-12 w-auto transition-transform duration-300 group-hover:scale-105"
-              width="200"
-              height="48"
+              className="h-8 w-auto transition-transform duration-300 group-hover:scale-105"
+              width="160"
+              height="32"
             />
           </Link>
           
@@ -142,7 +142,7 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`md:hidden transition-all duration-300 p-2 rounded-lg ${
+            className={`md:hidden transition-all duration-300 p-2 rounded-lg relative z-50 ${
               isScrolled 
                 ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50' 
                 : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
@@ -150,28 +150,44 @@ const Navbar: React.FC = () => {
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <div className="relative w-6 h-6">
+              <span className={`absolute top-1 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
+                isMobileMenuOpen ? 'rotate-45 top-3' : ''
+              }`}></span>
+              <span className={`absolute top-3 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
+                isMobileMenuOpen ? 'opacity-0' : ''
+              }`}></span>
+              <span className={`absolute top-5 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${
+                isMobileMenuOpen ? '-rotate-45 top-3' : ''
+              }`}></span>
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-20 bg-white/95 backdrop-blur-md z-40 overflow-y-auto shadow-xl">
-          <nav className="px-4 py-6 space-y-4" role="navigation" aria-label="Mobile navigation">
+
+    </header>
+
+    {/* Mobile Menu - Compact dropdown below navbar */}
+    {isMobileMenuOpen && (
+      <div className="md:hidden fixed top-20 right-4 z-40 w-[40%] max-w-xs">
+        {/* Menu Content */}
+        <div className="bg-white/70 backdrop-blur-md shadow-xl border border-gray-200/30 rounded-xl max-h-[50vh] overflow-y-auto">
+          <nav className="px-4 py-3 space-y-1" role="navigation" aria-label="Mobile navigation">
             {navigationItems.map((item) => (
               <div key={item.id}>
                 {item.hasDropdown ? (
-                  <div>
-                    <div className="text-gray-700 font-medium py-3 border-b border-gray-200/50">
+                  <div className="space-y-1">
+                    <div className="text-gray-700 font-medium py-1.5 px-2 text-xs border-b border-gray-200/40">
                       {item.label}
                     </div>
-                    <div className="ml-4 mt-2 space-y-2">
+                    <div className="ml-2 space-y-0.5">
                       {galleryCategories.map((category) => (
                         <Link
                           key={category.id}
                           to={category.href}
-                          className="block w-full text-left py-2 px-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 rounded-lg"
+                          className="block w-full text-left py-1.5 px-2 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-200 rounded-md"
+                          onClick={() => setIsMobileMenuOpen(false)}
                         >
                           {category.label}
                         </Link>
@@ -181,19 +197,29 @@ const Navbar: React.FC = () => {
                 ) : (
                   <Link
                     to={item.href}
-                    className={`block w-full text-left py-3 px-3 font-medium transition-all duration-200 rounded-lg ${
-                      isActiveRoute(item.href) ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    className={`block w-full text-left py-2 px-2 font-medium transition-all duration-200 rounded-md text-xs ${
+                      isActiveRoute(item.href) ? 'text-blue-600 bg-blue-50/60' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50/60'
                     }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.label}
                   </Link>
                 )}
               </div>
             ))}
+            
+            
           </nav>
         </div>
-      )}
-    </header>
+        
+        {/* Subtle background overlay */}
+        <div 
+          className="fixed inset-0 bg-black/10 -z-10"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      </div>
+    )}
+    </>
   );
 };
 

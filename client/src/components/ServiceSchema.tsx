@@ -21,7 +21,7 @@ const ServiceSchema: React.FC<ServiceSchemaProps> = ({ service }) => {
       "@type": "LocalBusiness",
       "name": "Tola Tiles",
       "telephone": "+1-904-210-3094",
-      "email": "Menitola@live.com",
+      "email": "menitola@tolatiles.com",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "445 Hutchinson Ln",

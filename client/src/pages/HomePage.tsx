@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ChevronLeft, 
@@ -40,7 +40,7 @@ const HomePage: React.FC = () => {
     "name": "Tola Tiles - Premium Tile Installation",
     "description": "Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured.",
     "url": "https://tolatiles.com",
-    "telephone": "+1-555-123-4567",
+    "telephone": "+1-904-210-3094",
     "priceRange": "$8-25 per sq ft",
     "serviceType": "Tile Installation",
     "areaServed": "Greater Metropolitan Area"
@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
     <>
       <SEO 
         title="Tola Tiles - Premium Tile Installation Services | Kitchen, Bathroom & Patio Tiles"
-        description="Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured. Free estimates. Call (555) 123-4567"
+        description="Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured. Free estimates. Call (904) 210-3094"
         keywords="tile installation, kitchen backsplash, bathroom tiles, patio tiles, flooring, ceramic tiles, porcelain tiles, natural stone, tile contractor, home renovation"
         url="https://tolatiles.com"
         schemaData={[homePageSchema, heroSchema]}
@@ -73,6 +73,10 @@ const HomePage: React.FC = () => {
 
 const HeroSlider: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isManualChange, setIsManualChange] = useState(false);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const sliderRef = useRef<HTMLElement>(null);
 
   const slides = [
     {
@@ -99,29 +103,78 @@ const HeroSlider: React.FC = () => {
       subtitle: "Stylish Designs • Perfect Installation • Lasting Beauty",
       description: "Enhance your kitchen with our expertly installed backsplashes using the finest materials and innovative designs.",
       image: cover3,
-      cta: "Get Quote",
+      cta: "See Gallery",
       alt: "Modern kitchen backsplash tile installation"
     }
   ];
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
+    if (!isManualChange) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 6000);
 
-    return () => clearInterval(timer);
-  }, [slides.length]);
+      return () => clearInterval(timer);
+    } else {
+      // Reset auto-advance after 10 seconds of manual interaction
+      const timer = setTimeout(() => {
+        setIsManualChange(false);
+      }, 10000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [slides.length, isManualChange]);
 
   const nextSlide = () => {
+    setIsManualChange(true);
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
+    setIsManualChange(true);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  const goToSlide = (index: number) => {
+    setIsManualChange(true);
+    setCurrentSlide(index);
+  };
+
+  // Touch handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
   return (
-    <section className="relative h-screen w-full overflow-hidden" role="banner">
+    <section 
+      ref={sliderRef}
+      className="relative h-screen w-full overflow-hidden" 
+      role="banner"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <h1 className="sr-only">Tola Tiles - Premium Tile Installation Services</h1>
       
       {/* Slides */}
@@ -199,10 +252,10 @@ const HeroSlider: React.FC = () => {
         </div>
       ))}
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Hidden on Mobile */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group"
+        className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group hidden md:block"
         aria-label="Previous slide"
       >
         <ChevronLeft className="h-6 w-6 transform group-hover:-translate-x-1 transition-transform" />
@@ -210,7 +263,7 @@ const HeroSlider: React.FC = () => {
       
       <button
         onClick={nextSlide}
-        className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group"
+        className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300 z-20 group hidden md:block"
         aria-label="Next slide"
       >
         <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform" />
@@ -221,13 +274,22 @@ const HeroSlider: React.FC = () => {
         {slides.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentSlide(index)}
+            onClick={() => goToSlide(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
               index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
+      </div>
+
+      {/* Swipe Indicator for Mobile */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-white/60 text-sm md:hidden">
+        <div className="flex items-center space-x-2">
+          <div className="w-6 h-0.5 bg-white/40 rounded"></div>
+          <span>Swipe to navigate</span>
+          <div className="w-6 h-0.5 bg-white/40 rounded"></div>
+        </div>
       </div>
     </section>
   );

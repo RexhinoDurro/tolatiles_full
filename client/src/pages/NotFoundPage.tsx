@@ -116,11 +116,11 @@ const NotFoundPage: React.FC = () => {
             <h3 className="text-xl font-semibold mb-4">Need Immediate Help?</h3>
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
               <a 
-                href="tel:+1-555-123-4567"
+                href="tel:+1-904-210-3094"
                 className="flex items-center gap-2 bg-white/20 px-6 py-3 rounded-lg hover:bg-white/30 transition-colors"
               >
                 <Phone className="h-5 w-5" aria-hidden="true" />
-                Call (555) 123-4567
+                Call (904) 210-3094
               </a>
               <span className="text-blue-200">or</span>
               <Link
@@ -137,8 +137,8 @@ const NotFoundPage: React.FC = () => {
           <div className="mt-8 text-sm text-gray-500">
             <p>
               If you believe this is an error, please contact us at{' '}
-              <a href="mailto:info@tolatiles.com" className="text-blue-600 hover:underline">
-                info@tolatiles.com
+              <a href="mailto:menitola@tolatiles.com" className="text-blue-600 hover:underline">
+                menitola@tolatiles.com
               </a>{' '}
               so we can help resolve the issue.
             </p>

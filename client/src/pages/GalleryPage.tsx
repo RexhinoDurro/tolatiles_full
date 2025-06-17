@@ -1,6 +1,7 @@
 // src/pages/GalleryPage.tsx
 import React, { useMemo, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
 import { sampleImages } from '../data/gallery';
@@ -87,6 +88,10 @@ ImageCard.displayName = 'ImageCard';
 const GalleryPage: React.FC = () => {
   const { category } = useParams<{ category?: string }>();
   const selectedCategory = category || 'all';
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const imagesPerPage = 12;
 
   const galleryCategories = [
     { id: 'all', label: 'All Projects', count: Object.values(sampleImages).flat().length },
@@ -98,12 +103,36 @@ const GalleryPage: React.FC = () => {
   ];
 
   // Memoize filtered images to prevent unnecessary recalculations
-  const filteredImages = useMemo((): TileImage[] => {
+  const allFilteredImages = useMemo((): TileImage[] => {
     if (selectedCategory === 'all') {
       return Object.values(sampleImages).flat();
     }
     return sampleImages[selectedCategory as keyof SampleImages] || [];
   }, [selectedCategory]);
+
+  // Reset page when category changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(allFilteredImages.length / imagesPerPage);
+  const startIndex = (currentPage - 1) * imagesPerPage;
+  const endIndex = startIndex + imagesPerPage;
+  const currentImages = allFilteredImages.slice(startIndex, endIndex);
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const goToPrevPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Generate SEO data based on category
   const getSEOData = () => {
@@ -156,7 +185,7 @@ const GalleryPage: React.FC = () => {
       "@type": "Organization",
       "name": "Tola Tiles"
     },
-    "image": filteredImages.slice(0, 10).map(image => ({
+    "image": currentImages.slice(0, 10).map(image => ({
       "@type": "ImageObject",
       "url": image.src,
       "name": image.title,
@@ -191,8 +220,9 @@ const GalleryPage: React.FC = () => {
                 }
               </p>
               <div className="mt-4 text-sm text-gray-500">
-                Showing {filteredImages.length} projects
+                Showing {startIndex + 1}-{Math.min(endIndex, allFilteredImages.length)} of {allFilteredImages.length} projects
                 {selectedCategory !== 'all' && ` in ${categoryLabel}`}
+                {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
               </div>
             </header>
             
@@ -222,26 +252,89 @@ const GalleryPage: React.FC = () => {
             </nav>
             
             {/* Loading State */}
-            {filteredImages.length === 0 && (
+            {allFilteredImages.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-gray-500 text-lg">No projects found in this category.</div>
               </div>
             )}
             
             {/* Image Grid */}
-            {filteredImages.length > 0 && (
+            {currentImages.length > 0 && (
               <div 
-                className="grid md:grid-cols-3 lg:grid-cols-4 gap-6"
-                key={selectedCategory} // Force re-render when category changes
+                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-12"
+                key={`${selectedCategory}-${currentPage}`} // Force re-render when category or page changes
               >
-                {filteredImages.map((image: TileImage, index) => (
+                {currentImages.map((image: TileImage, index) => (
                   <ImageCard 
-                    key={`${selectedCategory}-${image.id}`} // Unique key per category
+                    key={`${selectedCategory}-${image.id}-${currentPage}`} // Unique key per category and page
                     image={image} 
                     index={index}
                     category={categoryLabel}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center space-x-4 mb-16">
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-5 w-5 mr-1" />
+                  Previous
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex space-x-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          className={`px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
+                            page === currentPage
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                          aria-label={`Go to page ${page}`}
+                          aria-current={page === currentPage ? 'page' : undefined}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (
+                      (page === currentPage - 2 && currentPage > 3) ||
+                      (page === currentPage + 2 && currentPage < totalPages - 2)
+                    ) {
+                      return (
+                        <span key={page} className="px-2 py-2 text-gray-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  aria-label="Next page"
+                >
+                  Next
+                  <ChevronRight className="h-5 w-5 ml-1" />
+                </button>
               </div>
             )}
 

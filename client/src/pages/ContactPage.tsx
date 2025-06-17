@@ -30,8 +30,31 @@ const ContactPage: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically send the form data to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Create email body
+      const emailBody = `
+New Quote Request from Tola Tiles Website
+
+Name: ${formData.firstName} ${formData.lastName}
+Email: ${formData.email}
+Phone: ${formData.phone}
+Project Type: ${formData.projectType}
+
+Project Details:
+${formData.message}
+
+---
+This message was sent from the Tola Tiles website contact form.
+      `.trim();
+
+      // Create mailto link
+      const subject = encodeURIComponent(`Quote Request - ${formData.projectType}`);
+      const body = encodeURIComponent(emailBody);
+      const mailtoLink = `mailto:menitola@tolatiles.com?subject=${subject}&body=${body}`;
+
+      // Open email client
+      window.location.href = mailtoLink;
+      
+      // Show success message
       setSubmitStatus('success');
       setFormData({
         firstName: '',
@@ -49,28 +72,28 @@ const ContactPage: React.FC = () => {
   };
 
   const contactSchema = {
-  "@context": "https://schema.org",
-  "@type": "ContactPage",
-  "mainEntity": {
-    "@type": "LocalBusiness",
-    "name": "Tola Tiles",
-    "telephone": "+1-904-210-3094",
-    "email": "Menitola@live.com",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "445 Hutchinson Ln",
-      "addressLocality": "Saint Augustine",
-      "addressRegion": "FL",
-      "postalCode": "32084",
-      "addressCountry": "US"
-    },
-    "openingHours": [
-      "Mo-Fr 08:00-18:00",
-      "Sa 09:00-16:00"
-    ],
-    "url": "https://tolatiles.com/contact"
-  }
-};
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "mainEntity": {
+      "@type": "LocalBusiness",
+      "name": "Tola Tiles",
+      "telephone": "+1-904-210-3094",
+      "email": "menitola@tolatiles.com",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "445 Hutchinson Ln",
+        "addressLocality": "Saint Augustine",
+        "addressRegion": "FL",
+        "postalCode": "32084",
+        "addressCountry": "US"
+      },
+      "openingHours": [
+        "Mo-Fr 08:00-18:00",
+        "Sa 09:00-16:00"
+      ],
+      "url": "https://tolatiles.com/contact"
+    }
+  };
 
   const breadcrumbItems = [
     { name: "Home", url: "https://tolatiles.com" },
@@ -81,7 +104,7 @@ const ContactPage: React.FC = () => {
     <>
       <SEO 
         title="Contact Tola Tiles - Get Free Quote | Tile Installation Services"
-        description="Contact Tola Tiles for expert tile installation services. Get a free quote, schedule consultation, or call (555) 123-4567. Licensed professionals serving your area."
+        description="Contact Tola Tiles for expert tile installation services. Get a free quote, schedule consultation, or call (904) 210-3094. Licensed professionals serving your area."
         keywords="contact tola tiles, tile installation quote, free estimate, tile contractor contact, schedule consultation, tile installation phone number"
         url="https://tolatiles.com/contact"
         schemaData={contactSchema}
@@ -119,18 +142,18 @@ const ContactPage: React.FC = () => {
                     </div>
                   </div>
                   
-                   <div className="flex items-center group">
+                  <div className="flex items-center group">
                     <div className="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors duration-300">
                       <Mail className="h-6 w-6 text-blue-600" aria-hidden="true" />
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">Email</div>
                       <a 
-                        href="mailto:Menitola@live.com" 
+                        href="mailto:menitola@tolatiles.com" 
                         className="text-lg text-gray-700 hover:text-blue-600 transition-colors"
                         itemProp="email"
                       >
-                        Menitola@live.com
+                        menitola@tolatiles.com
                       </a>
                     </div>
                   </div>
@@ -186,6 +209,7 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
               {/* Contact Form */}
               <div className="bg-white p-8 rounded-2xl shadow-xl">
                 <h2 className="text-3xl font-semibold text-gray-900 mb-8">Request a Free Quote</h2>
@@ -193,13 +217,13 @@ const ContactPage: React.FC = () => {
                 {submitStatus === 'success' && (
                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-600" />
-                    <p className="text-green-700">Thank you! Your quote request has been submitted successfully. We'll contact you within 24 hours.</p>
+                    <p className="text-green-700">Thank you! Your email client should open with your quote request. We'll respond within 24 hours.</p>
                   </div>
                 )}
 
                 {submitStatus === 'error' && (
                   <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-700">Sorry, there was an error submitting your request. Please try again or call us directly.</p>
+                    <p className="text-red-700">Sorry, there was an error opening your email client. Please try again or call us directly at (904) 210-3094.</p>
                   </div>
                 )}
 
@@ -264,7 +288,7 @@ const ContactPage: React.FC = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                      placeholder="(555) 123-4567"
+                      placeholder="(904) 123-4567"
                     />
                   </div>
                   
@@ -315,7 +339,7 @@ const ContactPage: React.FC = () => {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                        Sending...
+                        Preparing Email...
                       </>
                     ) : (
                       <>
@@ -330,7 +354,7 @@ const ContactPage: React.FC = () => {
                   <p>
                     * Required fields. We'll respond within 24 hours.
                     <br />
-                    For immediate assistance, call <a href="tel:+1-555-123-4567" className="text-blue-600 hover:underline">(555) 123-4567</a>
+                    For immediate assistance, call <a href="tel:+1-904-210-3094" className="text-blue-600 hover:underline">(904) 210-3094</a>
                   </p>
                 </div>
               </div>
@@ -338,18 +362,18 @@ const ContactPage: React.FC = () => {
 
             {/* Emergency Contact */}
             <div className="mt-16 text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-            <h2 className="text-2xl font-bold mb-4">Need Emergency Tile Repair?</h2>
-            <p className="text-blue-100 mb-6">
-              We offer emergency repair services for urgent tile and water damage issues.
-            </p>
-            <a 
-              href="tel:+1-904-210-3094"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
-            >
-              <Phone className="h-5 w-5" />
-              Call Emergency Line
-            </a>
-          </div>
+              <h2 className="text-2xl font-bold mb-4">Need Emergency Tile Repair?</h2>
+              <p className="text-blue-100 mb-6">
+                We offer emergency repair services for urgent tile and water damage issues.
+              </p>
+              <a 
+                href="tel:+1-904-210-3094"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
+              >
+                <Phone className="h-5 w-5" />
+                Call Emergency Line
+              </a>
+            </div>
           </div>
         </section>
       </div>

@@ -1,3 +1,4 @@
+// src/components/Analytics.tsx
 import React from 'react';
 
 interface AnalyticsProps {
@@ -54,10 +55,19 @@ const Analytics: React.FC<AnalyticsProps> = ({ gtmId, gaId }) => {
           "name": "Tola Tiles",
           "url": "https://tolatiles.com",
           "logo": "https://tolatiles.com/assets/logo.png",
+          "telephone": "+1-904-210-3094",
+          "email": "menitola@tolatiles.com",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "445 Hutchinson Ln",
+            "addressLocality": "Saint Augustine",
+            "addressRegion": "FL",
+            "postalCode": "32084",
+            "addressCountry": "US"
+          },
           "sameAs": [
             "https://www.facebook.com/TolaTiles/",
-            "https://www.instagram.com/tolatiles/",
-            
+            "https://www.instagram.com/tolatiles/"
           ]
         })
       }} />

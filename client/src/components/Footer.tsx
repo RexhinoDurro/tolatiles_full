@@ -136,7 +136,7 @@ const Footer: React.FC = () => {
                     to="/faqs" 
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    FAQs
+                    Frequently Asked Questions
                   </Link>
                 </li>
                 <li>
@@ -171,7 +171,7 @@ const Footer: React.FC = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Call us today</div>
                   <a 
-                    href={`tel:${import.meta.env.VITE_BUSINESS_PHONE || '+1-904-210-3094'}`}
+                    href="tel:+1-904-210-3094"
                     className="hover:text-white transition-colors font-medium"
                     itemProp="telephone"
                   >
@@ -185,11 +185,11 @@ const Footer: React.FC = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Email us</div>
                   <a 
-                    href={`mailto:${import.meta.env.VITE_BUSINESS_EMAIL || 'Menitola@live.com'}`}
+                    href="mailto:menitola@tolatiles.com"
                     className="hover:text-white transition-colors"
                     itemProp="email"
                   >
-                    Menitola@live.com
+                    menitola@tolatiles.com
                   </a>
                 </div>
               </div>
