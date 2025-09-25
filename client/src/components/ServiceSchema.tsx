@@ -27,7 +27,7 @@ const ServiceSchema: React.FC<ServiceSchemaProps> = ({ service }) => {
         "streetAddress": "445 Hutchinson Ln",
         "addressLocality": "Saint Augustine",
         "addressRegion": "FL",
-        "postalCode": "32084",
+        "postalCode": "32095",
         "addressCountry": "US"
       }
     },

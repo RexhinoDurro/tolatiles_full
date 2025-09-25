@@ -175,7 +175,7 @@ const HeroSlider: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <h1 className="sr-only">Tola Tiles - Premium Tile Installation Services</h1>
+      <h1 className="sr-only">Tola Tiles - Premium Tile Installation Services in Jacksonville</h1>
       
       {/* Slides */}
       {slides.map((slide, index) => (
