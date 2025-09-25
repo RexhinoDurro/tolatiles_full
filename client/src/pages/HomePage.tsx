@@ -37,8 +37,8 @@ const HomePage: React.FC = () => {
   const heroSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
-    "name": "Tola Tiles - Premium Tile Installation",
-    "description": "Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured.",
+    "name": "Tola Tiles - Tile Installers in Jacksonville and Saint Augustine, Florida",
+    "description": "Expert tile installers in Jacksonville and Saint Augustine Florida, for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured.",
     "url": "https://tolatiles.com",
     "telephone": "+1-904-210-3094",
     "priceRange": "$8-25 per sq ft",
@@ -49,9 +49,9 @@ const HomePage: React.FC = () => {
   return (
     <>
       <SEO 
-        title="Tola Tiles - Premium Tile Installation Services | Kitchen, Bathroom & Patio Tiles"
-        description="Expert tile installation for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured. Free estimates. Call (904) 210-3094"
-        keywords="tile installation, kitchen backsplash, bathroom tiles, patio tiles, flooring, ceramic tiles, porcelain tiles, natural stone, tile contractor, home renovation"
+        title="Tola Tiles - Tile Installers in Jacksonville and Saint Augustine, Florida"
+        description="Expert tile installers in Jacksonville and Saint Augustine Florida, for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured."
+        keywords="tile installers jacksonville FL, tile installers Saint Augustine FL, backsplash jacksonville fl, backsplash saint augustine fl, bathroom tiles jacksonville fl, patio tiles, flooring installer, ceramic tiles, porcelain tiles, natural stone, tile contractor, tile installer jacksonville fl, tile installer saint augustine fl, home renovation"
         url="https://tolatiles.com"
         schemaData={[homePageSchema, heroSchema]}
       />
