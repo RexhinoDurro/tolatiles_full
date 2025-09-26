@@ -33,24 +33,24 @@ const HomePage: React.FC = () => {
       "query-input": "required name=search_term_string"
     }
   };
-
+ 
   const heroSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
     "name": "Tola Tiles - Tile Installers in Jacksonville and Saint Augustine, Florida",
-    "description": "Expert tile installers in Jacksonville and Saint Augustine Florida, for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured.",
+    "description": "Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida, Tile Contractors, Flooring Installers, Tile Installers",
     "url": "https://tolatiles.com",
     "telephone": "+1-904-210-3094",
     "priceRange": "$8-25 per sq ft",
-    "serviceType": "Tile Installation",
-    "areaServed": "Greater Metropolitan Area"
+    "serviceType": "Tile Installer",
+    "areaServed": "Jacksonville, Florida"
   };
 
   return (
     <>
       <SEO 
         title="Tola Tiles - Tile Installers in Jacksonville and Saint Augustine, Florida"
-        description="Expert tile installers in Jacksonville and Saint Augustine Florida, for kitchens, bathrooms, patios, and more. 15+ years experience, licensed & insured."
+        description="Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida, Tile Contractors, Flooring Installers, Tile Installers"
         keywords="tile installers jacksonville FL, tile installers Saint Augustine FL, backsplash jacksonville fl, backsplash saint augustine fl, bathroom tiles jacksonville fl, patio tiles, flooring installer, ceramic tiles, porcelain tiles, natural stone, tile contractor, tile installer jacksonville fl, tile installer saint augustine fl, home renovation"
         url="https://tolatiles.com"
         schemaData={[homePageSchema, heroSchema]}
@@ -175,7 +175,7 @@ const HeroSlider: React.FC = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <h1 className="sr-only">Tola Tiles - Premium Tile Installation Services in Jacksonville</h1>
+      <h1 className="sr-only">Tola Tiles - Tile Installation Services in Jacksonville and Saint Augustine Florida</h1>
       
       {/* Slides */}
       {slides.map((slide, index) => (
