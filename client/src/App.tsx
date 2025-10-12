@@ -1,4 +1,4 @@
-// src/App.tsx - FIXED VERSION WITH PAGE TRACKING INSIDE ROUTER
+// src/App.tsx
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -15,15 +15,13 @@ import './App.css';
 // Lazy load pages for better performance
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
-const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const FAQsPage = lazy(() => import('./pages/FAQsPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Component that uses page tracking - must be inside Router
 const AppContent: React.FC = () => {
-  // ✅ FIXED: Now usePageTracking is called inside Router context
   usePageTracking();
 
   return (
@@ -34,8 +32,12 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/services" element={<ServicesPage />} />
-            <Route path="/gallery" element={<GalleryPage />} />
-            <Route path="/gallery/:category" element={<GalleryPage />} />
+            <Route path="/services/kitchen-backsplash-jacksonville" element={<ServiceDetailPage />} />
+            <Route path="/services/bathroom-tile-jacksonville" element={<ServiceDetailPage />} />
+            <Route path="/services/floor-tiling-jacksonville" element={<ServiceDetailPage />} />
+            <Route path="/services/patio-tile-jacksonville" element={<ServiceDetailPage />} />
+            <Route path="/services/fireplace-tile-jacksonville" element={<ServiceDetailPage />} />
+            <Route path="/services/shower-tile-jacksonville" element={<ServiceDetailPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -54,14 +56,11 @@ const App: React.FC = () => {
     <Router>
       <ScrollToTop />
       <ErrorBoundary>
-        {/* ✅ Analytics & Performance Tracking */}
         <Analytics 
           gtmId={import.meta.env.VITE_GOOGLE_TAG_MANAGER_ID}
           gaId={import.meta.env.VITE_GOOGLE_ANALYTICS_ID}
         />
         <WebVitalsReporter />
-        
-        {/* ✅ FIXED: AppContent with page tracking is now inside Router */}
         <AppContent />
       </ErrorBoundary>
     </Router>

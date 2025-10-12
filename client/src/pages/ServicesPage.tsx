@@ -9,7 +9,6 @@ import {
   Palette, 
   Wrench,
   Clock,
-  DollarSign,
   CheckCircle,
   ArrowRight,
   Star,
@@ -18,7 +17,6 @@ import {
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import BreadcrumbSchema from '../components/BreadcrumbSchema';
-import ServiceSchema from '../components/ServiceSchema';
 import { services } from '../data/services';
 
 const iconMap = {
@@ -28,6 +26,16 @@ const iconMap = {
   Home,
   Palette,
   Wrench
+};
+
+// Mapping service IDs to Jacksonville URLs
+const serviceUrlMap: Record<string, string> = {
+  'kitchen-backsplash': '/services/kitchen-backsplash-jacksonville',
+  'bathroom': '/services/bathroom-tile-jacksonville',
+  'flooring': '/services/floor-tiling-jacksonville',
+  'patio': '/services/patio-tile-jacksonville',
+  'fireplace': '/services/fireplace-tile-jacksonville',
+  'shower': '/services/shower-tile-jacksonville'
 };
 
 const ServicesPage: React.FC = () => {
@@ -46,22 +54,22 @@ const ServicesPage: React.FC = () => {
         "addressRegion": "FL",
         "postalCode": "32084",
         "addressCountry": "US"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Jacksonville",
+        "addressRegion": "FL"
       }
     },
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
-      "name": "Tile Installation Services",
+      "name": "Tile Installation Services in Jacksonville",
       "itemListElement": services.map(service => ({
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
           "name": service.title,
           "description": service.description
-        },
-        "priceSpecification": {
-          "@type": "PriceSpecification",
-          "price": service.priceRange,
-          "priceCurrency": "USD"
         }
       }))
     }
@@ -72,17 +80,16 @@ const ServicesPage: React.FC = () => {
     { name: "Services", url: "https://tolatiles.com/services" }
   ];
 
-  // Function to create mailto link for quote requests
   const createQuoteEmailLink = (serviceName: string) => {
-    const subject = encodeURIComponent(`Quote Request - ${serviceName}`);
+    const subject = encodeURIComponent(`Quote Request - ${serviceName} in Jacksonville`);
     const body = encodeURIComponent(`
 Hello Tola Tiles,
 
-I would like to request a quote for ${serviceName}.
+I would like to request a quote for ${serviceName} in Jacksonville.
 
 Project Details:
 - Service: ${serviceName}
-- Location: 
+- Location: Jacksonville, FL
 - Timeline: 
 - Budget Range: 
 - Additional Notes: 
@@ -98,9 +105,9 @@ Thank you,
   return (
     <>
       <SEO 
-        title="Professional Tile Installation Services | Kitchen, Bathroom & Flooring | Tola Tiles"
-        description="Expert tile installation services for kitchens, bathrooms, patios, and flooring. Licensed professionals with 15+ years experience. Free estimates and 2-year warranty."
-        keywords="tile installation services, kitchen backsplash installation, bathroom tile installation, floor tiling, patio tiles, tile contractor, ceramic tile installation, porcelain tile installation"
+        title="Professional Tile Installation Services Jacksonville FL | Kitchen, Bathroom & Flooring | Tola Tiles"
+        description="Expert tile installation services in Jacksonville, FL for kitchens, bathrooms, patios, and flooring. Licensed professionals with 15+ years experience. Free estimates and 2-year warranty."
+        keywords="tile installation jacksonville fl, kitchen backsplash jacksonville, bathroom tile installation jacksonville, floor tiling jacksonville, tile contractor jacksonville fl, ceramic tile installation jacksonville"
         url="https://tolatiles.com/services"
         schemaData={servicesSchema}
       />
@@ -113,14 +120,14 @@ Thank you,
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <header>
               <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">
-                Professional Tile Installation Services
+                Professional Tile Installation Services in Jacksonville
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 animate-slideInUp">
-                Comprehensive tile solutions for residential and commercial properties. 
+                Comprehensive tile solutions for residential and commercial properties in Jacksonville, FL. 
                 From design consultation to installation and maintenance, we're your trusted tile experts.
               </p>
             </header>
-            <div className="flex justify-center items-center gap-8 text-sm text-gray-600 animate-slideInUp">
+            <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600 animate-slideInUp">
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-500 fill-current" aria-hidden="true" />
                 <span>15+ Years Experience</span>
@@ -145,6 +152,7 @@ Thank you,
             <div className="grid lg:grid-cols-2 gap-8 mb-16">
               {services.map((service, index) => {
                 const IconComponent = iconMap[service.icon as keyof typeof iconMap];
+                const serviceUrl = serviceUrlMap[service.id];
                 
                 return (
                   <article 
@@ -153,9 +161,6 @@ Thank you,
                     itemScope
                     itemType="https://schema.org/Service"
                   >
-                    {/* Individual service schema */}
-                    <ServiceSchema service={service} />
-                    
                     {/* Header */}
                     <div className="p-8 pb-6">
                       <div className="flex items-start gap-4 mb-6">
@@ -194,24 +199,18 @@ Thank you,
                     {/* Footer */}
                     <div className="bg-gray-50 px-8 py-6 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Clock className="h-4 w-4" aria-hidden="true" />
-                            <span itemProp="serviceType">{service.timeline}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-                            <DollarSign className="h-4 w-4" aria-hidden="true" />
-                            <span itemProp="price">{service.priceRange}</span>
-                          </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-4 w-4" aria-hidden="true" />
+                          <span itemProp="serviceType">{service.timeline}</span>
                         </div>
                       </div>
                       <div className="flex gap-2">
                         <Link
-                          to="/contact"
+                          to={serviceUrl}
                           className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg"
-                          aria-label={`Get quote for ${service.title}`}
+                          aria-label={`View details and gallery for ${service.title}`}
                         >
-                          Get Quote for {service.title}
+                          View Details & Gallery
                           <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <a
@@ -240,7 +239,7 @@ Thank you,
               
               <div className="grid md:grid-cols-4 gap-8">
                 {[
-                  { step: '01', title: 'Consultation', description: 'Free in-home consultation and design planning' },
+                  { step: '01', title: 'Consultation', description: 'Free in-home consultation and design planning in Jacksonville' },
                   { step: '02', title: 'Material Selection', description: 'Choose from our extensive tile and material library' },
                   { step: '03', title: 'Professional Installation', description: 'Expert installation by certified craftsmen' },
                   { step: '04', title: 'Quality Inspection', description: 'Thorough quality check and customer walkthrough' }
@@ -256,11 +255,36 @@ Thank you,
               </div>
             </section>
 
+            {/* Service Areas */}
+            <section className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-12 mb-16" aria-labelledby="service-areas-heading">
+              <header className="text-center mb-8">
+                <h2 id="service-areas-heading" className="text-3xl font-bold text-gray-900 mb-4">
+                  Serving Jacksonville & Surrounding Areas
+                </h2>
+                <p className="text-xl text-gray-600">Professional tile installation throughout Northeast Florida</p>
+              </header>
+              
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">Jacksonville</h3>
+                  <p className="text-gray-600 text-sm">All neighborhoods and districts</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">St. Augustine</h3>
+                  <p className="text-gray-600 text-sm">Historic and modern areas</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">Surrounding Areas</h3>
+                  <p className="text-gray-600 text-sm">Contact us for availability</p>
+                </div>
+              </div>
+            </section>
+
             {/* CTA Section */}
             <section className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-12 text-center text-white" aria-labelledby="cta-heading">
               <h2 id="cta-heading" className="text-3xl font-bold mb-6">Ready to Start Your Project?</h2>
               <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
-                Get a free consultation and detailed quote for your tile installation needs. 
+                Get a free consultation and detailed quote for your tile installation needs in Jacksonville. 
                 Our experts are ready to help bring your vision to life with professional craftsmanship and premium materials.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -282,7 +306,7 @@ Thank you,
               {/* Email CTA */}
               <div className="mt-6">
                 <a 
-                  href="mailto:menitola@tolatiles.com?subject=General%20Inquiry%20-%20Tile%20Installation&body=Hello%20Tola%20Tiles%2C%0A%0AI%20would%20like%20to%20learn%20more%20about%20your%20tile%20installation%20services.%0A%0APlease%20contact%20me%20to%20discuss%20my%20project.%0A%0AThank%20you%2C"
+                  href="mailto:menitola@tolatiles.com?subject=General%20Inquiry%20-%20Tile%20Installation%20Jacksonville&body=Hello%20Tola%20Tiles%2C%0A%0AI%20would%20like%20to%20learn%20more%20about%20your%20tile%20installation%20services%20in%20Jacksonville.%0A%0APlease%20contact%20me%20to%20discuss%20my%20project.%0A%0AThank%20you%2C"
                   className="text-blue-200 hover:text-white transition-colors text-sm flex items-center justify-center gap-2"
                 >
                   <Mail className="h-4 w-4" />

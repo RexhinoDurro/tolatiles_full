@@ -1,109 +1,117 @@
+// src/data/services.ts
 export interface Service {
-  name: string; // Add missing name property
+  id: string;
   title: string;
   description: string;
   detailedDescription: string;
-  features: string[];
   icon: string;
+  features: string[];
   timeline: string;
-  priceRange: string;
 }
+
+export type ServiceId = 
+  | 'kitchen-backsplash' 
+  | 'bathroom' 
+  | 'flooring' 
+  | 'patio' 
+  | 'fireplace' 
+  | 'shower';
 
 export const services: Service[] = [
   {
-    name: 'Tile Installation', // Add name field
-    title: 'Tile Installation',
-    description: 'Professional installation of ceramic, porcelain, and natural stone tiles for any surface.',
-    detailedDescription: 'Our expert craftsmen specialize in precision tile installation for kitchens, bathrooms, foyers, and commercial spaces. Using industry-leading techniques and premium materials, we ensure every tile is perfectly aligned and securely bonded for lasting durability.',
-    features: [
-      'Ceramic, porcelain, and natural stone expertise',
-      'Perfect pattern alignment and spacing',
-      'Waterproof membrane installation',
-      'Custom trim and edge finishing',
-      'Commercial and residential projects'
-    ],
-    icon: 'Hammer',
-    timeline: '1-5 days',
-    priceRange: '$8-15 per sq ft'
-  },
-  {
-    name: 'Kitchen Backsplashes',
-    title: 'Kitchen Backsplashes',
-    description: 'Transform your kitchen with stunning backsplash designs that combine beauty and functionality.',
-    detailedDescription: 'Create a focal point in your kitchen with our custom backsplash installations. From classic subway tiles to intricate mosaics, we help you choose the perfect style that complements your cabinets, countertops, and overall design aesthetic.',
-    features: [
-      'Custom design consultation',
-      'Subway, mosaic, and natural stone options',
-      'Behind-stove heat shields',
-      'Electrical outlet integration',
-      'Grout sealing and protection'
-    ],
+    id: 'kitchen-backsplash',
+    title: 'Kitchen Backsplash Installation',
+    description: 'Transform your kitchen with stunning custom backsplash designs using premium tiles.',
+    detailedDescription: 'Our expert team specializes in creating beautiful, functional kitchen backsplashes that protect your walls while adding aesthetic value to your space. We work with a wide variety of materials including ceramic, porcelain, glass, and natural stone tiles to match your unique style and budget. From modern subway tiles to intricate mosaic patterns, we bring your vision to life with precision and craftsmanship.',
     icon: 'ChefHat',
-    timeline: '1-3 days',
-    priceRange: '$12-25 per sq ft'
-  },
-  {
-    name: 'Bathroom Remodeling',
-    title: 'Bathroom Remodeling',
-    description: 'Complete bathroom transformations with expert tile work for walls, floors, and shower enclosures.',
-    detailedDescription: 'Turn your bathroom into a luxurious retreat with our comprehensive remodeling services. We handle everything from floor-to-ceiling tile installation to custom shower niches, ensuring every detail meets the highest standards of craftsmanship.',
     features: [
-      'Floor and wall tile installation',
-      'Custom shower and tub surrounds',
-      'Heated floor systems available',
-      'Waterproofing and moisture barriers',
-      'ADA-compliant installations'
+      'Custom design consultation and planning',
+      'Professional surface preparation and leveling',
+      'Precision tile cutting and installation',
+      'Expert grouting and sealing',
+      'Post-installation cleanup and inspection',
+      'Material selection guidance'
     ],
-    icon: 'Bath',
-    timeline: '3-7 days',
-    priceRange: '$10-20 per sq ft'
+    timeline: '1-3 days'
   },
   {
-    name: 'Floor Tiling',
+    id: 'bathroom',
+    title: 'Bathroom Tile Installation',
+    description: 'Complete bathroom tiling solutions including floors, walls, and shower enclosures.',
+    detailedDescription: 'Create a spa-like retreat in your home with our comprehensive bathroom tiling services. We handle everything from floor tiles to wall installations and custom shower designs. Our waterproofing expertise ensures your bathroom not only looks beautiful but also stands the test of time. We use only the highest quality materials and proven installation techniques to prevent moisture damage and maintain the integrity of your bathroom.',
+    icon: 'Bath',
+    features: [
+      'Complete waterproofing solutions',
+      'Custom shower and tub surrounds',
+      'Slip-resistant flooring options',
+      'Heated floor installation available',
+      'Niche and shelf integration',
+      'Matching grout color selection'
+    ],
+    timeline: '3-7 days'
+  },
+  {
+    id: 'flooring',
     title: 'Floor Tiling',
-    description: 'Durable and beautiful floor installations for residential and commercial properties.',
-    detailedDescription: 'From elegant marble entryways to practical porcelain floors, our flooring specialists deliver exceptional results that stand the test of time. We prepare subfloors properly and use premium adhesives for long-lasting installations.',
+    description: 'Durable and elegant floor tiling for residential and commercial spaces.',
+    detailedDescription: 'Whether you\'re updating a single room or tiling an entire property, our flooring experts deliver exceptional results. We specialize in various flooring materials including ceramic, porcelain, natural stone, and luxury vinyl tile. Our meticulous installation process ensures proper leveling, spacing, and finishing for a floor that\'s both beautiful and built to last. We pay special attention to high-traffic areas and can recommend the best materials for your specific needs.',
+    icon: 'Home',
     features: [
       'Subfloor preparation and leveling',
-      'Large format and specialty tiles',
-      'Radiant heating compatibility',
+      'Radiant heating system installation',
+      'Large format tile expertise',
+      'Pattern design and layout',
       'Transition strip installation',
-      'Commercial-grade installations'
+      'Commercial-grade options available'
     ],
-    icon: 'Home',
-    timeline: '2-5 days',
-    priceRange: '$6-18 per sq ft'
+    timeline: '2-5 days'
   },
   {
-    name: 'Design Consultation',
-    title: 'Design Consultation',
-    description: 'Expert design advice to help you choose the perfect tiles and layout for your space.',
-    detailedDescription: 'Our experienced design consultants work with you to select tiles that perfectly match your vision, budget, and lifestyle needs. We provide detailed mockups, material samples, and layout options to ensure your complete satisfaction.',
-    features: [
-      'In-home design consultations',
-      'Material and color selection',
-      'Layout and pattern design',
-      'Budget planning and optimization',
-      '3D visualization available'
-    ],
+    id: 'patio',
+    title: 'Patio & Outdoor Tile',
+    description: 'Weather-resistant outdoor tiling for patios, decks, and pool areas.',
+    detailedDescription: 'Extend your living space outdoors with our professional patio and outdoor tiling services. We use weather-resistant, slip-resistant materials designed to withstand the elements while maintaining their beauty year-round. Our outdoor installations are perfect for patios, pool decks, walkways, and outdoor entertainment areas. We ensure proper drainage and use specialized adhesives and grouts suitable for outdoor conditions and temperature fluctuations.',
     icon: 'Palette',
-    timeline: '1-2 hours',
-    priceRange: 'Free with project'
+    features: [
+      'Freeze-thaw resistant materials',
+      'Proper drainage planning',
+      'Slip-resistant surface options',
+      'UV-resistant grout and sealant',
+      'Pool deck specialization',
+      'Outdoor kitchen backsplash'
+    ],
+    timeline: '3-6 days'
   },
   {
-    name: 'Maintenance & Repair',
-    title: 'Maintenance & Repair',
-    description: 'Ongoing maintenance and repair services to keep your tiles looking perfect for years to come.',
-    detailedDescription: 'Protect your investment with our comprehensive maintenance services. From routine cleaning and resealing to crack repairs and tile replacement, we help maintain the beauty and integrity of your tile installations.',
+    id: 'fireplace',
+    title: 'Fireplace Tile',
+    description: 'Stunning fireplace surrounds and hearths with heat-resistant materials.',
+    detailedDescription: 'Create a focal point in your home with a beautifully tiled fireplace surround. We specialize in both traditional and contemporary fireplace designs using heat-resistant materials that are both safe and stunning. From rustic stone to sleek modern tiles, we can help you choose the perfect materials to complement your home\'s decor. Our installations meet all safety codes and building regulations while delivering the aesthetic impact you desire.',
+    icon: 'Hammer',
     features: [
-      'Grout cleaning and resealing',
-      'Cracked tile replacement',
-      'Caulk renewal and repair',
-      'Stone polishing and restoration',
-      'Preventive maintenance programs'
+      'Heat-resistant material selection',
+      'Custom surround design',
+      'Mantel and hearth integration',
+      'Safety code compliance',
+      'Stone and tile combinations',
+      'Accent lighting options'
     ],
+    timeline: '2-4 days'
+  },
+  {
+    id: 'shower',
+    title: 'Shower Installation',
+    description: 'Custom shower tile installations with complete waterproofing solutions.',
+    detailedDescription: 'Transform your bathroom with a custom-tiled shower that combines functionality with luxury. Our shower installations feature complete waterproofing systems, proper slope for drainage, and expertly installed tiles that create a beautiful, water-tight enclosure. We can create everything from simple, elegant designs to elaborate multi-pattern installations with accent strips, niches, and benches. All our shower installations come with a comprehensive waterproofing warranty.',
     icon: 'Wrench',
-    timeline: '2-4 hours',
-    priceRange: '$150-400 per visit'
+    features: [
+      'Complete waterproofing membrane',
+      'Custom shower pan installation',
+      'Built-in niches and benches',
+      'Multiple tile pattern options',
+      'Accent strip integration',
+      'Lifetime leak warranty'
+    ],
+    timeline: '4-7 days'
   }
 ];
