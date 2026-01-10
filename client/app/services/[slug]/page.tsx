@@ -47,21 +47,21 @@ function generateServiceSchema(service: Service, slug: string) {
 }
 
 const slugToServiceId: Record<string, string> = {
-  'kitchen-backsplash-jacksonville': 'kitchen-backsplash',
-  'bathroom-tile-jacksonville': 'bathroom',
-  'floor-tiling-jacksonville': 'flooring',
-  'patio-tile-jacksonville': 'patio',
-  'fireplace-tile-jacksonville': 'fireplace',
-  'shower-tile-jacksonville': 'shower',
+  'kitchen-backsplash-installation-jacksonville': 'kitchen-backsplash',
+  'bathroom-tile-installation-jacksonville': 'bathroom',
+  'floor-tile-installation-jacksonville': 'flooring',
+  'patio-tile-installation-jacksonville': 'patio',
+  'fireplace-tile-installation-jacksonville': 'fireplace',
+  'shower-tile-installation-jacksonville': 'shower',
 };
 
 const serviceIdToSlug: Record<string, string> = {
-  'kitchen-backsplash': 'kitchen-backsplash-jacksonville',
-  bathroom: 'bathroom-tile-jacksonville',
-  flooring: 'floor-tiling-jacksonville',
-  patio: 'patio-tile-jacksonville',
-  fireplace: 'fireplace-tile-jacksonville',
-  shower: 'shower-tile-jacksonville',
+  'kitchen-backsplash': 'kitchen-backsplash-installation-jacksonville',
+  bathroom: 'bathroom-tile-installation-jacksonville',
+  flooring: 'floor-tile-installation-jacksonville',
+  patio: 'patio-tile-installation-jacksonville',
+  fireplace: 'fireplace-tile-installation-jacksonville',
+  shower: 'shower-tile-installation-jacksonville',
 };
 
 export async function generateStaticParams() {

@@ -131,7 +131,7 @@ const HeroSlider = () => {
           aria-hidden={index !== currentSlide}
         >
           <div className="absolute inset-0">
-            <Image src={slide.image} alt={slide.alt} fill className="object-cover" loading={index === 0 ? 'eager' : 'lazy'} priority={index === 0} />
+            <Image src={slide.image} alt={slide.alt} fill sizes="100vw" className="object-cover" loading={index === 0 ? 'eager' : 'lazy'} priority={index === 0} quality={80} />
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
           </div>
 
@@ -367,7 +367,9 @@ const SampleWorkPreview = () => {
                   alt={`${image.title} - ${image.description}`}
                   width={400}
                   height={320}
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-500"
+                  quality={75}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
                   <div className="text-white p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">

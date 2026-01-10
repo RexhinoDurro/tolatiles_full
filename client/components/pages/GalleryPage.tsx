@@ -327,9 +327,11 @@ const ImageCard = ({ image, index, category }: ImageCardProps) => {
               src={image.src}
               alt={`${image.title} - ${image.description} | Tola Tiles ${category} installation`}
               fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
               className={`object-cover group-hover:scale-110 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
               onLoad={() => setIsLoaded(true)}
               loading="lazy"
+              quality={75}
             />
           )}
 

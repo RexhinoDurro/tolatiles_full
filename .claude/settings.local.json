@@ -15,7 +15,9 @@
       "Bash(psql:*)",
       "Bash(npm run dev:*)",
       "Bash(curl:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(sudo systemctl status:*)",
+      "Bash(sudo systemctl restart:*)"
     ]
   }
 }

@@ -2,14 +2,14 @@ import { MetadataRoute } from 'next';
 
 const BASE_URL = 'https://tolatiles.com';
 
-// Service slugs from data/services.ts
+// Service slugs - using 'installation' format for better SEO
 const servicesSlugs = [
-  'kitchen-backsplash-jacksonville',
-  'bathroom-tiles-jacksonville',
-  'flooring-jacksonville',
-  'patio-tiles-jacksonville',
-  'fireplace-tiles-jacksonville',
-  'shower-tiles-jacksonville',
+  'kitchen-backsplash-installation-jacksonville',
+  'bathroom-tile-installation-jacksonville',
+  'floor-tile-installation-jacksonville',
+  'patio-tile-installation-jacksonville',
+  'fireplace-tile-installation-jacksonville',
+  'shower-tile-installation-jacksonville',
 ];
 
 // Gallery categories
