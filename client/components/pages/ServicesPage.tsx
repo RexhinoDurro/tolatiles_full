@@ -14,12 +14,12 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
 };
 
 const serviceUrlMap: Record<string, string> = {
-  'kitchen-backsplash': '/services/kitchen-backsplash-jacksonville',
-  bathroom: '/services/bathroom-tile-jacksonville',
-  flooring: '/services/floor-tiling-jacksonville',
-  patio: '/services/patio-tile-jacksonville',
-  fireplace: '/services/fireplace-tile-jacksonville',
-  shower: '/services/shower-tile-jacksonville',
+  'kitchen-backsplash': '/services/kitchen-backsplash-installation-jacksonville',
+  bathroom: '/services/bathroom-tile-installation-jacksonville',
+  flooring: '/services/floor-tile-installation-jacksonville',
+  patio: '/services/patio-tile-installation-jacksonville',
+  fireplace: '/services/fireplace-tile-installation-jacksonville',
+  shower: '/services/shower-tile-installation-jacksonville',
 };
 
 const ServicesPage = () => {

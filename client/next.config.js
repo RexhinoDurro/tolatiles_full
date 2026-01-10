@@ -32,6 +32,27 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Prevent sitemap.xml from appearing in Google search results
+        // while keeping it crawlable for search engine bots
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      },
+      {
+        // Prevent robots.txt from appearing in search results
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {

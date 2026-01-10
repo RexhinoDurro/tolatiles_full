@@ -39,7 +39,9 @@ export default function GalleryGrid({ images, onEdit, onDelete, onToggleActive }
               src={image.image_url || image.image}
               alt={image.title}
               fill
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
               className="object-cover"
+              quality={75}
             />
 
             {/* Overlay on hover */}

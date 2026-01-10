@@ -137,6 +137,45 @@ const organizationSchema = {
   numberOfEmployees: '15',
 };
 
+// SiteNavigationElement schema helps Google understand main navigation for sitelinks
+const siteNavigationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SiteNavigationElement',
+  name: 'Main Navigation',
+  hasPart: [
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'Home',
+      url: 'https://tolatiles.com/',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'Services',
+      url: 'https://tolatiles.com/services',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'Gallery',
+      url: 'https://tolatiles.com/gallery',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'About',
+      url: 'https://tolatiles.com/about',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'FAQs',
+      url: 'https://tolatiles.com/faqs',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'Contact',
+      url: 'https://tolatiles.com/contact',
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -154,6 +193,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema) }}
         />
       </head>
       <body className={inter.className}>

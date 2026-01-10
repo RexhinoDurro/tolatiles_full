@@ -39,6 +39,7 @@ const Navbar = () => {
   const navigationItems = [
     { id: '/', label: 'Home', href: '/' },
     { id: '/services', label: 'Services', href: '/services', hasDropdown: true },
+    { id: '/gallery', label: 'Gallery', href: '/gallery' },
     { id: '/about', label: 'About', href: '/about' },
     { id: '/faqs', label: 'FAQs', href: '/faqs' },
     { id: '/contact', label: 'Contact Us', href: '/contact' },
@@ -46,12 +47,12 @@ const Navbar = () => {
 
   const serviceCategories = [
     { id: 'all', label: 'All Services', href: '/services' },
-    { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-jacksonville' },
-    { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-jacksonville' },
-    { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tiling-jacksonville' },
-    { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-jacksonville' },
-    { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-jacksonville' },
-    { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-jacksonville' },
+    { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-installation-jacksonville' },
+    { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-installation-jacksonville' },
+    { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-installation-jacksonville' },
+    { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-installation-jacksonville' },
+    { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-installation-jacksonville' },
+    { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-installation-jacksonville' },
   ];
 
   const isActiveRoute = (href: string) => {
