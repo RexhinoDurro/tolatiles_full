@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(done)",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && head -5 \"\"{}\"\"')",
+      "Bash(where:*)",
+      "Bash(where convert:*)",
+      "Bash(pip show:*)",
+      "Bash(findstr:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(psql:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)"
+    ]
+  }
+}
