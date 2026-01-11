@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, CheckCircle, Send, AlertCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, CheckCircle, Send, AlertCircle, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { ContactFormData } from '@/types/api';
 
@@ -323,6 +323,51 @@ const ContactPage = () => {
                     (904) 210-3094
                   </a>
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Map Section */}
+          <div className="mt-16">
+            <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Find Us</h2>
+            <div className="grid lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 h-[400px] rounded-xl overflow-hidden shadow-lg">
+                <iframe
+                  src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32084&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Tola Tiles Location - Saint Augustine, FL"
+                />
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6 flex flex-col justify-center">
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">Our Location</h3>
+                <address className="not-italic space-y-4 text-gray-600 mb-6">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <span>445 Hutchinson Ln<br />Saint Augustine, FL 32084</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <a href="tel:+1-904-210-3094" className="hover:text-blue-600 transition-colors">(904) 210-3094</a>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <a href="mailto:menitola@tolatiles.com" className="hover:text-blue-600 transition-colors">menitola@tolatiles.com</a>
+                  </div>
+                </address>
+                <a
+                  href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Get Directions
+                </a>
               </div>
             </div>
           </div>

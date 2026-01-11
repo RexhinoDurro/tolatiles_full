@@ -9,6 +9,21 @@ import type {
   User,
   PaginatedResponse,
   LeadStats,
+  CompanySettings,
+  Customer,
+  CustomerCreate,
+  Quote,
+  QuoteListItem,
+  QuoteCreate,
+  QuoteStats,
+  QuoteStatus,
+  Invoice,
+  InvoiceListItem,
+  InvoiceCreate,
+  InvoiceStats,
+  InvoiceStatus,
+  PublicQuote,
+  PublicInvoice,
 } from '@/types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -341,6 +356,210 @@ class ApiClient {
 
   async getLeadStats(): Promise<LeadStats> {
     return this.fetch<LeadStats>('/leads/stats/');
+  }
+
+  // ============ Company Settings ============
+
+  async getCompanySettings(): Promise<CompanySettings> {
+    return this.fetch<CompanySettings>('/company-settings/');
+  }
+
+  async updateCompanySettings(data: Partial<CompanySettings>): Promise<CompanySettings> {
+    return this.fetch<CompanySettings>('/company-settings/', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCompanySettingsWithLogo(formData: FormData): Promise<CompanySettings> {
+    return this.fetch<CompanySettings>('/company-settings/', {
+      method: 'PUT',
+      body: formData,
+    });
+  }
+
+  // ============ Customers ============
+
+  async getCustomers(): Promise<Customer[]> {
+    const response = await this.fetch<PaginatedResponse<Customer> | Customer[]>('/customers/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getCustomer(id: number): Promise<Customer> {
+    return this.fetch<Customer>(`/customers/${id}/`);
+  }
+
+  async createCustomer(data: CustomerCreate): Promise<Customer> {
+    return this.fetch<Customer>('/customers/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCustomer(id: number, data: Partial<CustomerCreate>): Promise<Customer> {
+    return this.fetch<Customer>(`/customers/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteCustomer(id: number): Promise<void> {
+    await this.fetch<void>(`/customers/${id}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  async searchCustomers(query: string): Promise<Customer[]> {
+    if (query.length < 2) return [];
+    return this.fetch<Customer[]>(`/customers/search/?q=${encodeURIComponent(query)}`);
+  }
+
+  // ============ Quotes ============
+
+  async getQuotes(status?: QuoteStatus): Promise<QuoteListItem[]> {
+    const params = status ? `?status=${status}` : '';
+    const response = await this.fetch<PaginatedResponse<QuoteListItem> | QuoteListItem[]>(
+      `/quotes/${params}`
+    );
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getQuote(id: number): Promise<Quote> {
+    return this.fetch<Quote>(`/quotes/${id}/`);
+  }
+
+  async createQuote(data: QuoteCreate): Promise<Quote> {
+    return this.fetch<Quote>('/quotes/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateQuote(id: number, data: Partial<QuoteCreate>): Promise<Quote> {
+    return this.fetch<Quote>(`/quotes/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteQuote(id: number): Promise<void> {
+    await this.fetch<void>(`/quotes/${id}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateQuoteStatus(id: number, status: QuoteStatus): Promise<Quote> {
+    return this.fetch<Quote>(`/quotes/${id}/update_status/`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async generateQuotePdf(id: number): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>(`/quotes/${id}/generate_pdf/`, {
+      method: 'POST',
+    });
+  }
+
+  async sendQuoteEmail(id: number): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>(`/quotes/${id}/send_email/`, {
+      method: 'POST',
+    });
+  }
+
+  async duplicateQuote(id: number): Promise<Quote> {
+    return this.fetch<Quote>(`/quotes/${id}/duplicate/`, {
+      method: 'POST',
+    });
+  }
+
+  async getQuoteStats(): Promise<QuoteStats> {
+    return this.fetch<QuoteStats>('/quotes/stats/');
+  }
+
+  async getPublicQuote(reference: string): Promise<PublicQuote> {
+    return this.fetch<PublicQuote>(`/quotes/public/${reference}/`);
+  }
+
+  async convertQuoteToInvoice(id: number, dueDate?: string): Promise<Invoice> {
+    return this.fetch<Invoice>(`/quotes/${id}/convert_to_invoice/`, {
+      method: 'POST',
+      body: JSON.stringify({ due_date: dueDate }),
+    });
+  }
+
+  // ============ Invoices ============
+
+  async getInvoices(status?: InvoiceStatus): Promise<InvoiceListItem[]> {
+    const params = status ? `?status=${status}` : '';
+    const response = await this.fetch<PaginatedResponse<InvoiceListItem> | InvoiceListItem[]>(
+      `/invoices/${params}`
+    );
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getInvoice(id: number): Promise<Invoice> {
+    return this.fetch<Invoice>(`/invoices/${id}/`);
+  }
+
+  async createInvoice(data: InvoiceCreate): Promise<Invoice> {
+    return this.fetch<Invoice>('/invoices/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateInvoice(id: number, data: Partial<InvoiceCreate>): Promise<Invoice> {
+    return this.fetch<Invoice>(`/invoices/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteInvoice(id: number): Promise<void> {
+    await this.fetch<void>(`/invoices/${id}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateInvoiceStatus(id: number, status: InvoiceStatus): Promise<Invoice> {
+    return this.fetch<Invoice>(`/invoices/${id}/update_status/`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async markInvoicePaid(id: number): Promise<Invoice> {
+    return this.fetch<Invoice>(`/invoices/${id}/mark_paid/`, {
+      method: 'POST',
+    });
+  }
+
+  async recordInvoicePayment(id: number, amount: number): Promise<Invoice> {
+    return this.fetch<Invoice>(`/invoices/${id}/record_payment/`, {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
+  async generateInvoicePdf(id: number): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>(`/invoices/${id}/generate_pdf/`, {
+      method: 'POST',
+    });
+  }
+
+  async sendInvoiceEmail(id: number): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>(`/invoices/${id}/send_email/`, {
+      method: 'POST',
+    });
+  }
+
+  async getInvoiceStats(): Promise<InvoiceStats> {
+    return this.fetch<InvoiceStats>('/invoices/stats/');
+  }
+
+  async getPublicInvoice(reference: string): Promise<PublicInvoice> {
+    return this.fetch<PublicInvoice>(`/invoices/public/${reference}/`);
   }
 }
 

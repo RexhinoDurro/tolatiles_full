@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, Users, LogOut, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, Users, LogOut, ExternalLink, FileText, Receipt, UserCircle, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
@@ -21,6 +21,26 @@ const navItems = [
     name: 'Leads',
     href: '/admin/leads',
     icon: Users,
+  },
+  {
+    name: 'Quotes',
+    href: '/admin/quotes',
+    icon: FileText,
+  },
+  {
+    name: 'Invoices',
+    href: '/admin/invoices',
+    icon: Receipt,
+  },
+  {
+    name: 'Customers',
+    href: '/admin/customers',
+    icon: UserCircle,
+  },
+  {
+    name: 'Settings',
+    href: '/admin/settings',
+    icon: Settings,
   },
 ];
 

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote {{ quote.reference }}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #2563eb; padding: 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">Quote from {{ company.company_name }}</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="margin: 0 0 20px; font-size: 16px; color: #333333; line-height: 1.6;">
+                                Dear {{ quote.customer.name }},
+                            </p>
+                            <p style="margin: 0 0 30px; font-size: 16px; color: #333333; line-height: 1.6;">
+                                Thank you for your interest in our services. Please find attached your quote for <strong>{{ quote.title }}</strong>.
+                            </p>
+
+                            <!-- Quote Summary Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border-radius: 8px; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 25px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <span style="font-size: 14px; color: #666666;">Quote Reference:</span>
+                                                    <span style="font-size: 14px; color: #333333; font-weight: 600; float: right;">{{ quote.reference }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <span style="font-size: 14px; color: #666666;">Date:</span>
+                                                    <span style="font-size: 14px; color: #333333; float: right;">{{ quote.created_at|date:"F d, Y" }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 8px 0;">
+                                                    <span style="font-size: 14px; color: #666666;">Valid Until:</span>
+                                                    <span style="font-size: 14px; color: #333333; float: right;">{{ quote.expires_at|date:"F d, Y" }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 15px 0 0; border-top: 1px solid #e5e7eb; margin-top: 10px;">
+                                                    <span style="font-size: 18px; color: #1e3a5f; font-weight: 600;">Total:</span>
+                                                    <span style="font-size: 18px; color: #2563eb; font-weight: 700; float: right;">${{ quote.total|floatformat:2 }}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 30px; font-size: 16px; color: #333333; line-height: 1.6;">
+                                The PDF with full details is attached to this email. Please review the quote and let us know if you have any questions.
+                            </p>
+
+                            {% if quote.comments_text %}
+                            <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 15px 20px; margin-bottom: 30px;">
+                                <p style="margin: 0; font-size: 14px; color: #1e3a5f; font-weight: 600;">Scope Notes:</p>
+                                <p style="margin: 10px 0 0; font-size: 14px; color: #444444; line-height: 1.6;">{{ quote.comments_text|truncatechars:300 }}</p>
+                            </div>
+                            {% endif %}
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 20px 0;">
+                                        <a href="{{ public_url }}" style="display: inline-block; background-color: #2563eb; color: #ffffff; font-size: 16px; font-weight: 600; padding: 14px 30px; text-decoration: none; border-radius: 6px;">View Quote Online</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 30px; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px; font-size: 14px; color: #666666; text-align: center;">
+                                Questions? Contact {{ company.sender_name }}{% if company.title %}, {{ company.title }}{% endif %}
+                            </p>
+                            <p style="margin: 0; font-size: 14px; color: #2563eb; text-align: center;">
+                                <a href="mailto:{{ company.email }}" style="color: #2563eb; text-decoration: none;">{{ company.email }}</a>
+                                {% if company.phone %} | {{ company.phone }}{% endif %}
+                            </p>
+                            <p style="margin: 20px 0 0; font-size: 12px; color: #999999; text-align: center;">
+                                {{ company.company_name }}<br>
+                                {{ company.company_address|truncatechars:100 }}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
