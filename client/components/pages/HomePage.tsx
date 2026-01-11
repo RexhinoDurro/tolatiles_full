@@ -13,6 +13,7 @@ const HomePage = () => {
       <FeaturesSection />
       <WhyChooseUsSection />
       <SampleWorkPreview />
+      <LocationSection />
       <TestimonialSection />
     </>
   );
@@ -390,6 +391,82 @@ const SampleWorkPreview = () => {
             <Sparkles className="h-5 w-5" aria-hidden="true" />
             View Full Gallery
           </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const LocationSection = () => {
+  return (
+    <section className="py-20 bg-white" aria-labelledby="location-heading">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="text-center mb-12">
+          <h2 id="location-heading" className="text-4xl font-bold text-gray-900 mb-6">
+            Visit Our Location
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Proudly serving Jacksonville, Saint Augustine, and the greater Northeast Florida area
+          </p>
+        </header>
+
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
+          {/* Map */}
+          <div className="w-full h-[400px] rounded-xl overflow-hidden shadow-lg">
+            <iframe
+              src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32084&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Tola Tiles Location - Saint Augustine, FL"
+            />
+          </div>
+
+          {/* Info */}
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Tola Tiles</h3>
+              <address className="not-italic space-y-3 text-gray-600">
+                <p className="flex items-start gap-3">
+                  <span className="text-blue-600 font-medium">Address:</span>
+                  <span>445 Hutchinson Ln<br />Saint Augustine, FL 32084</span>
+                </p>
+                <p className="flex items-center gap-3">
+                  <span className="text-blue-600 font-medium">Phone:</span>
+                  <a href="tel:+1-904-210-3094" className="hover:text-blue-600 transition-colors">(904) 210-3094</a>
+                </p>
+                <p className="flex items-center gap-3">
+                  <span className="text-blue-600 font-medium">Email:</span>
+                  <a href="mailto:menitola@tolatiles.com" className="hover:text-blue-600 transition-colors">menitola@tolatiles.com</a>
+                </p>
+              </address>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-6">
+              <h4 className="font-semibold text-gray-900 mb-3">Service Areas</h4>
+              <div className="grid grid-cols-2 gap-2 text-gray-600">
+                <span>Saint Augustine</span>
+                <span>Jacksonville</span>
+                <span>Ponte Vedra Beach</span>
+                <span>Palm Coast</span>
+                <span>St. Johns County</span>
+                <span>Flagler County</span>
+              </div>
+            </div>
+
+            <a
+              href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+            >
+              Get Directions
+              <ArrowRight className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </div>
     </section>

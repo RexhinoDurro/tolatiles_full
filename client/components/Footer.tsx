@@ -53,7 +53,6 @@ const Footer = () => {
             <div className="text-sm text-gray-400">
               <p className="mb-1">Licensed & Insured</p>
               <p className="mb-1">Bonded & Certified</p>
-              <p>BBB Accredited Business</p>
             </div>
           </div>
 

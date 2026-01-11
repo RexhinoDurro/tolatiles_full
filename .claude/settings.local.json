@@ -17,7 +17,21 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(sudo systemctl status:*)",
-      "Bash(sudo systemctl restart:*)"
+      "Bash(sudo systemctl restart:*)",
+      "Bash(venvScriptsactivate)",
+      "Bash(venv\\\\Scripts\\\\python.exe:*)",
+      "Bash(./venv/Scripts/python.exe manage.py runserver:*)",
+      "Bash(./venv/bin/python:*)",
+      "Bash(server/venv/bin/python:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout /t 10 /nobreak)",
+      "Bash(powershell -Command:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(npx tsc:*)",
+      "Bash(grep:*)",
+      "Bash(netstat:*)",
+      "Bash(timeout:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }
