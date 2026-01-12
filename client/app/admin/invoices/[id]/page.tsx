@@ -23,7 +23,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import InvoiceStatusBadge from '@/components/admin/invoices/InvoiceStatusBadge';
 import InvoiceForm from '@/components/admin/invoices/InvoiceForm';
 import { api } from '@/lib/api';
-import type { Invoice, InvoiceCreate } from '@/types/api';
+import type { Invoice, InvoiceCreate, InvoiceStatus } from '@/types/api';
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -146,7 +146,7 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  const handleUpdateStatus = async (status: string) => {
+  const handleUpdateStatus = async (status: InvoiceStatus) => {
     setActionLoading('status');
     try {
       await api.updateInvoiceStatus(invoiceId, status);
@@ -425,7 +425,7 @@ export default function InvoiceDetailPage() {
                         {formatCurrency(Number(item.unit_price))}
                       </td>
                       <td className="px-6 py-4 text-right font-medium text-gray-900">
-                        {formatCurrency(item.line_total)}
+                        {formatCurrency(item.line_total ?? 0)}
                       </td>
                     </tr>
                   ))}

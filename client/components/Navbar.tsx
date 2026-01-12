@@ -1,16 +1,68 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
+
+type LocationType = 'florida' | 'jacksonville' | 'st-augustine';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  // Determine current location based on pathname
+  const currentLocation: LocationType = useMemo(() => {
+    if (pathname.startsWith('/st-augustine') || pathname.includes('-st-augustine')) {
+      return 'st-augustine';
+    }
+    if (pathname.startsWith('/jacksonville') || pathname.includes('-jacksonville')) {
+      return 'jacksonville';
+    }
+    return 'florida';
+  }, [pathname]);
+
+  // Get home link based on location
+  const homeLink = currentLocation === 'st-augustine' ? '/st-augustine' : currentLocation === 'jacksonville' ? '/jacksonville' : '/';
+
+  // Get service categories based on location
+  const serviceCategories = useMemo(() => {
+    if (currentLocation === 'st-augustine') {
+      return [
+        { id: 'all', label: 'All Services', href: '/st-augustine' },
+        { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-st-augustine' },
+        { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-st-augustine' },
+        { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-st-augustine' },
+        { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-st-augustine' },
+        { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-st-augustine' },
+        { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-st-augustine' },
+      ];
+    }
+    if (currentLocation === 'jacksonville') {
+      return [
+        { id: 'all', label: 'All Services', href: '/jacksonville' },
+        { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-jacksonville' },
+        { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-jacksonville' },
+        { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-jacksonville' },
+        { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-jacksonville' },
+        { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-jacksonville' },
+        { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-jacksonville' },
+      ];
+    }
+    // Default Florida
+    return [
+      { id: 'all', label: 'All Services', href: '/services' },
+      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash' },
+      { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile' },
+      { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile' },
+      { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile' },
+      { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile' },
+      { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile' },
+    ];
+  }, [currentLocation]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,7 +89,7 @@ const Navbar = () => {
   }, [pathname]);
 
   const navigationItems = [
-    { id: '/', label: 'Home', href: '/' },
+    { id: '/', label: 'Home', href: homeLink },
     { id: '/services', label: 'Services', href: '/services', hasDropdown: true },
     { id: '/gallery', label: 'Gallery', href: '/gallery' },
     { id: '/about', label: 'About', href: '/about' },
@@ -45,19 +97,9 @@ const Navbar = () => {
     { id: '/contact', label: 'Contact Us', href: '/contact' },
   ];
 
-  const serviceCategories = [
-    { id: 'all', label: 'All Services', href: '/services' },
-    { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-installation-jacksonville' },
-    { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-installation-jacksonville' },
-    { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-installation-jacksonville' },
-    { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-installation-jacksonville' },
-    { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-installation-jacksonville' },
-    { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-installation-jacksonville' },
-  ];
-
   const isActiveRoute = (href: string) => {
-    if (href === '/') {
-      return pathname === '/';
+    if (href === '/' || href === '/jacksonville' || href === '/st-augustine') {
+      return pathname === href || pathname === '/';
     }
     return pathname.startsWith(href);
   };
@@ -73,7 +115,7 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-3">
-            <Link href="/" className="flex items-center space-x-3 group" aria-label="Tola Tiles - Go to homepage">
+            <Link href={homeLink} className="flex items-center space-x-3 group" aria-label="Tola Tiles - Go to homepage">
               <Image
                 src="/images/logoLong.webp"
                 alt="Tola Tiles Logo"

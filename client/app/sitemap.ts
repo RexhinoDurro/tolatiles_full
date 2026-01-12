@@ -2,14 +2,34 @@ import { MetadataRoute } from 'next';
 
 const BASE_URL = 'https://tolatiles.com';
 
-// Service slugs - using 'installation' format for better SEO
-const servicesSlugs = [
-  'kitchen-backsplash-installation-jacksonville',
-  'bathroom-tile-installation-jacksonville',
-  'floor-tile-installation-jacksonville',
-  'patio-tile-installation-jacksonville',
-  'fireplace-tile-installation-jacksonville',
-  'shower-tile-installation-jacksonville',
+// Florida (generic) service slugs
+const floridaServiceSlugs = [
+  'kitchen-backsplash',
+  'bathroom-tile',
+  'floor-tile',
+  'patio-tile',
+  'fireplace-tile',
+  'shower-tile',
+];
+
+// Jacksonville service slugs
+const jacksonvilleServiceSlugs = [
+  'kitchen-backsplash-jacksonville',
+  'bathroom-tile-jacksonville',
+  'floor-tile-jacksonville',
+  'patio-tile-jacksonville',
+  'fireplace-tile-jacksonville',
+  'shower-tile-jacksonville',
+];
+
+// St Augustine service slugs
+const stAugustineServiceSlugs = [
+  'kitchen-backsplash-st-augustine',
+  'bathroom-tile-st-augustine',
+  'floor-tile-st-augustine',
+  'patio-tile-st-augustine',
+  'fireplace-tile-st-augustine',
+  'shower-tile-st-augustine',
 ];
 
 // Gallery categories
@@ -89,12 +109,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Service detail pages
-  const servicePages: MetadataRoute.Sitemap = servicesSlugs.map((slug) => ({
+  // Florida service detail pages
+  const floridaServicePages: MetadataRoute.Sitemap = floridaServiceSlugs.map((slug) => ({
     url: `${BASE_URL}/services/${slug}`,
     lastModified: currentDate,
     changeFrequency: 'weekly' as const,
-    priority: 0.8,
+    priority: 0.85,
+  }));
+
+  // Jacksonville service detail pages (high priority for local SEO)
+  const jacksonvilleServicePages: MetadataRoute.Sitemap = jacksonvilleServiceSlugs.map((slug) => ({
+    url: `${BASE_URL}/services/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  }));
+
+  // St Augustine service detail pages (high priority for local SEO)
+  const stAugustineServicePages: MetadataRoute.Sitemap = stAugustineServiceSlugs.map((slug) => ({
+    url: `${BASE_URL}/services/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
   }));
 
   // Gallery category pages
@@ -105,5 +141,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...servicePages, ...galleryPages];
+  return [
+    ...staticPages,
+    ...floridaServicePages,
+    ...jacksonvilleServicePages,
+    ...stAugustineServicePages,
+    ...galleryPages,
+  ];
 }

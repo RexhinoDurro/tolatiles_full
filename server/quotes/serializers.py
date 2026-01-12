@@ -103,6 +103,7 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
     line_items = LineItemSerializer(many=True, read_only=True)
     pdf_url = serializers.SerializerMethodField()
     public_url = serializers.SerializerMethodField()
+    invoice_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Quote
@@ -112,7 +113,7 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
             'comments_text', 'terms',
             'subtotal', 'discount_amount', 'discount_percent',
             'tax_rate', 'tax_amount', 'shipping_amount', 'total',
-            'line_items', 'pdf_file', 'pdf_url', 'pdf_generated_at', 'public_url'
+            'line_items', 'pdf_file', 'pdf_url', 'pdf_generated_at', 'public_url', 'invoice_id'
         ]
         read_only_fields = [
             'reference', 'subtotal', 'tax_amount', 'total',
@@ -128,6 +129,11 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
 
     def get_public_url(self, obj):
         return obj.get_public_url()
+
+    def get_invoice_id(self, obj):
+        """Return the ID of the invoice if one exists for this quote."""
+        invoice = obj.invoices.first()
+        return invoice.id if invoice else None
 
 
 class QuoteCreateSerializer(serializers.ModelSerializer):
@@ -150,7 +156,10 @@ class QuoteCreateSerializer(serializers.ModelSerializer):
 
     def validate_line_items(self, value):
         if not value:
-            raise serializers.ValidationError("At least one line item is required.")
+            raise serializers.ValidationError(
+                "Please add at least one line item to the quote. "
+                "Each item needs a name, quantity, and unit price."
+            )
         return value
 
     def create(self, validated_data):
@@ -271,7 +280,10 @@ class InvoiceCreateSerializer(serializers.ModelSerializer):
 
     def validate_line_items(self, value):
         if not value:
-            raise serializers.ValidationError("At least one line item is required.")
+            raise serializers.ValidationError(
+                "Please add at least one line item to the invoice. "
+                "Each item needs a name, quantity, and unit price."
+            )
         return value
 
     def create(self, validated_data):

@@ -159,7 +159,27 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error || error.detail || 'API request failed');
+      // Handle different error formats from DRF
+      let message = 'API request failed';
+      if (error.error) {
+        message = error.error;
+      } else if (error.detail) {
+        message = error.detail;
+      } else if (typeof error === 'object') {
+        // Handle DRF validation errors like {"field": ["error message"]}
+        const messages: string[] = [];
+        for (const [field, errors] of Object.entries(error)) {
+          if (Array.isArray(errors)) {
+            messages.push(...errors.map(e => String(e)));
+          } else if (typeof errors === 'string') {
+            messages.push(errors);
+          }
+        }
+        if (messages.length > 0) {
+          message = messages.join(' ');
+        }
+      }
+      throw new Error(message);
     }
 
     // Handle empty responses

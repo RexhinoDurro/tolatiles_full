@@ -54,6 +54,9 @@ def generate_quote_pdf(self, quote_id: int) -> dict:
             logger.error(f"Error generating PDF: {pisa_status.err}")
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
 
+        # Set file permissions so nginx can read
+        os.chmod(pdf_path, 0o644)
+
         # Update quote with PDF path
         quote.pdf_file.name = f"quotes/{pdf_filename}"
         quote.pdf_generated_at = timezone.now()
@@ -189,6 +192,9 @@ def generate_invoice_pdf(self, invoice_id: int) -> dict:
         if pisa_status.err:
             logger.error(f"Error generating PDF: {pisa_status.err}")
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
+
+        # Set file permissions so nginx can read
+        os.chmod(pdf_path, 0o644)
 
         # Update invoice with PDF path
         invoice.pdf_file.name = f"invoices/{pdf_filename}"

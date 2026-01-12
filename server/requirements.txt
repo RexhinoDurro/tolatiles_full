@@ -9,3 +9,4 @@ python-dotenv>=1.0
 celery[redis]>=5.3
 whitenoise>=6.6
 xhtml2pdf>=0.2.11
+requests>=2.31

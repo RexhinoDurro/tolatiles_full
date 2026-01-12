@@ -138,7 +138,7 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading }: InvoiceFor
       title: formData.title,
       customer_id: selectedCustomer!.id,
       due_date: formData.due_date,
-      currency: formData.currency,
+      currency: formData.currency as 'USD' | 'EUR',
       notes: formData.notes,
       payment_terms: formData.payment_terms,
       discount_amount: formData.discount_amount,
@@ -146,7 +146,7 @@ export default function InvoiceForm({ invoice, onSubmit, isLoading }: InvoiceFor
       shipping_amount: formData.shipping_amount,
       line_items: lineItems
         .filter((item) => item.name.trim())
-        .map((item, index) => ({ ...item, order: index })),
+        .map((item, index) => ({ ...item, description: item.description || '', order: index })),
     };
 
     await onSubmit(data);

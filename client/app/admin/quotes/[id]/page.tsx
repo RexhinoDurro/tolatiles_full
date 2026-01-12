@@ -349,14 +349,24 @@ export default function QuoteDetailPage() {
                   </button>
                 )}
                 {quote.status === 'accepted' && (
-                  <button
-                    onClick={handleConvertToInvoice}
-                    disabled={actionLoading === 'invoice'}
-                    className="text-sm px-3 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200"
-                  >
-                    <FileText className="w-3 h-3 inline mr-1" />
-                    {actionLoading === 'invoice' ? 'Creating...' : 'Create Invoice'}
-                  </button>
+                  quote.invoice_id ? (
+                    <Link
+                      href={`/admin/invoices/${quote.invoice_id}`}
+                      className="text-sm px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200"
+                    >
+                      <FileText className="w-3 h-3 inline mr-1" />
+                      View Invoice
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handleConvertToInvoice}
+                      disabled={actionLoading === 'invoice'}
+                      className="text-sm px-3 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200"
+                    >
+                      <FileText className="w-3 h-3 inline mr-1" />
+                      {actionLoading === 'invoice' ? 'Creating...' : 'Create Invoice'}
+                    </button>
+                  )
                 )}
                 <button
                   onClick={handleDuplicate}
