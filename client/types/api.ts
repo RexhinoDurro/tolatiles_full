@@ -215,6 +215,7 @@ export interface Quote {
   pdf_url: string | null;
   pdf_generated_at: string | null;
   public_url: string;
+  invoice_id: number | null;
 }
 
 export interface QuoteListItem {

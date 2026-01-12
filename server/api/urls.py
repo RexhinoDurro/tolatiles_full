@@ -13,6 +13,7 @@ from quotes.views import (
     PublicQuoteView,
     PublicInvoiceView,
 )
+from api.views import GoogleReviewsView
 
 
 # Create router and register viewsets
@@ -41,4 +42,7 @@ urlpatterns = [
     # Public quote/invoice views (no auth required)
     path('quotes/public/<str:reference>/', PublicQuoteView.as_view(), name='public_quote'),
     path('invoices/public/<str:reference>/', PublicInvoiceView.as_view(), name='public_invoice'),
+
+    # Google Reviews
+    path('google-reviews/', GoogleReviewsView.as_view(), name='google_reviews'),
 ]

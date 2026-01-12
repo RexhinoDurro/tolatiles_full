@@ -263,7 +263,7 @@ export default function PublicQuotePage() {
                         {formatCurrency(Number(item.unit_price))}
                       </td>
                       <td className="py-4 px-4 text-right font-semibold text-slate-900">
-                        {formatCurrency(item.line_total)}
+                        {formatCurrency(item.line_total ?? 0)}
                       </td>
                     </tr>
                   ))}

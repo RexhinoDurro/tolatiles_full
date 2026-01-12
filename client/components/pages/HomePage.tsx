@@ -3,56 +3,419 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, ArrowRight, Star, Zap, Shield, Award, Clock, CheckCircle, Users, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Star, Zap, Shield, Award, Clock, CheckCircle, Users, Sparkles, MapPin } from 'lucide-react';
 import { sampleImages } from '@/data/gallery';
 
-const HomePage = () => {
+interface GoogleReview {
+  authorName: string;
+  profilePhotoUrl: string;
+  rating: number;
+  text: string;
+  relativeTimeDescription: string;
+  publishTime: string;
+}
+
+interface GoogleReviewsData {
+  displayName: string;
+  rating: number;
+  userRatingCount: number;
+  reviews: GoogleReview[];
+}
+
+interface LocationContent {
+  location: 'florida' | 'st-augustine' | 'jacksonville';
+  locationName: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroDescription: string;
+  featuresDescription: string;
+  advantageDescription: string;
+  locationHeading: string;
+  locationDescription: string;
+  serviceAreas: string[];
+  servicesBasePath: string;
+}
+
+const floridaContent: LocationContent = {
+  location: 'florida',
+  locationName: 'Florida',
+  heroTitle: 'Transform Your Space with Premium Tiles',
+  heroSubtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
+  heroDescription: 'Expert tile installation for kitchens, bathrooms, patios, and more. Creating beautiful spaces that last a lifetime across Northeast Florida.',
+  featuresDescription: 'We bring years of experience and unmatched expertise to every tile installation project, ensuring exceptional results that stand the test of time.',
+  advantageDescription: "When you choose us, you're partnering with professionals who are committed to transforming your vision into reality with precision and care.",
+  locationHeading: 'Where We Are Established',
+  locationDescription: 'Proudly serving Jacksonville, Saint Augustine, and the greater Northeast Florida area',
+  serviceAreas: ['Saint Augustine', 'Jacksonville', 'Ponte Vedra Beach', 'Palm Coast', 'St. Johns County', 'Flagler County'],
+  servicesBasePath: '/services',
+};
+
+const stAugustineContent: LocationContent = {
+  location: 'st-augustine',
+  locationName: 'St Augustine',
+  heroTitle: 'Transform Your St Augustine Home with Premium Tiles',
+  heroSubtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
+  heroDescription: 'Expert tile installation for St Augustine homes. From stunning kitchen backsplashes to luxurious bathroom renovations in the Ancient City.',
+  featuresDescription: 'We bring years of experience and unmatched expertise to every tile installation project in St Augustine, ensuring exceptional results that stand the test of time.',
+  advantageDescription: "When you choose us for your St Augustine project, you're partnering with professionals who understand the unique needs of homes in the Ancient City.",
+  locationHeading: 'Where We Are Established',
+  locationDescription: 'Proudly serving St Augustine, St Johns County, and the surrounding Northeast Florida communities',
+  serviceAreas: ['Downtown St Augustine', 'St Augustine Beach', 'Vilano Beach', 'Anastasia Island', 'Ponte Vedra', 'Palm Coast'],
+  servicesBasePath: '/services',
+};
+
+const jacksonvilleContent: LocationContent = {
+  location: 'jacksonville',
+  locationName: 'Jacksonville',
+  heroTitle: 'Transform Your Jacksonville Home with Premium Tiles',
+  heroSubtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
+  heroDescription: 'Expert tile installation for Jacksonville and Jax area homes. From stunning kitchen backsplashes to luxurious bathroom renovations in the River City.',
+  featuresDescription: 'We bring years of experience and unmatched expertise to every tile installation project in Jacksonville, ensuring exceptional results that stand the test of time.',
+  advantageDescription: "When you choose us for your Jacksonville project, you're partnering with professionals who understand the unique needs of homes in the River City.",
+  locationHeading: 'Where We Are Established',
+  locationDescription: 'Proudly serving Jacksonville, Jax Beach, and the surrounding Duval County communities',
+  serviceAreas: ['Downtown Jacksonville', 'Jacksonville Beach', 'Neptune Beach', 'Atlantic Beach', 'Orange Park', 'Mandarin'],
+  servicesBasePath: '/services',
+};
+
+interface HomePageProps {
+  location?: 'florida' | 'st-augustine' | 'jacksonville';
+}
+
+const HomePage = ({ location = 'florida' }: HomePageProps) => {
+  const content = location === 'st-augustine' ? stAugustineContent : location === 'jacksonville' ? jacksonvilleContent : floridaContent;
+
   return (
     <>
-      <HeroSlider />
-      <FeaturesSection />
-      <WhyChooseUsSection />
+      <HeroSlider content={content} />
+      <GoogleReviewsSection />
+      <FeaturesSection content={content} />
+      <ServiceAreasSection currentLocation={location} />
+      <WhyChooseUsSection content={content} />
       <SampleWorkPreview />
-      <LocationSection />
-      <TestimonialSection />
+      <LocationSection content={content} />
     </>
   );
 };
 
-const HeroSlider = () => {
+const GOOGLE_BUSINESS_URL = 'https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7';
+
+const ReviewCard = ({ review }: { review: GoogleReview }) => (
+  <article className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 h-full mx-2 md:mx-3">
+    {/* Quote Icon */}
+    <div className="text-blue-100 mb-4">
+      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+      </svg>
+    </div>
+
+    {/* Review Text */}
+    {review.text && (
+      <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6 line-clamp-4 min-h-[80px]">
+        {review.text}
+      </p>
+    )}
+
+    {/* Rating Stars */}
+    <div className="flex gap-0.5 mb-4">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+        />
+      ))}
+    </div>
+
+    {/* Author Info */}
+    <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+      {review.profilePhotoUrl ? (
+        <Image
+          src={review.profilePhotoUrl}
+          alt={review.authorName}
+          width={44}
+          height={44}
+          className="rounded-full ring-2 ring-gray-100"
+        />
+      ) : (
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center ring-2 ring-gray-100">
+          <span className="text-white font-semibold text-lg">
+            {review.authorName.charAt(0).toUpperCase()}
+          </span>
+        </div>
+      )}
+      <div>
+        <h4 className="font-semibold text-gray-900 text-sm">{review.authorName}</h4>
+        <p className="text-xs text-gray-400">{review.relativeTimeDescription}</p>
+      </div>
+    </div>
+  </article>
+);
+
+const GoogleReviewsSection = () => {
+  const [reviewsData, setReviewsData] = useState<GoogleReviewsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tolatiles.com/api';
+        const response = await fetch(`${apiUrl}/google-reviews/`);
+        if (response.ok) {
+          const data = await response.json();
+          setReviewsData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Google reviews:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  const reviews = reviewsData?.reviews || [];
+  const totalReviews = reviews.length;
+
+  // Auto-play carousel
+  useEffect(() => {
+    if (!reviewsData || totalReviews === 0) return;
+
+    const interval = setInterval(() => {
+      handleNext();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [reviewsData, totalReviews]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + totalReviews) % totalReviews);
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % totalReviews);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const distance = touchStartX.current - touchEndX.current;
+    if (distance > 50) handleNext();
+    else if (distance < -50) handlePrev();
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  if (isLoading || !reviewsData || totalReviews === 0) {
+    return null;
+  }
+
+  // Create infinite loop by tripling the reviews array
+  const infiniteReviews = [...reviews, ...reviews, ...reviews];
+  const offsetIndex = currentIndex + totalReviews; // Start from middle set
+
+  return (
+    <section className="py-12 md:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden" aria-labelledby="reviews-heading">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-8 md:mb-12">
+          <a
+            href={GOOGLE_BUSINESS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity"
+          >
+            <Image
+              src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
+              alt="Google"
+              width={92}
+              height={30}
+              className="h-7 md:h-8 w-auto"
+            />
+            <h2 id="reviews-heading" className="text-xl md:text-2xl font-semibold text-gray-900">Reviews</h2>
+          </a>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 bg-clip-text text-transparent">
+              {reviewsData.rating.toFixed(1)}
+            </span>
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-6 w-6 md:h-7 md:w-7 ${i < Math.round(reviewsData.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
+                />
+              ))}
+            </div>
+          </div>
+          <p className="text-gray-500 text-sm md:text-base">Based on {reviewsData.userRatingCount} reviews</p>
+        </div>
+
+        {/* Carousel Container */}
+        <div className="relative">
+          {/* Navigation Arrows - Desktop */}
+          <button
+            onClick={handlePrev}
+            className="hidden md:flex absolute -left-4 lg:-left-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg items-center justify-center hover:bg-gray-50 hover:scale-110 transition-all duration-300 border border-gray-100"
+            aria-label="Previous review"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="hidden md:flex absolute -right-4 lg:-right-6 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white rounded-full shadow-lg items-center justify-center hover:bg-gray-50 hover:scale-110 transition-all duration-300 border border-gray-100"
+            aria-label="Next review"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700" />
+          </button>
+
+          {/* Reviews Carousel - Mobile (single card) */}
+          <div
+            className="md:hidden overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{
+                transform: `translateX(-${offsetIndex * 100}%)`,
+              }}
+            >
+              {infiniteReviews.map((review, index) => (
+                <div key={index} className="w-full flex-shrink-0">
+                  <ReviewCard review={review} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Reviews Carousel - Desktop (3 cards visible) */}
+          <div className="hidden md:block overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{
+                transform: `translateX(-${offsetIndex * (100 / 3)}%)`,
+              }}
+            >
+              {infiniteReviews.map((review, index) => (
+                <div key={index} className="w-1/3 flex-shrink-0">
+                  <ReviewCard review={review} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination Dots */}
+          <div className="flex justify-center gap-2 mt-6 md:mt-8">
+            {reviews.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  index === currentIndex % totalReviews
+                    ? 'w-8 h-2 bg-blue-600'
+                    : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                }`}
+                aria-label={`Go to review ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Button */}
+        <div className="text-center mt-8">
+          <a
+            href={GOOGLE_BUSINESS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-full font-semibold shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-300 border border-gray-200"
+          >
+            <Image
+              src="https://www.google.com/favicon.ico"
+              alt=""
+              width={20}
+              height={20}
+              className="w-5 h-5"
+            />
+            See all reviews on Google
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const HeroSlider = ({ content }: { content: LocationContent }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isManualChange, setIsManualChange] = useState(false);
+  const [reviewsData, setReviewsData] = useState<GoogleReviewsData | null>(null);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const sliderRef = useRef<HTMLElement>(null);
 
+  // Fetch Google reviews for hero badge
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tolatiles.com/api';
+        const response = await fetch(`${apiUrl}/google-reviews/`);
+        if (response.ok) {
+          const data = await response.json();
+          setReviewsData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Google reviews:', error);
+      }
+    };
+    fetchReviews();
+  }, []);
+
+  const locationText = content.location === 'st-augustine' ? 'St Augustine' : content.location === 'jacksonville' ? 'Jacksonville' : 'Jacksonville and Saint Augustine';
+  const locationSuffix = content.location === 'florida' ? '' : ` in ${content.locationName}`;
+
   const slides = [
     {
       id: 1,
-      title: 'Transform Your Space with Premium Tiles',
-      subtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
-      description: 'Expert tile installation for kitchens, bathrooms, patios, and more. Creating beautiful spaces that last a lifetime.',
+      title: content.heroTitle,
+      subtitle: content.heroSubtitle,
+      description: content.heroDescription,
       image: '/images/fireplace/1.webp',
       cta: 'View Our Work',
-      alt: 'Beautiful fireplace tile installation by Tola Tiles',
+      alt: `Beautiful fireplace tile installation by Tola Tiles in ${content.locationName}`,
     },
     {
       id: 2,
-      title: 'Luxury Bathroom Transformations',
+      title: content.location === 'florida' ? 'Luxury Bathroom Transformations' : `Luxury Bathroom Transformations in ${content.locationName}`,
       subtitle: 'Custom Designs • Expert Craftsmanship • Modern Solutions',
-      description: 'From elegant marble to contemporary ceramics, we create stunning bathroom spaces tailored to your vision.',
+      description: `From elegant marble to contemporary ceramics, we create stunning bathroom spaces tailored to your vision${locationSuffix}.`,
       image: '/images/shower/2.webp',
       cta: 'See Gallery',
-      alt: 'Luxury bathroom shower tile installation',
+      alt: `Luxury bathroom shower tile installation in ${content.locationName}`,
     },
     {
       id: 3,
-      title: 'Beautiful Kitchen Backsplashes',
+      title: content.location === 'florida' ? 'Beautiful Kitchen Backsplashes' : `Beautiful Kitchen Backsplashes for ${content.locationName} Homes`,
       subtitle: 'Stylish Designs • Perfect Installation • Lasting Beauty',
-      description: 'Enhance your kitchen with our expertly installed backsplashes using the finest materials and innovative designs.',
+      description: `Enhance your kitchen with our expertly installed backsplashes using the finest materials and innovative designs${locationSuffix}.`,
       image: '/images/backsplash/1.webp',
       cta: 'See Gallery',
-      alt: 'Modern kitchen backsplash tile installation',
+      alt: `Modern kitchen backsplash tile installation in ${content.locationName}`,
     },
   ];
 
@@ -121,7 +484,7 @@ const HeroSlider = () => {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <h1 className="sr-only">Tola Tiles - Tile Installation Services in Jacksonville and Saint Augustine Florida</h1>
+      <h1 className="sr-only">Tola Tiles - Tile Installation Services in {locationText} Florida</h1>
 
       {slides.map((slide, index) => (
         <div
@@ -191,6 +554,38 @@ const HeroSlider = () => {
                     </Link>
                   </div>
                 </div>
+
+                {/* Google Reviews Badge */}
+                {reviewsData && (
+                  <div className="overflow-hidden mt-8">
+                    <a
+                      href={GOOGLE_BUSINESS_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full transform transition-all duration-1000 delay-1200 hover:bg-white/20 ${
+                        index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+                      }`}
+                    >
+                      <img
+                        src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
+                        alt="Google"
+                        className="h-5 w-auto"
+                      />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-white font-semibold">{reviewsData.rating.toFixed(1)}</span>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${i < Math.round(reviewsData.rating) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-white/80 text-sm">({reviewsData.userRatingCount} reviews)</span>
+                      </div>
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -235,7 +630,7 @@ const HeroSlider = () => {
   );
 };
 
-const FeaturesSection = () => {
+const FeaturesSection = ({ content }: { content: LocationContent }) => {
   const features = [
     {
       icon: Star,
@@ -259,10 +654,10 @@ const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-16">
           <h2 id="features-heading" className="text-4xl font-bold text-gray-900 mb-6">
-            Why Choose Tola Tiles?
+            Why Choose Tola Tiles{content.location === 'st-augustine' ? ' in St Augustine' : ''}?
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We bring years of experience and unmatched expertise to every tile installation project, ensuring exceptional results that stand the test of time.
+            {content.featuresDescription}
           </p>
         </header>
 
@@ -288,12 +683,197 @@ const FeaturesSection = () => {
   );
 };
 
-const WhyChooseUsSection = () => {
+const ServiceAreasSection = ({ currentLocation }: { currentLocation: 'florida' | 'st-augustine' | 'jacksonville' }) => {
+  // Define service areas with their details
+  const areas = [
+    {
+      id: 'jacksonville',
+      name: 'Jacksonville',
+      shortName: 'Jax',
+      href: '/jacksonville',
+      description: 'Expert tile installation in Jacksonville, Jax Beach, and Duval County. Kitchen backsplashes, bathroom tiles, flooring, and more.',
+      serviceAreas: ['Downtown Jax', 'Jax Beach', 'Neptune Beach', 'Atlantic Beach', 'Orange Park', 'Mandarin'],
+      services: [
+        { name: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-jacksonville' },
+        { name: 'Bathroom Tile', href: '/services/bathroom-tile-jacksonville' },
+        { name: 'Floor Tile', href: '/services/floor-tile-jacksonville' },
+      ],
+    },
+    {
+      id: 'st-augustine',
+      name: 'St Augustine',
+      shortName: 'St Aug',
+      href: '/st-augustine',
+      description: 'Professional tile services in St Augustine, St Johns County, and the Ancient City. Specializing in coastal homes.',
+      serviceAreas: ['Downtown St Aug', 'St Aug Beach', 'Vilano Beach', 'Anastasia Island', 'Ponte Vedra', 'Palm Coast'],
+      services: [
+        { name: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-st-augustine' },
+        { name: 'Bathroom Tile', href: '/services/bathroom-tile-st-augustine' },
+        { name: 'Floor Tile', href: '/services/floor-tile-st-augustine' },
+      ],
+    },
+  ];
+
+  // Filter out current location and add cross-linking
+  const otherAreas = areas.filter(area => area.id !== currentLocation);
+
+  // If on a specific location page, show link to main and other locations
+  if (currentLocation !== 'florida') {
+    const currentArea = areas.find(area => area.id === currentLocation);
+    return (
+      <section className="py-16 bg-blue-50" aria-labelledby="service-areas-heading">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="text-center mb-12">
+            <h2 id="service-areas-heading" className="text-3xl font-bold text-gray-900 mb-4">
+              Also Serving Northeast Florida
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              In addition to {currentArea?.name}, we provide professional tile installation services throughout Northeast Florida
+            </p>
+          </header>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Link to main Florida page */}
+            <Link
+              href="/"
+              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                  <MapPin className="h-6 w-6 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">All Florida Services</h3>
+              </div>
+              <p className="text-gray-600 mb-4">
+                View our complete tile installation services across Northeast Florida
+              </p>
+              <span className="text-blue-600 font-medium flex items-center gap-2 group-hover:gap-3 transition-all">
+                View All Services
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
+
+            {/* Link to other location */}
+            {otherAreas.map(area => (
+              <Link
+                key={area.id}
+                href={area.href}
+                className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <MapPin className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">{area.name} Services</h3>
+                </div>
+                <p className="text-gray-600 mb-4">{area.description}</p>
+                <span className="text-blue-600 font-medium flex items-center gap-2 group-hover:gap-3 transition-all">
+                  View {area.shortName} Services
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Main Florida page - show all location links
+  return (
+    <section className="py-20 bg-blue-50" aria-labelledby="service-areas-heading">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="text-center mb-16">
+          <h2 id="service-areas-heading" className="text-4xl font-bold text-gray-900 mb-6">
+            Tile Installation Across Northeast Florida
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Professional tile installation services in Jacksonville, St Augustine, and surrounding communities. Find expert tile installers near you.
+          </p>
+        </header>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {areas.map(area => (
+            <article
+              key={area.id}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group"
+            >
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
+                    <MapPin className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      <Link href={area.href} className="hover:text-blue-600 transition-colors">
+                        Tile Installer {area.name} FL
+                      </Link>
+                    </h3>
+                    <p className="text-gray-500 text-sm">Professional tile installation services</p>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 mb-6">{area.description}</p>
+
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">Popular Services:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {area.services.map(service => (
+                      <Link
+                        key={service.href}
+                        href={service.href}
+                        className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                      >
+                        {service.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">Areas Served:</h4>
+                  <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+                    {area.serviceAreas.map((subArea, idx) => (
+                      <span key={subArea}>
+                        {subArea}{idx < area.serviceAreas.length - 1 && <span className="mx-1">•</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <Link
+                  href={area.href}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 group-hover:gap-3"
+                >
+                  View {area.name} Services
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* All Services Link */}
+        <div className="text-center mt-12">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors text-lg"
+          >
+            View All Tile Installation Services
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const WhyChooseUsSection = ({ content }: { content: LocationContent }) => {
   const benefits = [
     {
       icon: Award,
       title: '15+ Years Experience',
-      description: 'Proven track record with over 1,500 successful installations',
+      description: `Proven track record with over 1,500 successful installations${content.location === 'st-augustine' ? ' in St Augustine area' : ''}`,
     },
     {
       icon: Users,
@@ -317,10 +897,10 @@ const WhyChooseUsSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-16">
           <h2 id="advantages-heading" className="text-4xl font-bold text-gray-900 mb-6">
-            The Tola Tiles Advantage
+            The Tola Tiles Advantage{content.location === 'st-augustine' ? ' in St Augustine' : ''}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            When you choose us, you&apos;re partnering with professionals who are committed to transforming your vision into reality with precision and care.
+            {content.advantageDescription}
           </p>
         </header>
 
@@ -397,16 +977,16 @@ const SampleWorkPreview = () => {
   );
 };
 
-const LocationSection = () => {
+const LocationSection = ({ content }: { content: LocationContent }) => {
   return (
     <section className="py-20 bg-white" aria-labelledby="location-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="text-center mb-12">
           <h2 id="location-heading" className="text-4xl font-bold text-gray-900 mb-6">
-            Visit Our Location
+            {content.locationHeading}
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Proudly serving Jacksonville, Saint Augustine, and the greater Northeast Florida area
+            {content.locationDescription}
           </p>
         </header>
 
@@ -436,7 +1016,7 @@ const LocationSection = () => {
                 </p>
                 <p className="flex items-center gap-3">
                   <span className="text-blue-600 font-medium">Phone:</span>
-                  <a href="tel:+1-904-210-3094" className="hover:text-blue-600 transition-colors">(904) 210-3094</a>
+                  <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">+1 (904) 866-1738</a>
                 </p>
                 <p className="flex items-center gap-3">
                   <span className="text-blue-600 font-medium">Email:</span>
@@ -448,12 +1028,9 @@ const LocationSection = () => {
             <div className="bg-blue-50 rounded-xl p-6">
               <h4 className="font-semibold text-gray-900 mb-3">Service Areas</h4>
               <div className="grid grid-cols-2 gap-2 text-gray-600">
-                <span>Saint Augustine</span>
-                <span>Jacksonville</span>
-                <span>Ponte Vedra Beach</span>
-                <span>Palm Coast</span>
-                <span>St. Johns County</span>
-                <span>Flagler County</span>
+                {content.serviceAreas.map((area) => (
+                  <span key={area}>{area}</span>
+                ))}
               </div>
             </div>
 
@@ -467,62 +1044,6 @@ const LocationSection = () => {
               <ArrowRight className="w-5 h-5" />
             </a>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const TestimonialSection = () => {
-  const testimonials = [
-    {
-      name: 'Sarah Johnson',
-      project: 'Kitchen Backsplash',
-      quote: 'Tola Tiles transformed our kitchen beyond our expectations. The attention to detail and craftsmanship is exceptional.',
-      rating: 5,
-    },
-    {
-      name: 'Mike Chen',
-      project: 'Bathroom Renovation',
-      quote: 'Professional, reliable, and the quality is outstanding. Our bathroom looks like a luxury spa now!',
-      rating: 5,
-    },
-    {
-      name: 'Lisa Rodriguez',
-      project: 'Patio Installation',
-      quote: 'From design to completion, the team was fantastic. They delivered exactly what they promised.',
-      rating: 5,
-    },
-  ];
-
-  return (
-    <section className="py-20 bg-blue-600" aria-labelledby="testimonials-heading">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-16">
-          <h2 id="testimonials-heading" className="text-4xl font-bold text-white mb-6">
-            What Our Clients Say
-          </h2>
-          <p className="text-xl text-blue-100">Don&apos;t just take our word for it—hear from satisfied customers who trusted us with their projects</p>
-        </header>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <article
-              key={index}
-              className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-            >
-              <div className="flex mb-4" role="img" aria-label={`${testimonial.rating} out of 5 stars`}>
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" aria-hidden="true" />
-                ))}
-              </div>
-              <blockquote className="text-gray-700 mb-6 leading-relaxed">&quot;{testimonial.quote}&quot;</blockquote>
-              <footer>
-                <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                <div className="text-sm text-gray-600">{testimonial.project}</div>
-              </footer>
-            </article>
-          ))}
         </div>
       </div>
     </section>

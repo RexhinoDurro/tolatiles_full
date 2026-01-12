@@ -98,8 +98,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">Phone</div>
-                    <a href="tel:+1-904-210-3094" className="text-lg text-gray-700 hover:text-blue-600 transition-colors">
-                      (904) 210-3094
+                    <a href="tel:+1-904-866-1738" className="text-lg text-gray-700 hover:text-blue-600 transition-colors">
+                      +1 (904) 866-1738
                     </a>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ const ContactPage = () => {
                   <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                   <div className="text-red-700">
                     <p className="font-medium">Unable to submit form</p>
-                    <p className="text-sm mt-1">{errorMessage || 'Please try again or call us directly at (904) 210-3094.'}</p>
+                    <p className="text-sm mt-1">{errorMessage || 'Please try again or call us directly at +1 (904) 866-1738.'}</p>
                   </div>
                 </div>
               )}
@@ -319,8 +319,8 @@ const ContactPage = () => {
                   * Required fields. We&apos;ll respond within 24 hours.
                   <br />
                   For immediate assistance, call{' '}
-                  <a href="tel:+1-904-210-3094" className="text-blue-600 hover:underline">
-                    (904) 210-3094
+                  <a href="tel:+1-904-866-1738" className="text-blue-600 hover:underline">
+                    +1 (904) 866-1738
                   </a>
                 </p>
               </div>
@@ -329,7 +329,7 @@ const ContactPage = () => {
 
           {/* Map Section */}
           <div className="mt-16">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Find Us</h2>
+            <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Where We Are Established</h2>
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 h-[400px] rounded-xl overflow-hidden shadow-lg">
                 <iframe
@@ -352,7 +352,7 @@ const ContactPage = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <a href="tel:+1-904-210-3094" className="hover:text-blue-600 transition-colors">(904) 210-3094</a>
+                    <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">+1 (904) 866-1738</a>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
@@ -372,18 +372,6 @@ const ContactPage = () => {
             </div>
           </div>
 
-          {/* Emergency Contact */}
-          <div className="mt-16 text-center bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
-            <h2 className="text-2xl font-bold mb-4">Need Emergency Tile Repair?</h2>
-            <p className="text-blue-100 mb-6">We offer emergency repair services for urgent tile and water damage issues.</p>
-            <a
-              href="tel:+1-904-210-3094"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center gap-2"
-            >
-              <Phone className="h-5 w-5" />
-              Call Emergency Line
-            </a>
-          </div>
         </div>
       </section>
     </div>

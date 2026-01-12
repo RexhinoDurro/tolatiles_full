@@ -1,11 +1,61 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Phone, Mail, MapPin, Clock, ExternalLink, Facebook, Instagram } from 'lucide-react';
+import { getEmail, getMailtoLink } from '@/lib/email';
+
+type LocationType = 'florida' | 'jacksonville' | 'st-augustine';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+
+  // Determine current location based on pathname
+  const currentLocation: LocationType = useMemo(() => {
+    if (pathname.startsWith('/st-augustine') || pathname.includes('-st-augustine')) {
+      return 'st-augustine';
+    }
+    if (pathname.startsWith('/jacksonville') || pathname.includes('-jacksonville')) {
+      return 'jacksonville';
+    }
+    return 'florida';
+  }, [pathname]);
+
+  // Get service links based on location
+  const serviceLinks = useMemo(() => {
+    if (currentLocation === 'st-augustine') {
+      return {
+        all: '/st-augustine',
+        kitchenBacksplash: '/services/kitchen-backsplash-st-augustine',
+        bathroom: '/services/bathroom-tile-st-augustine',
+        floor: '/services/floor-tile-st-augustine',
+        patio: '/services/patio-tile-st-augustine',
+        fireplace: '/services/fireplace-tile-st-augustine',
+      };
+    }
+    if (currentLocation === 'jacksonville') {
+      return {
+        all: '/jacksonville',
+        kitchenBacksplash: '/services/kitchen-backsplash-jacksonville',
+        bathroom: '/services/bathroom-tile-jacksonville',
+        floor: '/services/floor-tile-jacksonville',
+        patio: '/services/patio-tile-jacksonville',
+        fireplace: '/services/fireplace-tile-jacksonville',
+      };
+    }
+    // Default Florida
+    return {
+      all: '/services',
+      kitchenBacksplash: '/services/kitchen-backsplash',
+      bathroom: '/services/bathroom-tile',
+      floor: '/services/floor-tile',
+      patio: '/services/patio-tile',
+      fireplace: '/services/fireplace-tile',
+    };
+  }, [currentLocation]);
 
   return (
     <footer className="bg-gray-900 text-white py-16" role="contentinfo">
@@ -62,13 +112,13 @@ const Footer = () => {
             <nav aria-label="Services">
               <ul className="space-y-3 text-gray-300">
                 <li>
-                  <Link href="/services" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                  <Link href={serviceLinks.all} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
                     Tile Installation
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/gallery/backsplashes"
+                    href={serviceLinks.kitchenBacksplash}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     Kitchen Backsplashes
@@ -76,7 +126,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/gallery/showers"
+                    href={serviceLinks.bathroom}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     Bathroom Remodeling
@@ -84,7 +134,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/gallery/flooring"
+                    href={serviceLinks.floor}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     Floor Tiling
@@ -92,7 +142,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/gallery/patios"
+                    href={serviceLinks.patio}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     Outdoor Patios
@@ -100,7 +150,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/gallery/fireplaces"
+                    href={serviceLinks.fireplace}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
                     Fireplace Surrounds
@@ -110,11 +160,11 @@ const Footer = () => {
             </nav>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links & Service Areas */}
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <nav aria-label="Quick links">
-              <ul className="space-y-3 text-gray-300">
+              <ul className="space-y-3 text-gray-300 mb-6">
                 <li>
                   <Link href="/about" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
                     About Us
@@ -135,10 +185,26 @@ const Footer = () => {
                     Contact Us
                   </Link>
                 </li>
+              </ul>
+            </nav>
+
+            <h4 className="text-md font-semibold mb-4 text-gray-200">Service Areas</h4>
+            <nav aria-label="Service areas">
+              <ul className="space-y-2 text-gray-300">
+                <li>
+                  <Link href="/jacksonville" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    Tile Installer Jacksonville FL
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/st-augustine" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    Tile Installer St Augustine FL
+                  </Link>
+                </li>
                 <li>
                   <a
                     href="/sitemap.xml"
-                    className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-flex items-center gap-1"
+                    className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-flex items-center gap-1 text-sm text-gray-400"
                     target="_blank"
                     rel="noopener"
                   >
@@ -161,8 +227,8 @@ const Footer = () => {
                 />
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Call us today</div>
-                  <a href="tel:+1-904-210-3094" className="hover:text-white transition-colors font-medium" itemProp="telephone">
-                    (904) 210-3094
+                  <a href="tel:+1-904-866-1738" className="hover:text-white transition-colors font-medium" itemProp="telephone">
+                    +1 (904) 866-1738
                   </a>
                 </div>
               </div>
@@ -174,8 +240,8 @@ const Footer = () => {
                 />
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Email us</div>
-                  <a href="mailto:menitola@tolatiles.com" className="hover:text-white transition-colors" itemProp="email">
-                    menitola@tolatiles.com
+                  <a href={getMailtoLink()} className="hover:text-white transition-colors" itemProp="email">
+                    {getEmail()}
                   </a>
                 </div>
               </div>
@@ -186,7 +252,7 @@ const Footer = () => {
                   aria-hidden="true"
                 />
                 <div>
-                  <div className="text-sm text-gray-400 mb-1">Visit us</div>
+                  <div className="text-sm text-gray-400 mb-1">Where we are established</div>
                   <address className="not-italic" itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
                     <span itemProp="streetAddress">445 Hutchinson Ln</span>
                     <br />
@@ -212,11 +278,6 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Emergency Service */}
-            <div className="mt-6 p-3 bg-red-900/30 rounded-lg border border-red-800">
-              <div className="text-sm font-semibold text-red-200 mb-1">Emergency Service</div>
-              <div className="text-xs text-red-300">24/7 emergency tile repair available</div>
-            </div>
           </div>
         </div>
 
@@ -236,11 +297,18 @@ const Footer = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <span>Designed with excellence in mind</span>
+            <div className="flex flex-col items-center md:items-end gap-2 text-sm text-gray-400">
               <div className="flex items-center gap-1">
                 <span>4.9/5 rating</span>
               </div>
+              <a
+                href="https://montrose.agency"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                Developed by Montrose Agency
+              </a>
             </div>
           </div>
         </div>

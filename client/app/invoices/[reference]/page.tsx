@@ -182,8 +182,8 @@ export default function PublicInvoicePage() {
               <p className="font-semibold text-slate-900 text-xl mb-2">{invoice.company.company_name}</p>
               <div className="space-y-1.5 text-slate-600">
                 <p>{invoice.company.sender_name}</p>
-                {invoice.company.sender_title && (
-                  <p className="text-slate-500 text-sm">{invoice.company.sender_title}</p>
+                {invoice.company.title && (
+                  <p className="text-slate-500 text-sm">{invoice.company.title}</p>
                 )}
                 {invoice.company.company_address && (
                   <p className="text-sm whitespace-pre-wrap mt-2">{invoice.company.company_address}</p>
@@ -255,7 +255,7 @@ export default function PublicInvoicePage() {
                         {formatCurrency(Number(item.unit_price))}
                       </td>
                       <td className="py-4 px-4 text-right font-semibold text-slate-900">
-                        {formatCurrency(item.line_total)}
+                        {formatCurrency(item.line_total ?? 0)}
                       </td>
                     </tr>
                   ))}

@@ -17,7 +17,7 @@ export default function AdminSettingsPage() {
 
   const [formData, setFormData] = useState({
     sender_name: '',
-    sender_title: '',
+    title: '',
     email: '',
     phone: '',
     company_name: '',
@@ -32,7 +32,7 @@ export default function AdminSettingsPage() {
       setSettings(data);
       setFormData({
         sender_name: data.sender_name || '',
-        sender_title: data.sender_title || '',
+        title: data.title || '',
         email: data.email || '',
         phone: data.phone || '',
         company_name: data.company_name || '',
@@ -72,7 +72,12 @@ export default function AdminSettingsPage() {
 
     try {
       if (logoFile) {
-        await api.updateCompanySettingsWithLogo(formData, logoFile);
+        const formDataWithLogo = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+          formDataWithLogo.append(key, value);
+        });
+        formDataWithLogo.append('company_logo', logoFile);
+        await api.updateCompanySettingsWithLogo(formDataWithLogo);
       } else {
         await api.updateCompanySettings(formData);
       }
@@ -210,9 +215,9 @@ export default function AdminSettingsPage() {
                   </label>
                   <input
                     type="text"
-                    value={formData.sender_title}
+                    value={formData.title}
                     onChange={(e) =>
-                      setFormData({ ...formData, sender_title: e.target.value })
+                      setFormData({ ...formData, title: e.target.value })
                     }
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Sales Manager"
