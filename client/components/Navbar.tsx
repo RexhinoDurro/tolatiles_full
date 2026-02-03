@@ -93,6 +93,7 @@ const Navbar = () => {
     { id: '/services', label: 'Services', href: '/services', hasDropdown: true },
     { id: '/gallery', label: 'Gallery', href: '/gallery' },
     { id: '/about', label: 'About', href: '/about' },
+    { id: '/blog', label: 'Blog', href: '/blog' },
     { id: '/faqs', label: 'FAQs', href: '/faqs' },
     { id: '/contact', label: 'Contact Us', href: '/contact' },
   ];

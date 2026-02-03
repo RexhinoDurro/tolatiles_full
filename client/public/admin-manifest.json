@@ -1,0 +1,57 @@
+{
+  "name": "Tola Tiles Admin",
+  "short_name": "TT Admin",
+  "description": "Tola Tiles Administration Portal - Manage quotes, leads, blog, and gallery",
+  "start_url": "/admin/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "scope": "/admin",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/admin/dashboard",
+      "description": "Go to admin dashboard"
+    },
+    {
+      "name": "Blog Calendar",
+      "url": "/admin/blog/calendar",
+      "description": "Schedule blog posts"
+    },
+    {
+      "name": "Quotes",
+      "url": "/admin/quotes",
+      "description": "Manage quotes"
+    },
+    {
+      "name": "Leads",
+      "url": "/admin/leads",
+      "description": "View leads"
+    }
+  ]
+}

@@ -123,6 +123,22 @@ export default function AdminGalleryPage() {
     await fetchData(true);
   };
 
+  // Handle image transform (rotate/flip)
+  const handleTransform = async (
+    image: GalleryImage,
+    type: 'rotate_left' | 'rotate_right' | 'flip_horizontal' | 'flip_vertical'
+  ) => {
+    try {
+      const result = await api.transformGalleryImage(image.id, type);
+      // Update only this image in state instead of refetching everything
+      setImages(prev => prev.map(img =>
+        img.id === result.id ? { ...result, updated_at: new Date().toISOString() } : img
+      ));
+    } catch (error) {
+      console.error('Transform error:', error);
+    }
+  };
+
   // Edit handler
   const handleEdit = (image: GalleryImage) => {
     setEditingImage(image);
@@ -211,6 +227,7 @@ export default function AdminGalleryPage() {
             onEdit={handleEdit}
             onDelete={setDeleteTarget}
             onToggleActive={handleToggleActive}
+            onTransform={handleTransform}
           />
         )}
 

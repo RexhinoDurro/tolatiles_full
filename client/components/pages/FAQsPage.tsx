@@ -195,8 +195,8 @@ const FAQsPage = () => {
                 <Phone className="h-8 w-8 mx-auto mb-3 text-blue-200" aria-hidden="true" />
                 <h3 className="font-semibold mb-2">Call Us</h3>
                 <p className="text-blue-100 text-sm mb-3">Speak directly with our experts</p>
-                <a href="tel:+1-904-210-3094" className="text-white hover:text-blue-200 font-medium" aria-label="Call Tola Tiles at (904) 210-3094">
-                  (904) 210-3094
+                <a href="tel:+1-904-866-1738" className="text-white hover:text-blue-200 font-medium" aria-label="Call Tola Tiles at (904) 866-1738">
+                  (904) 866-1738
                 </a>
               </div>
 

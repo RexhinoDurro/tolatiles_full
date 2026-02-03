@@ -70,6 +70,72 @@ export interface LeadStats {
   by_status: Record<LeadStatus, number>;
 }
 
+// Website Lead Admin Create (for manually adding leads)
+export interface WebsiteLeadCreate {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone?: string;
+  project_type: string;
+  message?: string;
+  status?: LeadStatus;
+  notes?: string;
+}
+
+// Local Ads Lead Types (Google LSA)
+export type LocalAdsLeadStatus = 'new' | 'contacted' | 'closed';
+export type LocalAdsLeadType = 'phone' | 'message';
+export type LocalAdsChargeStatus = 'charged' | 'not_charged';
+
+export interface LocalAdsLead {
+  id: number;
+  customer_phone: string;
+  customer_name?: string;
+  job_type: string;
+  location: string;
+  lead_type: LocalAdsLeadType;
+  charge_status: LocalAdsChargeStatus;
+  lead_received: string;
+  last_activity: string;
+  status: LocalAdsLeadStatus;
+  message?: string;
+  call_duration?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LocalAdsLeadsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: LocalAdsLead[];
+}
+
+export interface LocalAdsLeadsFilters {
+  page?: number;
+  page_size?: number;
+  status?: LocalAdsLeadStatus | '';
+  charge_status?: LocalAdsChargeStatus | '';
+  date_from?: string;
+  date_to?: string;
+}
+
+// Local Ads Lead Create (for manually adding leads)
+export interface LocalAdsLeadCreate {
+  customer_phone: string;
+  customer_name?: string;
+  job_type: string;
+  location?: string;
+  lead_type: LocalAdsLeadType;
+  charge_status?: LocalAdsChargeStatus;
+  lead_received?: string;
+  message?: string;
+  call_duration?: number;
+  status?: LocalAdsLeadStatus;
+  notes?: string;
+}
+
 // Authentication Types
 export interface User {
   id: number;
@@ -380,4 +446,319 @@ export interface PublicInvoice {
   line_items: InvoiceLineItem[];
   company: CompanySettings;
   pdf_file: string | null;
+}
+
+// ==================== NOTIFICATION TYPES ====================
+
+export type NotificationType = 'new_lead' | 'lead_status' | 'quote_status' | 'invoice_paid' | 'system';
+export type NotificationPriority = 'low' | 'normal' | 'high';
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  priority: NotificationPriority;
+  related_object_type: string | null;
+  related_object_type_name: string | null;
+  related_object_id: number | null;
+  is_read: boolean;
+  read_at: string | null;
+  delivered_via_websocket: boolean;
+  delivered_via_push: boolean;
+  data: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface NotificationPreferences {
+  new_lead_enabled: boolean;
+  lead_status_enabled: boolean;
+  quote_status_enabled: boolean;
+  invoice_paid_enabled: boolean;
+  system_enabled: boolean;
+  push_enabled: boolean;
+  sound_enabled: boolean;
+}
+
+export interface PushSubscription {
+  id: number;
+  endpoint: string;
+  p256dh_key: string;
+  auth_key: string;
+  device_name: string;
+  user_agent: string;
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
+}
+
+export interface PushSubscriptionCreate {
+  endpoint: string;
+  p256dh_key: string;
+  auth_key: string;
+  device_name?: string;
+  user_agent?: string;
+}
+
+export interface DailyStats {
+  date: string;
+  new_leads_website: number;
+  new_leads_local_ads: number;
+  total_new_leads: number;
+  leads_contacted: number;
+  leads_converted: number;
+  quotes_created: number;
+  quotes_sent: number;
+  quotes_accepted: number;
+  quotes_total_value: number;
+  invoices_created: number;
+  invoices_paid: number;
+  invoices_paid_value: number;
+}
+
+export interface DailyStatsResponse {
+  days: DailyStats[];
+  totals: {
+    total_leads_website: number;
+    total_leads_local_ads: number;
+    total_leads: number;
+    total_contacted: number;
+    total_converted: number;
+    total_quotes_created: number;
+    total_quotes_sent: number;
+    total_quotes_accepted: number;
+    total_quotes_value: number;
+    total_invoices_created: number;
+    total_invoices_paid: number;
+    total_invoices_paid_value: number;
+  };
+  period: {
+    start: string;
+    end: string;
+    days: number;
+  };
+}
+
+// ==================== BLOG TYPES ====================
+
+export type BlogPostStatus = 'draft' | 'published' | 'scheduled';
+
+export interface BlogCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  post_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogCategoryMinimal {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface BlogCategoryCreate {
+  name: string;
+  slug?: string;
+  description?: string;
+}
+
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  author_name: string;
+  featured_image: string | null;
+  featured_image_alt: string;
+  meta_title: string;
+  meta_description: string;
+  canonical_url: string;
+  is_indexed: boolean;
+  has_faq_schema: boolean;
+  faq_data: FAQItem[];
+  categories: BlogCategoryMinimal[];
+  status: BlogPostStatus;
+  publish_date: string | null;
+  scheduled_publish_date: string | null;
+  reading_time: number;
+  effective_meta_title: string;
+  effective_meta_description: string;
+  created_at: string;
+  last_updated: string;
+}
+
+export interface BlogPostListItem {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  author_name: string;
+  featured_image: string | null;
+  featured_image_alt: string;
+  categories: BlogCategoryMinimal[];
+  status: BlogPostStatus;
+  publish_date: string | null;
+  reading_time: number;
+  created_at: string;
+  last_updated: string;
+}
+
+export interface BlogPostCreate {
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  author_name?: string;
+  featured_image?: File | null;
+  featured_image_alt?: string;
+  meta_title?: string;
+  meta_description?: string;
+  canonical_url?: string;
+  is_indexed?: boolean;
+  has_faq_schema?: boolean;
+  faq_data?: FAQItem[];
+  category_ids?: number[];
+  status?: BlogPostStatus;
+  scheduled_publish_date?: string;
+}
+
+export interface BlogPostUpdate {
+  title?: string;
+  slug?: string;
+  content?: string;
+  excerpt?: string;
+  author_name?: string;
+  featured_image?: File | null;
+  featured_image_alt?: string;
+  meta_title?: string;
+  meta_description?: string;
+  canonical_url?: string;
+  is_indexed?: boolean;
+  has_faq_schema?: boolean;
+  faq_data?: FAQItem[];
+  category_ids?: number[];
+  status?: BlogPostStatus;
+  scheduled_publish_date?: string | null;
+}
+
+export interface BlogPostSitemapItem {
+  slug: string;
+  last_updated: string;
+  publish_date: string;
+}
+
+// AI Generation Types
+export interface AIGeneratePostRequest {
+  topic: string;
+  keywords?: string[];
+  tone?: 'professional' | 'friendly' | 'informative';
+}
+
+export interface AIGeneratePostResponse {
+  title: string;
+  content: string;
+  excerpt: string;
+  meta_title: string;
+  meta_description: string;
+  faq_data: FAQItem[];
+  error?: string;
+  raw_response?: string;
+}
+
+export interface AIGenerateSectionRequest {
+  section_type: 'intro' | 'body' | 'conclusion' | 'faq';
+  context: string;
+  existing_content?: string;
+}
+
+export interface AIGenerateSectionResponse {
+  content?: string;
+  faq_data?: FAQItem[];
+  error?: string;
+}
+
+export interface AIGenerateSEORequest {
+  title: string;
+  content: string;
+}
+
+export interface AIGenerateSEOResponse {
+  meta_title: string;
+  meta_description: string;
+  suggested_slug: string;
+  error?: string;
+}
+
+export interface BlogImageUploadResponse {
+  url: string;
+  alt_text: string;
+  filename: string;
+}
+
+// AI Image Generation Types
+export interface AIEnhancePromptRequest {
+  prompt: string;
+  context?: string;
+}
+
+export interface AIEnhancePromptResponse {
+  enhanced_prompt: string;
+  error?: string;
+}
+
+export interface AIGenerateImageRequest {
+  prompt: string;
+  aspect_ratio: '1:1' | '3:4' | '4:3' | '9:16' | '16:9';
+  enhanced?: boolean;
+  context?: string;
+}
+
+export interface AIGenerateImageResponse {
+  url: string;
+  filename: string;
+  aspect_ratio: string;
+  error?: string;
+}
+
+export interface AspectRatioOption {
+  value: string;
+  label: string;
+}
+
+export interface AIImageOptionsResponse {
+  aspect_ratios: AspectRatioOption[];
+}
+
+// Calendar Types
+export interface CalendarBlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  status: BlogPostStatus;
+  scheduled_publish_date: string | null;
+  publish_date: string | null;
+  created_at: string;
+  categories: BlogCategoryMinimal[];
+  display_date: string;
+}
+
+export interface QuickDraftCreate {
+  title: string;
+  slug: string;
+  category_ids?: number[];
+  scheduled_publish_date?: string;
+  status?: BlogPostStatus;
+}
+
+export interface RescheduleRequest {
+  scheduled_publish_date: string;
 }

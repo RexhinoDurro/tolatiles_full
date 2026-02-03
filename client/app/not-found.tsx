@@ -101,11 +101,11 @@ export default function NotFound() {
           <h3 className="text-xl font-semibold mb-4">Need Immediate Help?</h3>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <a
-              href="tel:+1-904-210-3094"
+              href="tel:+1-904-866-1738"
               className="flex items-center gap-2 bg-white/20 px-6 py-3 rounded-lg hover:bg-white/30 transition-colors"
             >
               <Phone className="h-5 w-5" aria-hidden="true" />
-              Call (904) 210-3094
+              Call (904) 866-1738
             </a>
             <span className="text-blue-200">or</span>
             <Link href="/contact" className="flex items-center gap-2 bg-white/20 px-6 py-3 rounded-lg hover:bg-white/30 transition-colors">

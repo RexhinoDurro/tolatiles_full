@@ -12,8 +12,17 @@ interface SlugConfig {
   location: LocationType;
 }
 
+// Geo coordinates for each location
+const geoCoordinates: Record<LocationType, { lat: string; lon: string }> = {
+  florida: { lat: '30.1766', lon: '-81.6076' }, // NE Florida center
+  jacksonville: { lat: '30.3322', lon: '-81.6557' },
+  'st-augustine': { lat: '29.8912', lon: '-81.3124' },
+};
+
 function generateServiceSchema(service: Service, slug: string, location: LocationType) {
   const locationName = location === 'st-augustine' ? 'St Augustine' : location === 'jacksonville' ? 'Jacksonville' : 'Florida';
+  const locationContent = service.locations[location];
+
   const areaServed = location === 'st-augustine'
     ? [
         { '@type': 'City', name: 'St Augustine', addressRegion: 'FL' },
@@ -40,13 +49,14 @@ function generateServiceSchema(service: Service, slug: string, location: Locatio
     '@type': 'Service',
     '@id': `https://tolatiles.com/services/${slug}#service`,
     name: `${service.title} ${locationName} FL`,
-    description: service.detailedDescription,
+    description: locationContent.localDescription,
     serviceType: service.title,
+    priceRange: '$$',
     provider: {
       '@type': 'LocalBusiness',
       '@id': 'https://tolatiles.com/#business',
       name: 'Tola Tiles',
-      telephone: '+1-904-210-3094',
+      telephone: '+1-904-866-1738',
       email: 'menitola@tolatiles.com',
       address: {
         '@type': 'PostalAddress',
@@ -161,19 +171,43 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const locationName = config.location === 'st-augustine' ? 'St Augustine' : config.location === 'jacksonville' ? 'Jacksonville' : 'Northeast Florida';
-  const locationKeywords = config.location === 'st-augustine' ? 'st augustine, st johns county' : config.location === 'jacksonville' ? 'jacksonville, jax, duval county' : 'florida, jacksonville, st augustine';
+  const locationContent = service.locations[config.location];
+  const geo = geoCoordinates[config.location];
+
+  // Build enhanced description (150-160 chars)
+  const baseDescription = `Professional ${service.title.toLowerCase()} services in ${locationName}, FL.`;
+  const truncatedLocal = locationContent.localDescription.substring(0, 160 - baseDescription.length - 1);
+  const enhancedDescription = `${baseDescription} ${truncatedLocal}...`;
 
   return {
     title: `${service.title} ${locationName} FL - Expert Installation | Tola Tiles`,
-    description: `Professional ${service.title.toLowerCase()} services in ${locationName}, FL. ${service.detailedDescription.substring(0, 120)}`,
-    keywords: `${service.title.toLowerCase()}, tile installation ${locationName.toLowerCase()}, ${locationKeywords}, tile contractor florida`,
+    description: enhancedDescription,
+    keywords: [
+      ...locationContent.keywords,
+      `${service.title.toLowerCase()} ${locationName.toLowerCase()}`,
+      'tile installation',
+      'tile contractor florida',
+    ].join(', '),
     alternates: {
       canonical: `https://tolatiles.com/services/${resolvedParams.slug}`,
     },
     openGraph: {
       title: `${service.title} ${locationName} FL | Tola Tiles`,
-      description: `Professional ${service.title.toLowerCase()} services in ${locationName}, FL. Free estimates!`,
+      description: `Professional ${service.title.toLowerCase()} services in ${locationName}, FL. Free estimates! ${locationContent.sellingPoints[0]}`,
       url: `https://tolatiles.com/services/${resolvedParams.slug}`,
+      type: 'website',
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${service.title} ${locationName} FL | Tola Tiles`,
+      description: `Professional ${service.title.toLowerCase()} services in ${locationName}, FL. Free estimates!`,
+    },
+    other: {
+      'geo.region': 'US-FL',
+      'geo.placename': locationName,
+      'geo.position': `${geo.lat};${geo.lon}`,
+      'ICBM': `${geo.lat}, ${geo.lon}`,
     },
   };
 }
