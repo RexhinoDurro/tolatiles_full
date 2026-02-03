@@ -4,7 +4,7 @@ import HomePage from '@/components/pages/HomePage';
 export const metadata: Metadata = {
   title: 'Tile Installer Jacksonville FL | Tile Installation & Tile Installers Jax | Tola Tiles',
   description:
-    'Looking for tile installers in Jacksonville FL? Expert tile installation services in Jax - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving Jacksonville, Duval County. Free estimates! Call (904) 210-3094.',
+    'Looking for tile installers in Jacksonville FL? Expert tile installation services in Jax - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving Jacksonville, Duval County. Free estimates! Call (904) 866-1738.',
   keywords:
     'tile installer jacksonville fl, tile installers jacksonville, tile installation jacksonville fl, jacksonville tile installer, jax tile installer, jax tile installation, tile contractor jacksonville, bathroom tile installer jacksonville, kitchen backsplash jacksonville fl, floor tile installation jacksonville, tile company jacksonville florida, duval county tile installer, best tile installer jacksonville, professional tile installation jacksonville fl, jax tile services',
   alternates: {
@@ -34,7 +34,7 @@ const jacksonvilleSchema = {
   description:
     'Professional tile installer and tile installation services in Jacksonville FL and Jax area. Expert tile installers specializing in kitchen backsplashes, bathroom tiles, floor tiling, patios, and fireplace surrounds. Serving Jacksonville, Duval County and surrounding areas.',
   url: 'https://tolatiles.com/jacksonville',
-  telephone: '+1-904-210-3094',
+  telephone: '+1-904-866-1738',
   priceRange: '$8-25 per sq ft',
   address: {
     '@type': 'PostalAddress',

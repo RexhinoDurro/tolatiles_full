@@ -150,87 +150,147 @@ export default function AdminInvoicesPage() {
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Reference
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Balance
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    Due Date
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="font-mono text-sm text-green-600">{invoice.reference}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900 truncate max-w-xs">
-                        {invoice.title}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {invoice.customer_name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <InvoiceStatusBadge status={invoice.status} size="sm" />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="font-semibold text-gray-900">
-                        {formatCurrency(invoice.balance_due)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(invoice.due_date)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={`/admin/invoices/${invoice.id}`}
-                          className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Link>
-                        {invoice.status !== 'paid' && (
-                          <button
-                            onClick={() => handleMarkPaid(invoice.id)}
-                            disabled={actionLoading === invoice.id}
-                            className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-50"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(invoice.id)}
-                          disabled={actionLoading === invoice.id}
-                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Reference
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      Balance
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Due Date
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredInvoices.map((invoice) => (
+                    <tr key={invoice.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="font-mono text-sm text-green-600">{invoice.reference}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900 truncate max-w-xs">
+                          {invoice.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {invoice.customer_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <InvoiceStatusBadge status={invoice.status} size="sm" />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(invoice.balance_due)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(invoice.due_date)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/invoices/${invoice.id}`}
+                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Link>
+                          {invoice.status !== 'paid' && (
+                            <button
+                              onClick={() => handleMarkPaid(invoice.id)}
+                              disabled={actionLoading === invoice.id}
+                              className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-50"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDelete(invoice.id)}
+                            disabled={actionLoading === invoice.id}
+                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredInvoices.map((invoice) => (
+                <Link
+                  key={invoice.id}
+                  href={`/admin/invoices/${invoice.id}`}
+                  className="block p-4 hover:bg-gray-50 active:bg-gray-100"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <span className="font-mono text-sm text-green-600">{invoice.reference}</span>
+                      <h3 className="font-medium text-gray-900 truncate">{invoice.title}</h3>
+                      <p className="text-sm text-gray-500">{invoice.customer_name}</p>
+                    </div>
+                    <InvoiceStatusBadge status={invoice.status} size="sm" />
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                    <div>
+                      <p className="text-xs text-gray-500">Balance Due</p>
+                      <p className="text-lg font-semibold text-gray-900">{formatCurrency(invoice.balance_due)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">Due Date</p>
+                      <p className="text-sm text-gray-700">{formatDate(invoice.due_date)}</p>
+                    </div>
+                  </div>
+                  {invoice.status !== 'paid' && (
+                    <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100" onClick={(e) => e.preventDefault()}>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleMarkPaid(invoice.id);
+                        }}
+                        disabled={actionLoading === invoice.id}
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-50 text-green-700 rounded-lg text-sm font-medium disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Mark Paid
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDelete(invoice.id);
+                        }}
+                        disabled={actionLoading === invoice.id}
+                        className="flex items-center justify-center p-2.5 bg-red-50 text-red-600 rounded-lg disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from gallery.views import CategoryViewSet, GalleryImageViewSet
-from leads.views import ContactLeadViewSet
+from leads.views import ContactLeadViewSet, LocalAdsLeadViewSet
 from authentication.views import LoginView, LogoutView, CurrentUserView
 from quotes.views import (
     CompanySettingsView,
@@ -14,6 +14,7 @@ from quotes.views import (
     PublicInvoiceView,
 )
 from api.views import GoogleReviewsView
+from integrations.urls import api_urlpatterns as integration_api_urls
 
 
 # Create router and register viewsets
@@ -21,6 +22,7 @@ router = DefaultRouter()
 router.register('categories', CategoryViewSet, basename='category')
 router.register('gallery', GalleryImageViewSet, basename='gallery')
 router.register('leads', ContactLeadViewSet, basename='lead')
+router.register('admin/leads/local-ads', LocalAdsLeadViewSet, basename='local-ads-lead')
 router.register('customers', CustomerViewSet, basename='customer')
 router.register('quotes', QuoteViewSet, basename='quote')
 router.register('invoices', InvoiceViewSet, basename='invoice')
@@ -45,4 +47,13 @@ urlpatterns = [
 
     # Google Reviews
     path('google-reviews/', GoogleReviewsView.as_view(), name='google_reviews'),
+
+    # Integrations API
+    path('integrations/', include(integration_api_urls)),
+
+    # Notifications API
+    path('notifications/', include('notifications.urls')),
+
+    # Blog API
+    path('blog/', include('blog.urls')),
 ]

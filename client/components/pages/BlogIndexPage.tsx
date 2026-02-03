@@ -1,0 +1,244 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Calendar, Clock, ArrowRight, Tag, Phone } from 'lucide-react';
+import { api } from '@/lib/api';
+import type { BlogPostListItem, BlogCategory } from '@/types/api';
+
+const PHONE_NUMBER = '(904) 866-1738';
+
+export default function BlogIndexPage() {
+  const [posts, setPosts] = useState<BlogPostListItem[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  useEffect(() => {
+    loadData();
+  }, [selectedCategory]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [postsData, categoriesData] = await Promise.all([
+        api.getBlogPosts({ category: selectedCategory || undefined }),
+        api.getBlogCategories(),
+      ]);
+      setPosts(postsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Failed to load blog data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">Tile Installation Blog</h1>
+            <p className="text-xl text-blue-100 mb-8">
+              Expert tips, design inspiration, and industry insights from the Tola Tiles team
+            </p>
+            <a
+              href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-900 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              <Phone className="w-5 h-5" />
+              Call for Free Estimate: {PHONE_NUMBER}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories */}
+      {categories.length > 0 && (
+        <section className="bg-white border-b border-gray-200 py-4 sticky top-0 z-30">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <button
+                onClick={() => setSelectedCategory('')}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  !selectedCategory
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Posts
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.slug)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    selectedCategory === category.slug
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Blog Posts */}
+      <section className="py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse">
+                  <div className="aspect-video bg-gray-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    <div className="h-6 bg-gray-200 rounded" />
+                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No blog posts found</p>
+              {selectedCategory && (
+                <button
+                  onClick={() => setSelectedCategory('')}
+                  className="mt-4 text-blue-600 hover:underline"
+                >
+                  View all posts
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {posts.map((post) => (
+                <article
+                  key={post.id}
+                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow group"
+                >
+                  <Link href={`/blog/${post.slug}`}>
+                    <div className="relative aspect-video overflow-hidden bg-gray-100">
+                      {post.featured_image ? (
+                        <Image
+                          src={post.featured_image}
+                          alt={post.featured_image_alt || post.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
+                          <span className="text-4xl">📝</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      {/* Categories */}
+                      {post.categories.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {post.categories.map((cat) => (
+                            <span
+                              key={cat.id}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded"
+                            >
+                              <Tag className="w-3 h-3" />
+                              {cat.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Title */}
+                      <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {post.title}
+                      </h2>
+
+                      {/* Excerpt */}
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {post.excerpt || 'Read more about this topic...'}
+                      </p>
+
+                      {/* Meta */}
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center gap-4">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {formatDate(post.publish_date)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {post.reading_time} min read
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Read More */}
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <span className="inline-flex items-center gap-2 text-blue-600 font-medium group-hover:gap-3 transition-all">
+                          Read More
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-blue-900 text-white py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Start Your Tile Project?</h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Contact Tola Tiles today for a free estimate. We serve St. Augustine, Jacksonville,
+            and the surrounding North Florida area.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-900 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+            >
+              <Phone className="w-5 h-5" />
+              {PHONE_NUMBER}
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
+            >
+              Get Free Estimate
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* NAP Block */}
+      <section className="bg-gray-100 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-gray-700 font-medium">Tola Tiles</p>
+          <p className="text-gray-600">445 Hutchinson Ln, St. Augustine, FL 32095</p>
+          <p className="text-gray-600">{PHONE_NUMBER}</p>
+        </div>
+      </section>
+    </div>
+  );
+}

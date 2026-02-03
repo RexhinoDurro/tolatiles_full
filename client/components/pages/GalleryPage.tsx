@@ -14,6 +14,40 @@ interface GalleryPageProps {
   category?: string;
 }
 
+// Category descriptions for SEO and user information
+const categoryDescriptions: Record<string, { title: string; description: string; serviceLink: string }> = {
+  all: {
+    title: 'Our Complete Tile Installation Portfolio',
+    description: 'Browse our comprehensive gallery showcasing tile installations across Northeast Florida. From elegant kitchen backsplashes in Jacksonville to stunning bathroom renovations in St. Augustine, each project demonstrates our commitment to quality craftsmanship and attention to detail. We take pride in transforming spaces throughout Duval and St. Johns counties with premium tile work.',
+    serviceLink: '/services',
+  },
+  backsplashes: {
+    title: 'Kitchen Backsplash Installations',
+    description: 'Explore our kitchen backsplash projects featuring subway tiles, glass mosaics, and natural stone installations. Each backsplash is custom-designed to complement the unique style of homes in Jacksonville, St. Augustine, and surrounding areas. Our precise installations protect walls while adding character to kitchens across Northeast Florida.',
+    serviceLink: '/services/kitchen-backsplash',
+  },
+  showers: {
+    title: 'Custom Shower Tile Work',
+    description: 'View our portfolio of custom shower installations with complete waterproofing systems designed for Florida\'s humid climate. From luxurious walk-in showers in Ponte Vedra homes to practical renovations in St. Augustine vacation rentals, we create beautiful, water-tight enclosures with built-in niches, benches, and stunning tile patterns.',
+    serviceLink: '/services/shower-tile',
+  },
+  flooring: {
+    title: 'Floor Tile Installations',
+    description: 'See examples of our floor tile installations including large format porcelain, natural stone, and durable ceramic tiles. Our flooring projects span open-concept living spaces, commercial lobbies, and cozy Florida rooms throughout Jacksonville and St. Augustine. Each installation features proper leveling and moisture protection for lasting results.',
+    serviceLink: '/services/floor-tile',
+  },
+  patios: {
+    title: 'Outdoor Patio & Pool Deck Tile',
+    description: 'Discover our outdoor tile installations including pool decks, courtyard patios, and covered lanais designed for year-round Florida living. Using slip-resistant, UV-stable materials, we create beautiful outdoor spaces that withstand intense sun, summer storms, and coastal conditions while requiring minimal maintenance.',
+    serviceLink: '/services/patio-tile',
+  },
+  fireplaces: {
+    title: 'Fireplace Surround Installations',
+    description: 'Browse our fireplace tile projects featuring marble surrounds, stacked stone, and contemporary designs that create stunning focal points. Whether updating an original fireplace in a historic Riverside home or framing a new gas unit in Nocatee, our installations combine safety with style.',
+    serviceLink: '/services/fireplace-tile',
+  },
+};
+
 // Convert API image to component format
 interface DisplayImage {
   id: number;
@@ -119,6 +153,7 @@ const GalleryPage = ({ category }: GalleryPageProps) => {
   };
 
   const categoryLabel = categories.find((cat) => cat.id === selectedCategory)?.label || 'All Projects';
+  const categoryInfo = categoryDescriptions[selectedCategory] || categoryDescriptions.all;
 
   return (
     <div className="pt-20">
@@ -129,11 +164,17 @@ const GalleryPage = ({ category }: GalleryPageProps) => {
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
               {selectedCategory === 'all' ? 'Project Gallery' : `${categoryLabel} Gallery`}
             </h1>
-            <p className="text-xl text-gray-600">
-              {selectedCategory === 'all'
-                ? 'Explore our completed tile installations'
-                : `Professional ${categoryLabel.toLowerCase()} tile installation projects`}
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
+              {categoryInfo.description}
             </p>
+            {selectedCategory !== 'all' && (
+              <Link
+                href={categoryInfo.serviceLink}
+                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Learn more about our {categoryLabel.toLowerCase()} services →
+              </Link>
+            )}
             {!isLoading && images.length > 0 && (
               <div className="mt-4 text-sm text-gray-500">
                 Showing {startIndex + 1}-{Math.min(endIndex, images.length)} of {images.length} projects

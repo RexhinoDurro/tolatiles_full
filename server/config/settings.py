@@ -27,6 +27,9 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com']
 
+# Trust X-Forwarded-Proto header from nginx proxy for HTTPS detection
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -43,11 +46,16 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
+    'django_celery_beat',
+    'channels',
     # Local apps
     'gallery',
     'leads',
     'authentication',
     'quotes',
+    'integrations',
+    'notifications',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -82,6 +90,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 
 # Database
@@ -233,6 +242,18 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
 
+# Celery Beat Schedule (periodic tasks)
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Default beat schedule (can be overridden in database)
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'publish-scheduled-blog-posts': {
+        'task': 'blog.tasks.publish_scheduled_posts',
+        'schedule': crontab(minute='*/5'),  # Every 5 minutes
+    },
+}
+
 
 # WhiteNoise settings for static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -253,3 +274,41 @@ EMAIL_HOST_USER = "menitola@tolatiles.com"
 EMAIL_HOST_PASSWORD = os.environ.get('WORKMAIL_PASS', '')
 DEFAULT_FROM_EMAIL = "Meni Tola <menitola@tolatiles.com>"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
+# Frontend URL for redirects
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://tolatiles.com')
+
+
+# Google OAuth Settings (Search Console)
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
+
+# Google Ads / Local Services Ads Settings
+GOOGLE_ADS_DEVELOPER_TOKEN = os.environ.get('GOOGLE_ADS_DEVELOPER_TOKEN', '')
+GOOGLE_ADS_LOGIN_CUSTOMER_ID = os.environ.get('GOOGLE_ADS_LOGIN_CUSTOMER_ID', '')
+GOOGLE_ADS_CUSTOMER_ID = os.environ.get('GOOGLE_ADS_CUSTOMER_ID', '')
+GOOGLE_ADS_CLIENT_ID = os.environ.get('GOOGLE_ADS_CLIENT_ID', '')
+GOOGLE_ADS_CLIENT_SECRET = os.environ.get('GOOGLE_ADS_CLIENT_SECRET', '')
+
+
+# Django Channels Configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.environ.get('REDIS_HOST', 'localhost'), 6379)],
+        },
+    },
+}
+
+
+# Web Push (VAPID) Configuration
+VAPID_PUBLIC_KEY = os.environ.get('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.environ.get('VAPID_PRIVATE_KEY', '')
+VAPID_CLAIMS_EMAIL = os.environ.get('VAPID_CLAIMS_EMAIL', 'menitola@tolatiles.com')
+
+
+# Gemini AI Configuration
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyAjUNaAV8QVUz9FgVCpdeacJY3QVl_sirQ')
+GEMINI_IMAGE_API_KEY = os.environ.get('GEMINI_IMAGE_API_KEY', '')

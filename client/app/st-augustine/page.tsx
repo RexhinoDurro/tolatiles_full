@@ -4,7 +4,7 @@ import HomePage from '@/components/pages/HomePage';
 export const metadata: Metadata = {
   title: 'Tile Installer St Augustine FL | Tile Installation & Tile Installers | Tola Tiles',
   description:
-    'Looking for tile installers in St Augustine FL? Expert tile installation services - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving St Augustine, St Johns County. Free estimates! Call (904) 210-3094.',
+    'Looking for tile installers in St Augustine FL? Expert tile installation services - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving St Augustine, St Johns County. Free estimates! Call (904) 866-1738.',
   keywords:
     'tile installer st augustine fl, tile installers st augustine, tile installation st augustine fl, st augustine tile installer, st augustine tile installation, tile contractor st augustine, bathroom tile installer st augustine, kitchen backsplash st augustine fl, floor tile installation st augustine, tile company st augustine florida, st johns county tile installer, best tile installer st augustine, professional tile installation st augustine fl',
   alternates: {
@@ -34,7 +34,7 @@ const stAugustineSchema = {
   description:
     'Professional tile installer and tile installation services in St Augustine FL. Expert tile installers specializing in kitchen backsplashes, bathroom tiles, floor tiling, patios, and fireplace surrounds. Serving St Augustine, St Johns County and surrounding areas.',
   url: 'https://tolatiles.com/st-augustine',
-  telephone: '+1-904-210-3094',
+  telephone: '+1-904-866-1738',
   priceRange: '$8-25 per sq ft',
   address: {
     '@type': 'PostalAddress',

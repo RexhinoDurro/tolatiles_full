@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Eye, EyeOff, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function AdminLoginPage() {
@@ -81,93 +81,97 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 px-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 p-4">
+      <div className="w-full max-w-sm">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-4">
             <Image
               src="/images/logo.webp"
               alt="Tola Tiles Logo"
-              width={60}
-              height={60}
-              className="w-15 h-15"
+              width={48}
+              height={48}
+              className="w-12 h-12"
             />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Admin Portal</h1>
-          <p className="text-blue-200">Sign in to manage your Tola Tiles dashboard</p>
+          <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
+          <p className="text-slate-400 text-sm mt-1">Sign in to continue</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-              <div className="text-red-700 text-sm">{error}</div>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <span className="text-red-700 text-sm">{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+          <form onSubmit={handleSubmit}>
+            {/* Username Field */}
+            <div className="mb-4">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Username
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={credentials.username}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your username"
-                  autoComplete="username"
-                  disabled={isSubmitting}
-                />
-              </div>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={credentials.username}
+                onChange={handleInputChange}
+                className="block w-full px-4 py-3 text-gray-900 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                style={{ fontSize: '16px' }}
+                placeholder="Enter username"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                disabled={isSubmitting}
+              />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            {/* Password Field */}
+            <div className="mb-6">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
+              <div className="flex items-center gap-2">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
                   value={credentials.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="Enter your password"
+                  className="flex-1 px-4 py-3 text-gray-900 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  style={{ fontSize: '16px' }}
+                  placeholder="Enter password"
                   autoComplete="current-password"
                   disabled={isSubmitting}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  tabIndex={-1}
+                  className="p-3 bg-gray-100 border border-gray-300 rounded-xl"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-gray-500" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-gray-500" />
                   )}
                 </button>
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-all duration-300 font-semibold flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 text-white py-3.5 px-6 rounded-xl font-semibold disabled:bg-blue-400 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -180,20 +184,17 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <a
-              href="/"
-              className="text-sm text-gray-500 hover:text-blue-600 transition-colors"
-            >
-              &larr; Back to website
+          <div className="mt-4 text-center">
+            <a href="/" className="text-sm text-gray-500">
+              ← Back to website
             </a>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-blue-200 text-sm">
-          <p>&copy; {new Date().getFullYear()} Tola Tiles. All rights reserved.</p>
-        </div>
+        <p className="mt-6 text-center text-slate-500 text-xs">
+          © {new Date().getFullYear()} Tola Tiles
+        </p>
       </div>
     </div>
   );

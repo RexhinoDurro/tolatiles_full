@@ -31,7 +31,29 @@
       "Bash(grep:*)",
       "Bash(netstat:*)",
       "Bash(timeout:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(source venv/bin/activate)",
+      "Bash(sudo journalctl:*)",
+      "Bash(sudo tail:*)",
+      "Bash(DJANGO_SETTINGS_MODULE=config.settings python:*)",
+      "Bash(sudo apt-get update:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(TMPDIR=/home/ubuntu/tmp pip install:*)",
+      "Bash(mount:*)",
+      "Bash(sudo mount:*)",
+      "Bash(chmod:*)",
+      "Bash(pm2 list:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(kill:*)",
+      "Bash(sudo cp:*)",
+      "Bash(sudo nginx:*)",
+      "Bash(sudo mv:*)",
+      "Bash(sudo systemctl reload:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(git push https://RexhinoDurro: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@github.com/RexhinoDurro/tolatiles_full.git main)",
+      "Bash(ls:*)",
+      "Bash(systemctl:*)",
+      "Bash(pgrep:*)"
     ]
   }
 }

@@ -13,4 +13,22 @@ from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-application = get_asgi_application()
+# Initialize Django ASGI application early to ensure settings are loaded
+django_asgi_app = get_asgi_application()
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+from notifications.middleware import JWTAuthMiddlewareStack
+from notifications.routing import websocket_urlpatterns
+
+
+application = ProtocolTypeRouter({
+    # HTTP requests are handled by Django
+    'http': django_asgi_app,
+    # WebSocket connections use JWT authentication
+    'websocket': AllowedHostsOriginValidator(
+        JWTAuthMiddlewareStack(
+            URLRouter(websocket_urlpatterns)
+        )
+    ),
+})

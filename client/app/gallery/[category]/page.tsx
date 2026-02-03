@@ -12,6 +12,24 @@ const categoryLabels: Record<string, string> = {
   fireplaces: 'Fireplaces',
 };
 
+// Enhanced category descriptions for SEO
+const categoryDescriptions: Record<string, string> = {
+  backsplashes: 'Explore our kitchen backsplash gallery featuring subway tiles, glass mosaics, and natural stone installations in Jacksonville, St. Augustine, and Northeast Florida homes. Custom designs for every style.',
+  patios: 'View our outdoor patio and pool deck tile installations across Northeast Florida. Slip-resistant, UV-stable materials perfect for year-round Florida living in Jacksonville and St. Augustine areas.',
+  showers: 'Browse custom shower tile installations with waterproofing systems designed for Florida humidity. Walk-in showers, built-in niches, and luxury designs for Jacksonville and St. Augustine homes.',
+  flooring: 'See our floor tile portfolio including large format porcelain, natural stone, and ceramic installations. Professional flooring for homes and businesses throughout Northeast Florida.',
+  fireplaces: 'Discover fireplace tile surrounds featuring marble, stacked stone, and contemporary designs. Creating stunning focal points in Jacksonville, St. Augustine, and Ponte Vedra homes.',
+};
+
+// Service links for each category
+const categoryServiceLinks: Record<string, string> = {
+  backsplashes: '/services/kitchen-backsplash',
+  patios: '/services/patio-tile',
+  showers: '/services/shower-tile',
+  flooring: '/services/floor-tile',
+  fireplaces: '/services/fireplace-tile',
+};
+
 export async function generateStaticParams() {
   return validCategories.map((category) => ({
     category,
@@ -28,12 +46,31 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
     };
   }
 
+  const description = categoryDescriptions[resolvedParams.category] || `View our ${categoryLabel.toLowerCase()} tile installation projects in Northeast Florida.`;
+
   return {
-    title: `${categoryLabel} Gallery - Tile Installation | Tola Tiles`,
-    description: `View our ${categoryLabel.toLowerCase()} tile installation projects. Professional ${categoryLabel.toLowerCase()} installation with premium materials and expert craftsmanship by Tola Tiles.`,
-    keywords: `${resolvedParams.category} tile gallery, ${resolvedParams.category} installation, ${resolvedParams.category} renovation, ${resolvedParams.category} tile examples`,
+    title: `${categoryLabel} Tile Gallery Jacksonville & St Augustine FL | Tola Tiles`,
+    description,
+    keywords: [
+      `${resolvedParams.category} tile gallery`,
+      `${resolvedParams.category} tile installation jacksonville`,
+      `${resolvedParams.category} tile st augustine`,
+      `${categoryLabel.toLowerCase()} renovation florida`,
+      `${categoryLabel.toLowerCase()} tile examples`,
+      'tile contractor northeast florida',
+    ].join(', '),
     alternates: {
       canonical: `https://tolatiles.com/gallery/${resolvedParams.category}`,
+    },
+    openGraph: {
+      title: `${categoryLabel} Tile Gallery | Tola Tiles`,
+      description,
+      url: `https://tolatiles.com/gallery/${resolvedParams.category}`,
+      type: 'website',
+    },
+    other: {
+      'geo.region': 'US-FL',
+      'geo.placename': 'Jacksonville',
     },
   };
 }

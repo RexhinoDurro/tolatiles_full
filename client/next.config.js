@@ -61,6 +61,15 @@ const nextConfig = {
         ],
       },
       {
+        source: '/:path((?!_next|images|fonts|api).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           {
@@ -110,6 +119,15 @@ const nextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: '/Tola',
+        destination: '/',
+        permanent: true,
       },
     ];
   },

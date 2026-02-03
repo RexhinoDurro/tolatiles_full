@@ -152,8 +152,8 @@ const PrivacyPolicyPage = () => {
               </div>
               <div className="flex items-center text-gray-600">
                 <Phone className="w-5 h-5 mr-3 text-blue-600" />
-                <a href="tel:+1-904-210-3094" className="hover:text-blue-600 transition-colors">
-                  (904) 210-3094
+                <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">
+                  (904) 866-1738
                 </a>
               </div>
             </div>

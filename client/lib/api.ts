@@ -24,6 +24,37 @@ import type {
   InvoiceStatus,
   PublicQuote,
   PublicInvoice,
+  LocalAdsLead,
+  LocalAdsLeadsResponse,
+  LocalAdsLeadsFilters,
+  LocalAdsLeadStatus,
+  WebsiteLeadCreate,
+  LocalAdsLeadCreate,
+  Notification,
+  NotificationPreferences,
+  PushSubscriptionCreate,
+  DailyStatsResponse,
+  BlogCategory,
+  BlogPost,
+  BlogPostListItem,
+  BlogPostCreate,
+  BlogPostUpdate,
+  BlogPostSitemapItem,
+  BlogPostStatus,
+  AIGeneratePostRequest,
+  AIGeneratePostResponse,
+  AIGenerateSectionRequest,
+  AIGenerateSectionResponse,
+  AIGenerateSEORequest,
+  AIGenerateSEOResponse,
+  BlogImageUploadResponse,
+  AIEnhancePromptRequest,
+  AIEnhancePromptResponse,
+  AIGenerateImageRequest,
+  AIGenerateImageResponse,
+  AIImageOptionsResponse,
+  CalendarBlogPost,
+  QuickDraftCreate,
 } from '@/types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -85,6 +116,8 @@ class ApiClient {
   private accessToken: string | null = null;
   private refreshToken: string | null = null;
   private cache = new ApiCache();
+  private refreshPromise: Promise<boolean> | null = null;
+  private tokenRefreshListeners: (() => void)[] = [];
 
   constructor() {
     // Initialize tokens from localStorage (client-side only)
@@ -92,6 +125,18 @@ class ApiClient {
       this.accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
       this.refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     }
+  }
+
+  // Subscribe to token refresh events (for WebSocket reconnection)
+  onTokenRefresh(callback: () => void): () => void {
+    this.tokenRefreshListeners.push(callback);
+    return () => {
+      this.tokenRefreshListeners = this.tokenRefreshListeners.filter(cb => cb !== callback);
+    };
+  }
+
+  private notifyTokenRefresh(): void {
+    this.tokenRefreshListeners.forEach(cb => cb());
   }
 
   // Token management
@@ -190,6 +235,22 @@ class ApiClient {
   }
 
   async refreshAccessToken(): Promise<boolean> {
+    // If a refresh is already in progress, wait for it
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    // Start a new refresh
+    this.refreshPromise = this.doRefreshToken();
+
+    try {
+      return await this.refreshPromise;
+    } finally {
+      this.refreshPromise = null;
+    }
+  }
+
+  private async doRefreshToken(): Promise<boolean> {
     try {
       const response = await fetch(`${API_BASE}/auth/refresh/`, {
         method: 'POST',
@@ -201,6 +262,7 @@ class ApiClient {
 
       const data = await response.json();
       this.setTokens(data.access, data.refresh || this.refreshToken!);
+      this.notifyTokenRefresh();
       return true;
     } catch {
       return false;
@@ -336,6 +398,18 @@ class ApiClient {
     this.cache.invalidate('gallery');
   }
 
+  async transformGalleryImage(
+    id: number,
+    type: 'rotate_left' | 'rotate_right' | 'flip_horizontal' | 'flip_vertical'
+  ): Promise<GalleryImage> {
+    const data = await this.fetch<GalleryImage>(`/gallery/${id}/transform/`, {
+      method: 'POST',
+      body: JSON.stringify({ type }),
+    });
+    this.cache.invalidate('gallery');
+    return data;
+  }
+
   // ============ Contact Leads ============
 
   async submitContactForm(data: ContactFormData): Promise<{ message: string }> {
@@ -376,6 +450,81 @@ class ApiClient {
 
   async getLeadStats(): Promise<LeadStats> {
     return this.fetch<LeadStats>('/leads/stats/');
+  }
+
+  async createWebsiteLead(data: WebsiteLeadCreate): Promise<ContactLead> {
+    return this.fetch<ContactLead>('/leads/admin_create/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ============ Local Ads Leads (Google LSA) ============
+
+  async getLocalAdsLeads(filters: LocalAdsLeadsFilters = {}): Promise<LocalAdsLeadsResponse> {
+    const params = new URLSearchParams();
+    if (filters.page) params.set('page', filters.page.toString());
+    if (filters.page_size) params.set('page_size', filters.page_size.toString());
+    if (filters.status) params.set('status', filters.status);
+    if (filters.charge_status) params.set('charge_status', filters.charge_status);
+    if (filters.date_from) params.set('date_from', filters.date_from);
+    if (filters.date_to) params.set('date_to', filters.date_to);
+
+    const queryString = params.toString();
+    const endpoint = `/admin/leads/local-ads/${queryString ? `?${queryString}` : ''}`;
+    return this.fetch<LocalAdsLeadsResponse>(endpoint);
+  }
+
+  async getLocalAdsLead(id: number): Promise<LocalAdsLead> {
+    return this.fetch<LocalAdsLead>(`/admin/leads/local-ads/${id}/`);
+  }
+
+  async updateLocalAdsLeadStatus(id: number, status: LocalAdsLeadStatus): Promise<LocalAdsLead> {
+    return this.fetch<LocalAdsLead>(`/admin/leads/local-ads/${id}/status/`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  async createLocalAdsLead(data: LocalAdsLeadCreate): Promise<LocalAdsLead> {
+    return this.fetch<LocalAdsLead>('/admin/leads/local-ads/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ============ Google Ads Integration ============
+
+  async getGoogleAdsStatus(): Promise<{
+    is_connected: boolean;
+    connected_email: string | null;
+    connected_at: string | null;
+    last_sync_at: string | null;
+    last_sync_status: string | null;
+    last_sync_count: number;
+  }> {
+    return this.fetch('/integrations/google-ads/status/');
+  }
+
+  async getGoogleAdsAuthUrl(): Promise<{ auth_url: string }> {
+    return this.fetch('/integrations/google-ads/auth-url/');
+  }
+
+  async disconnectGoogleAds(): Promise<{ success: boolean; message: string }> {
+    return this.fetch('/integrations/google-ads/disconnect/', {
+      method: 'POST',
+    });
+  }
+
+  async syncGoogleAdsLeads(days: number = 90): Promise<{
+    success: boolean;
+    message: string;
+    stats: { created: number; updated: number; skipped: number; errors: number };
+  }> {
+    return this.fetch('/integrations/google-ads/sync-leads/', {
+      method: 'POST',
+      body: JSON.stringify({ days }),
+    });
   }
 
   // ============ Company Settings ============
@@ -581,6 +730,358 @@ class ApiClient {
   async getPublicInvoice(reference: string): Promise<PublicInvoice> {
     return this.fetch<PublicInvoice>(`/invoices/public/${reference}/`);
   }
+
+  // ============ Search Console Integration ============
+
+  async getSearchConsoleStatus(): Promise<{
+    is_connected: boolean;
+    connected_email: string | null;
+    connected_at: string | null;
+  }> {
+    return this.fetch('/integrations/search-console/status/');
+  }
+
+  async disconnectSearchConsole(): Promise<{ success: boolean; message: string }> {
+    return this.fetch('/integrations/search-console/disconnect/', {
+      method: 'POST',
+    });
+  }
+
+  async getSearchConsoleSites(): Promise<{
+    sites: Array<{ siteUrl: string; permissionLevel: string }>;
+  }> {
+    return this.fetch('/integrations/search-console/sites/');
+  }
+
+  async getSearchConsolePerformance(params: {
+    site_url: string;
+    type?: 'summary' | 'daily' | 'queries' | 'pages' | 'totals';
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+  }): Promise<SearchConsolePerformance> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('site_url', params.site_url);
+    if (params.type) queryParams.set('type', params.type);
+    if (params.start_date) queryParams.set('start_date', params.start_date);
+    if (params.end_date) queryParams.set('end_date', params.end_date);
+    if (params.limit) queryParams.set('limit', params.limit.toString());
+
+    return this.fetch(`/integrations/search-console/performance/?${queryParams.toString()}`);
+  }
+
+  async getSearchConsoleAuthUrl(): Promise<{ auth_url: string }> {
+    return this.fetch('/integrations/search-console/auth-url/');
+  }
+
+  // ============ Notifications ============
+
+  async getNotifications(): Promise<Notification[]> {
+    const response = await this.fetch<PaginatedResponse<Notification> | Notification[]>(
+      '/notifications/notifications/'
+    );
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async markNotificationRead(id: number): Promise<{ status: string }> {
+    return this.fetch<{ status: string }>(`/notifications/notifications/${id}/mark_read/`, {
+      method: 'POST',
+    });
+  }
+
+  async markAllNotificationsRead(): Promise<{ status: string; count: number }> {
+    return this.fetch<{ status: string; count: number }>(
+      '/notifications/notifications/mark_all_read/',
+      { method: 'POST' }
+    );
+  }
+
+  async getUnreadNotificationCount(): Promise<{ count: number }> {
+    return this.fetch<{ count: number }>('/notifications/notifications/unread_count/');
+  }
+
+  async getNotificationPreferences(): Promise<NotificationPreferences> {
+    return this.fetch<NotificationPreferences>('/notifications/preferences/');
+  }
+
+  async updateNotificationPreferences(
+    data: Partial<NotificationPreferences>
+  ): Promise<NotificationPreferences> {
+    return this.fetch<NotificationPreferences>('/notifications/preferences/', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getVapidPublicKey(): Promise<{ public_key: string }> {
+    return this.fetch<{ public_key: string }>('/notifications/vapid-key/');
+  }
+
+  async subscribeToPush(data: PushSubscriptionCreate): Promise<{ id: number }> {
+    return this.fetch<{ id: number }>('/notifications/push-subscriptions/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async unsubscribeFromPush(endpoint: string): Promise<{ status: string }> {
+    return this.fetch<{ status: string }>('/notifications/push-subscriptions/unsubscribe/', {
+      method: 'DELETE',
+      body: JSON.stringify({ endpoint }),
+    });
+  }
+
+  async getDailyStats(days: number = 30): Promise<DailyStatsResponse> {
+    return this.fetch<DailyStatsResponse>(`/notifications/stats/daily/?days=${days}`);
+  }
+
+  // ============ Blog Categories ============
+
+  async getBlogCategories(): Promise<BlogCategory[]> {
+    const response = await this.fetch<PaginatedResponse<BlogCategory> | BlogCategory[]>(
+      '/blog/categories/'
+    );
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getBlogCategory(slug: string): Promise<BlogCategory> {
+    return this.fetch<BlogCategory>(`/blog/categories/${slug}/`);
+  }
+
+  async createBlogCategory(data: { name: string; slug?: string; description?: string }): Promise<BlogCategory> {
+    return this.fetch<BlogCategory>('/blog/categories/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateBlogCategory(slug: string, data: Partial<BlogCategory>): Promise<BlogCategory> {
+    return this.fetch<BlogCategory>(`/blog/categories/${slug}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBlogCategory(slug: string): Promise<void> {
+    await this.fetch<void>(`/blog/categories/${slug}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  // ============ Blog Posts ============
+
+  async getBlogPosts(params?: {
+    status?: BlogPostStatus;
+    category?: string;
+    search?: string;
+    ordering?: string;
+  }): Promise<BlogPostListItem[]> {
+    const queryParams = new URLSearchParams();
+    if (params?.status) queryParams.set('status', params.status);
+    if (params?.category) queryParams.set('category', params.category);
+    if (params?.search) queryParams.set('search', params.search);
+    if (params?.ordering) queryParams.set('ordering', params.ordering);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/blog/posts/${queryString ? `?${queryString}` : ''}`;
+    const response = await this.fetch<PaginatedResponse<BlogPostListItem> | BlogPostListItem[]>(endpoint);
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getBlogPost(slug: string): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/`);
+  }
+
+  async createBlogPost(data: BlogPostCreate): Promise<BlogPost> {
+    // Handle file upload for featured_image
+    if (data.featured_image instanceof File) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'featured_image' && value instanceof File) {
+          formData.append(key, value);
+        } else if (key === 'category_ids' && Array.isArray(value)) {
+          value.forEach(id => formData.append('category_ids', id.toString()));
+        } else if (key === 'faq_data' && Array.isArray(value)) {
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      return this.fetch<BlogPost>('/blog/posts/', {
+        method: 'POST',
+        body: formData,
+      });
+    }
+
+    // JSON request without file
+    const { featured_image, ...jsonData } = data;
+    return this.fetch<BlogPost>('/blog/posts/', {
+      method: 'POST',
+      body: JSON.stringify(jsonData),
+    });
+  }
+
+  async updateBlogPost(slug: string, data: BlogPostUpdate): Promise<BlogPost> {
+    // Handle file upload for featured_image
+    if (data.featured_image instanceof File) {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'featured_image' && value instanceof File) {
+          formData.append(key, value);
+        } else if (key === 'category_ids' && Array.isArray(value)) {
+          value.forEach(id => formData.append('category_ids', id.toString()));
+        } else if (key === 'faq_data' && Array.isArray(value)) {
+          formData.append(key, JSON.stringify(value));
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      return this.fetch<BlogPost>(`/blog/posts/${slug}/`, {
+        method: 'PATCH',
+        body: formData,
+      });
+    }
+
+    // JSON request without file
+    const { featured_image, ...jsonData } = data;
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(jsonData),
+    });
+  }
+
+  async deleteBlogPost(slug: string): Promise<void> {
+    await this.fetch<void>(`/blog/posts/${slug}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getBlogPostSitemapData(): Promise<BlogPostSitemapItem[]> {
+    return this.fetch<BlogPostSitemapItem[]>('/blog/posts/sitemap_data/');
+  }
+
+  async getRelatedBlogPosts(slug: string): Promise<BlogPostListItem[]> {
+    return this.fetch<BlogPostListItem[]>(`/blog/posts/${slug}/related/`);
+  }
+
+  // ============ Blog AI Generation ============
+
+  async generateBlogPost(data: AIGeneratePostRequest): Promise<AIGeneratePostResponse> {
+    return this.fetch<AIGeneratePostResponse>('/blog/posts/ai_generate_post/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async generateBlogSection(data: AIGenerateSectionRequest): Promise<AIGenerateSectionResponse> {
+    return this.fetch<AIGenerateSectionResponse>('/blog/posts/ai_generate_section/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async generateBlogSEO(data: AIGenerateSEORequest): Promise<AIGenerateSEOResponse> {
+    return this.fetch<AIGenerateSEOResponse>('/blog/posts/ai_generate_seo/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async uploadBlogImage(image: File, altText?: string): Promise<BlogImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (altText) formData.append('alt_text', altText);
+
+    return this.fetch<BlogImageUploadResponse>('/blog/posts/upload_image/', {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  // ============ AI Image Generation ============
+
+  async enhanceImagePrompt(data: AIEnhancePromptRequest): Promise<AIEnhancePromptResponse> {
+    return this.fetch<AIEnhancePromptResponse>('/blog/posts/ai_enhance_prompt/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async generateAIImage(data: AIGenerateImageRequest): Promise<AIGenerateImageResponse> {
+    return this.fetch<AIGenerateImageResponse>('/blog/posts/ai_generate_image/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAIImageOptions(): Promise<AIImageOptionsResponse> {
+    return this.fetch<AIImageOptionsResponse>('/blog/posts/ai_image_options/');
+  }
+
+  // ============ Blog Calendar ============
+
+  async getBlogPostsCalendar(startDate: string, endDate: string): Promise<CalendarBlogPost[]> {
+    const params = new URLSearchParams();
+    params.set('start_date', startDate);
+    params.set('end_date', endDate);
+    return this.fetch<CalendarBlogPost[]>(`/blog/posts/calendar/?${params.toString()}`);
+  }
+
+  async rescheduleBlogPost(slug: string, scheduledDate: string): Promise<CalendarBlogPost> {
+    return this.fetch<CalendarBlogPost>(`/blog/posts/${slug}/reschedule/`, {
+      method: 'PATCH',
+      body: JSON.stringify({ scheduled_publish_date: scheduledDate }),
+    });
+  }
+
+  async createQuickDraft(data: QuickDraftCreate): Promise<CalendarBlogPost> {
+    return this.fetch<CalendarBlogPost>('/blog/posts/quick_draft/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+}
+
+// Search Console types
+export interface SearchConsolePerformance {
+  period?: {
+    start_date: string;
+    end_date: string;
+    days: number;
+  };
+  totals?: {
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  };
+  comparison?: {
+    clicks_change: number;
+    impressions_change: number;
+    ctr_change: number;
+    position_change: number;
+  };
+  daily_trend?: Array<{
+    date: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  }>;
+  top_queries?: Array<{
+    query: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  }>;
+  top_pages?: Array<{
+    page: string;
+    clicks: number;
+    impressions: number;
+    ctr: number;
+    position: number;
+  }>;
 }
 
 // Export singleton instance

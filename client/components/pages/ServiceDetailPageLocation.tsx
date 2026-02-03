@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Hammer, ChefHat, Bath, Home, Palette, Wrench, Clock, CheckCircle, ArrowRight, ChevronRight, Phone, Mail, Loader2 } from 'lucide-react';
+import { Hammer, ChefHat, Bath, Home, Palette, Wrench, Clock, CheckCircle, ArrowRight, ChevronRight, Phone, Mail, Loader2, MapPin, Star } from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
@@ -27,6 +27,43 @@ const serviceToGalleryPath: Record<string, string> = {
   shower: 'showers',
 };
 
+// Map service IDs to location-specific slugs
+const getLocationSlug = (serviceId: string, loc: 'jacksonville' | 'st-augustine' | 'florida'): string => {
+  const slugMap: Record<string, Record<string, string>> = {
+    'kitchen-backsplash': {
+      jacksonville: 'kitchen-backsplash-jacksonville',
+      'st-augustine': 'kitchen-backsplash-st-augustine',
+      florida: 'kitchen-backsplash',
+    },
+    bathroom: {
+      jacksonville: 'bathroom-tile-jacksonville',
+      'st-augustine': 'bathroom-tile-st-augustine',
+      florida: 'bathroom-tile',
+    },
+    flooring: {
+      jacksonville: 'floor-tile-jacksonville',
+      'st-augustine': 'floor-tile-st-augustine',
+      florida: 'floor-tile',
+    },
+    patio: {
+      jacksonville: 'patio-tile-jacksonville',
+      'st-augustine': 'patio-tile-st-augustine',
+      florida: 'patio-tile',
+    },
+    fireplace: {
+      jacksonville: 'fireplace-tile-jacksonville',
+      'st-augustine': 'fireplace-tile-st-augustine',
+      florida: 'fireplace-tile',
+    },
+    shower: {
+      jacksonville: 'shower-tile-jacksonville',
+      'st-augustine': 'shower-tile-st-augustine',
+      florida: 'shower-tile',
+    },
+  };
+  return slugMap[serviceId]?.[loc] || serviceId;
+};
+
 interface DisplayImage {
   id: number;
   src: string;
@@ -47,6 +84,11 @@ const ServiceDetailPageLocation = ({ service, relatedServices, serviceIdToSlug, 
 
   const locationName = location === 'st-augustine' ? 'St Augustine' : 'Jacksonville';
   const locationPath = location === 'st-augustine' ? '/st-augustine' : '/jacksonville';
+  const otherLocation = location === 'st-augustine' ? 'jacksonville' : 'st-augustine';
+  const otherLocationName = location === 'st-augustine' ? 'Jacksonville' : 'St Augustine';
+
+  // Get location-specific content
+  const locationContent = service.locations[location];
 
   const IconComponent = iconMap[service.icon];
   const galleryKey = serviceToGalleryPath[service.id] || 'backsplashes';
@@ -152,7 +194,8 @@ Thank you,
 
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{service.title} in {locationName}</h1>
 
-              <p className="text-xl text-gray-700 mb-8 leading-relaxed">{service.detailedDescription}</p>
+              {/* Use location-specific description */}
+              <p className="text-xl text-gray-700 mb-8 leading-relaxed">{locationContent.localDescription}</p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
@@ -163,7 +206,7 @@ Thank you,
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a
-                  href="tel:+1-904-210-3094"
+                  href="tel:+1-904-866-1738"
                   className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <Phone className="h-5 w-5" />
@@ -197,8 +240,29 @@ Thank you,
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Why Choose Us Section - Location Specific */}
       <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us in {locationName}</h2>
+            <p className="text-xl text-gray-600">Local expertise for exceptional results</p>
+          </header>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {locationContent.sellingPoints.map((point, index) => (
+              <div key={index} className="bg-blue-50 rounded-xl p-6 text-center hover:bg-blue-100 transition-colors duration-300">
+                <div className="bg-blue-600 p-3 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+                  <Star className="h-6 w-6 text-white" aria-hidden="true" />
+                </div>
+                <p className="text-gray-800 font-medium text-lg">{point}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Combined Base + Location Features */}
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What&apos;s Included</h2>
@@ -206,14 +270,48 @@ Thank you,
           </header>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Location-specific features first */}
+            {locationContent.localFeatures.map((feature, index) => (
+              <div key={`local-${index}`} className="bg-blue-50 rounded-xl p-6 hover:bg-blue-100 transition-colors duration-300 border-2 border-blue-200">
+                <div className="flex items-start gap-4">
+                  <div className="bg-blue-600 p-2 rounded-lg">
+                    <MapPin className="h-5 w-5 text-white" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-gray-700 font-medium">{feature}</p>
+                    <span className="text-xs text-blue-600 font-semibold">{locationName} Specialty</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {/* Base features */}
             {service.features.map((feature, index) => (
-              <div key={index} className="bg-gray-50 rounded-xl p-6 hover:bg-blue-50 transition-colors duration-300">
+              <div key={`base-${index}`} className="bg-white rounded-xl p-6 hover:bg-blue-50 transition-colors duration-300">
                 <div className="flex items-start gap-4">
                   <div className="bg-green-100 p-2 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
                   </div>
                   <p className="text-gray-700 font-medium">{feature}</p>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Service Areas Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Service Areas in {locationName}</h2>
+            <p className="text-xl text-gray-600">Proudly serving these communities</p>
+          </header>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            {locationContent.areasServed.map((area, index) => (
+              <div key={index} className="bg-gray-100 px-6 py-3 rounded-full text-gray-700 font-medium hover:bg-blue-100 hover:text-blue-700 transition-colors duration-300 flex items-center gap-2">
+                <MapPin className="h-4 w-4" aria-hidden="true" />
+                {area}
               </div>
             ))}
           </div>
@@ -291,6 +389,31 @@ Thank you,
                 <p className="text-gray-600 text-sm leading-relaxed">{process.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Cross-Location Links */}
+      <section className="py-12 bg-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">This service is also available in:</p>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Link
+                href={`/services/${getLocationSlug(service.id, otherLocation)}`}
+                className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
+              >
+                <MapPin className="h-4 w-4" />
+                {otherLocationName}
+              </Link>
+              <Link
+                href={`/services/${getLocationSlug(service.id, 'florida')}`}
+                className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
+              >
+                <MapPin className="h-4 w-4" />
+                All Northeast Florida
+              </Link>
+            </div>
           </div>
         </div>
       </section>

@@ -67,7 +67,7 @@ const localBusinessSchema = {
   name: 'Tola Tiles',
   description: 'Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida, Tile Contractors, Flooring Installers, Tile Installers',
   url: 'https://tolatiles.com',
-  telephone: '+1-904-210-3094',
+  telephone: '+1-904-866-1738',
   email: 'Menitola@live.com',
   foundingDate: '2008',
   priceRange: '$8-25 per sq ft',
@@ -116,7 +116,7 @@ const organizationSchema = {
   logo: 'https://tolatiles.com/assets/logo.png',
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+1-904-210-3094',
+    telephone: '+1-904-866-1738',
     contactType: 'Customer Service',
     email: 'Menitola@live.com',
     availableLanguage: 'English',
