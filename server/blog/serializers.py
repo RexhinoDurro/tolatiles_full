@@ -33,7 +33,7 @@ class BlogPostListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'excerpt', 'author_name',
             'featured_image', 'featured_image_alt',
-            'categories', 'status', 'publish_date',
+            'categories', 'location', 'status', 'publish_date',
             'reading_time', 'created_at', 'last_updated'
         ]
 
@@ -59,7 +59,7 @@ class BlogPostDetailSerializer(serializers.ModelSerializer):
             'featured_image', 'featured_image_alt',
             'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'categories', 'category_ids',
+            'categories', 'category_ids', 'location',
             'status', 'publish_date', 'scheduled_publish_date',
             'reading_time', 'effective_meta_title', 'effective_meta_description',
             'created_at', 'last_updated'
@@ -103,7 +103,7 @@ class BlogPostCreateSerializer(serializers.ModelSerializer):
             'featured_image', 'featured_image_alt',
             'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'category_ids',
+            'category_ids', 'location',
             'status', 'scheduled_publish_date'
         ]
         read_only_fields = ['id']
@@ -127,7 +127,7 @@ class BlogPostSitemapSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlogPost
-        fields = ['slug', 'last_updated', 'publish_date']
+        fields = ['slug', 'location', 'last_updated', 'publish_date']
 
 
 class BlogPostPublicSerializer(serializers.ModelSerializer):
@@ -145,7 +145,7 @@ class BlogPostPublicSerializer(serializers.ModelSerializer):
             'effective_meta_title', 'effective_meta_description',
             'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'categories',
+            'categories', 'location',
             'publish_date', 'reading_time', 'last_updated'
         ]
 
@@ -210,7 +210,7 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogPost
         fields = [
-            'id', 'title', 'slug', 'status',
+            'id', 'title', 'slug', 'status', 'location',
             'scheduled_publish_date', 'publish_date', 'created_at',
             'categories', 'display_date'
         ]

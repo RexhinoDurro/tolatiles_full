@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, User, LogOut, ChevronDown, Check, CheckCheck, ExternalLink, X } from 'lucide-react';
+import { Bell, User, LogOut, ChevronDown, Check, CheckCheck, ExternalLink, X, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import type { Notification } from '@/types/api';
@@ -9,6 +9,8 @@ import Link from 'next/link';
 
 interface AdminHeaderProps {
   title?: string;
+  backHref?: string;
+  backLabel?: string;
 }
 
 function formatTimeAgo(dateString: string): string {
@@ -86,7 +88,7 @@ function NotificationItem({
   return content;
 }
 
-export default function AdminHeader({ title }: AdminHeaderProps) {
+export default function AdminHeader({ title, backHref, backLabel }: AdminHeaderProps) {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -139,7 +141,16 @@ export default function AdminHeader({ title }: AdminHeaderProps) {
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Left side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {backHref && (
+            <Link
+              href={backHref}
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors lg:hidden"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{backLabel ?? 'Back'}</span>
+            </Link>
+          )}
           {title && <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{title}</h1>}
         </div>
 

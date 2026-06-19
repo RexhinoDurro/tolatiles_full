@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      router.push('/admin/dashboard');
+      router.push('/admin/crm');
     }
   }, [isAuthenticated, authLoading, router]);
 

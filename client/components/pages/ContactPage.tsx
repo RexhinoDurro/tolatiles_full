@@ -1,11 +1,61 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Phone, Mail, MapPin, Clock, CheckCircle, Send, AlertCircle, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
+import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
 import type { ContactFormData } from '@/types/api';
 
-const ContactPage = () => {
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: HTMLElement, options: Record<string, unknown>) => string;
+      execute: (widgetId: string) => void;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
+interface ContactLocationContent {
+  heroH1: string;
+  heroSubtitle: string;
+  serviceAreasDescription: string;
+  serviceAreasList: string[];
+  mapHeading: string;
+}
+
+const locationContent: Record<string, ContactLocationContent> = {
+  jacksonville: {
+    heroH1: 'Contact Tola Tiles Jacksonville - Free Tile Installation Estimates',
+    heroSubtitle: 'Get in touch to discuss your tile installation project anywhere in Duval County',
+    serviceAreasDescription: 'We proudly serve Jacksonville and all of Duval County, from the urban core to the beaches.',
+    serviceAreasList: ['Riverside', 'San Marco', 'Mandarin', 'Southside', 'Jacksonville Beach', 'Neptune Beach', 'Ortega', 'Avondale'],
+    mapHeading: 'Serving All of Jacksonville & Duval County',
+  },
+  'st-augustine': {
+    heroH1: 'Contact Tola Tiles St Augustine - Free Tile Installation Estimates',
+    heroSubtitle: 'Get in touch to discuss your tile installation project in the Ancient City and St. Johns County',
+    serviceAreasDescription: 'Located in St. Augustine, we serve the entire St. Johns County area and surrounding coastal communities.',
+    serviceAreasList: ['Historic District', 'Vilano Beach', 'Anastasia Island', 'Nocatee', 'World Golf Village', 'Palencia', 'St. Augustine Beach', 'Davis Shores'],
+    mapHeading: 'Located in St. Augustine - Serving St. Johns County',
+  },
+  florida: {
+    heroH1: 'Contact Tola Tiles - Northeast Florida Tile Installation',
+    heroSubtitle: 'Get in touch to discuss your tile installation project anywhere in Northeast Florida',
+    serviceAreasDescription: 'Based in St. Augustine, we serve the greater Northeast Florida region within a 50-mile radius.',
+    serviceAreasList: ['St. Augustine', 'Jacksonville', 'Ponte Vedra Beach', 'Palm Coast', 'St. Johns County', 'Duval County', 'Flagler County', 'Green Cove Springs'],
+    mapHeading: 'Where We Are Established',
+  },
+};
+
+interface ContactPageProps {
+  location?: string;
+}
+
+const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
+  const content = locationContent[location] || locationContent.florida;
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -15,9 +65,74 @@ const ContactPage = () => {
     message: '',
   });
 
+  const [honeypot, setHoneypot] = useState('');
+  const mountTimeRef = useRef<number>(Date.now());
+
+  // Turnstile invisible widget
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const tokenResolverRef = useRef<((token: string) => void) | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
+
+  // Load Turnstile script and render invisible widget
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (turnstileContainerRef.current && window.turnstile) {
+        widgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+          sitekey: siteKey,
+          size: 'invisible',
+          callback: (token: string) => {
+            if (tokenResolverRef.current) {
+              tokenResolverRef.current(token);
+              tokenResolverRef.current = null;
+            }
+          },
+        });
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
+  const executeTurnstile = (): Promise<string> =>
+    new Promise((resolve, reject) => {
+      if (!window.turnstile || !widgetIdRef.current) {
+        reject(new Error('Turnstile not ready'));
+        return;
+      }
+      // Reset so we always get a fresh token on each submission
+      window.turnstile.reset(widgetIdRef.current);
+      tokenResolverRef.current = resolve;
+      window.turnstile.execute(widgetIdRef.current);
+      // Fail the submission if Cloudflare doesn't respond within 15 s
+      setTimeout(() => {
+        tokenResolverRef.current = null;
+        reject(new Error('Security check timed out. Please try again.'));
+      }, 15000);
+    });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -25,6 +140,11 @@ const ContactPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = extractPhoneDigits(e.target.value);
+    setFormData((prev) => ({ ...prev, phone: digits }));
   };
 
   // Map display values to API values
@@ -45,14 +165,27 @@ const ContactPage = () => {
     setErrorMessage('');
 
     try {
+      // Run the invisible Turnstile challenge to get a token
+      let turnstileToken: string | undefined;
+      try {
+        turnstileToken = await executeTurnstile();
+      } catch {
+        // Log but don't block — backend will still reject if token is absent
+        console.warn('Turnstile challenge failed or timed out');
+      }
+
       // Prepare data for API
+      const fillTime = Math.floor((Date.now() - mountTimeRef.current) / 1000);
       const apiData: ContactFormData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
-        phone: formData.phone || undefined,
+        phone: formData.phone ? `+1${formData.phone}` : undefined,
         project_type: projectTypeMap[formData.projectType] || formData.projectType,
         message: formData.message,
+        honeypot: honeypot,
+        form_fill_time: fillTime,
+        cf_turnstile_response: turnstileToken,
       };
 
       // Submit to API
@@ -60,6 +193,8 @@ const ContactPage = () => {
 
       // Success
       setSubmitStatus('success');
+      setHoneypot('');
+      mountTimeRef.current = Date.now();
       setFormData({
         firstName: '',
         lastName: '',
@@ -82,8 +217,8 @@ const ContactPage = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">Contact Tola Tiles</h1>
-            <p className="text-xl text-gray-600">Get in touch to discuss your tile installation project</p>
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">{content.heroH1}</h1>
+            <p className="text-xl text-gray-600">{content.heroSubtitle}</p>
           </header>
 
           <div className="grid lg:grid-cols-2 gap-16">
@@ -155,14 +290,11 @@ const ContactPage = () => {
               {/* Service Areas */}
               <div className="mt-8 p-6 border border-gray-200 rounded-xl">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Service Areas</h3>
-                <p className="text-gray-600 mb-4">We proudly serve Saint Augustine and the greater Northeast Florida area within a 50-mile radius.</p>
+                <p className="text-gray-600 mb-4">{content.serviceAreasDescription}</p>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                  <div>Saint Augustine</div>
-                  <div>Ponte Vedra Beach</div>
-                  <div>Jacksonville</div>
-                  <div>Palm Coast</div>
-                  <div>St. Johns County</div>
-                  <div>Flagler County</div>
+                  {content.serviceAreasList.map((area, index) => (
+                    <div key={index}>{area}</div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -192,6 +324,20 @@ const ContactPage = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Honeypot field - hidden from real users */}
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <label htmlFor="company_website">Company Website</label>
+                  <input
+                    type="text"
+                    id="company_website"
+                    name="company_website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -245,15 +391,24 @@ const ContactPage = () => {
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                     Phone
                   </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="(904) 123-4567"
-                  />
+                  <div className="relative flex">
+                    {formData.phone && (
+                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-blue-600 font-bold text-sm select-none">
+                        +1
+                      </span>
+                    )}
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formatPhoneNumber(formData.phone)}
+                      onChange={handlePhoneChange}
+                      className={`w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                        formData.phone ? 'rounded-r-lg' : 'rounded-lg'
+                      }`}
+                      placeholder="(904) 123-4567"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -295,6 +450,9 @@ const ContactPage = () => {
                   ></textarea>
                 </div>
 
+                {/* Cloudflare Turnstile invisible widget — no visible UI */}
+                <div ref={turnstileContainerRef} aria-hidden="true" />
+
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -329,7 +487,7 @@ const ContactPage = () => {
 
           {/* Map Section */}
           <div className="mt-16">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">Where We Are Established</h2>
+            <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">{content.mapHeading}</h2>
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 h-[400px] rounded-xl overflow-hidden shadow-lg">
                 <iframe

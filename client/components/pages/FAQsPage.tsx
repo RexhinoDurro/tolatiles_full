@@ -13,7 +13,42 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Shield,
 };
 
-const FAQsPage = () => {
+interface FAQsLocationContent {
+  heroH1: string;
+  heroSubtitle: string;
+  ctaDescription: string;
+}
+
+const locationContent: Record<string, FAQsLocationContent> = {
+  jacksonville: {
+    heroH1: 'Tile Installation FAQs - Jacksonville FL',
+    heroSubtitle:
+      "Find answers to common questions about tile installation in Jacksonville and Duval County. From project timelines to material selection for the River City's climate — we've got you covered.",
+    ctaDescription:
+      'Our Jacksonville team is ready to answer any questions about your tile installation project. Get personalized advice for your Duval County home or business.',
+  },
+  'st-augustine': {
+    heroH1: 'Tile Installation FAQs - St Augustine FL',
+    heroSubtitle:
+      "Find answers to common questions about tile installation in St. Augustine and St. Johns County. Whether you're renovating a historic home or building new in Nocatee, we have the expertise you need.",
+    ctaDescription:
+      'Our St. Augustine team is ready to answer any questions about your tile installation project. Get expert advice on materials and techniques suited to our coastal climate.',
+  },
+  florida: {
+    heroH1: 'Tile Installation FAQs - Northeast Florida',
+    heroSubtitle:
+      "Find answers to common questions about our tile installation services, processes, and expertise across Northeast Florida. Can't find what you're looking for? We're here to help!",
+    ctaDescription:
+      'Our experienced team is ready to answer any questions about your tile installation project. Get personalized advice and detailed information about our services anywhere in Northeast Florida.',
+  },
+};
+
+interface FAQsPageProps {
+  location?: string;
+}
+
+const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
+  const content = locationContent[location] || locationContent.florida;
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -46,10 +81,9 @@ const FAQsPage = () => {
       <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <header>
-            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">Frequently Asked Questions</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
             <p className="text-xl text-gray-600 mb-8 animate-slideInUp">
-              Find answers to common questions about our tile installation services, processes, and expertise. Can&apos;t find what you&apos;re
-              looking for? We&apos;re here to help!
+              {content.heroSubtitle}
             </p>
           </header>
 
@@ -186,8 +220,7 @@ const FAQsPage = () => {
               Still Have Questions?
             </h2>
             <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
-              Our experienced team is ready to answer any questions about your tile installation project. Get personalized advice and detailed
-              information about our services.
+              {content.ctaDescription}
             </p>
 
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -217,7 +250,7 @@ const FAQsPage = () => {
                 <MessageCircle className="h-8 w-8 mx-auto mb-3 text-blue-200" aria-hidden="true" />
                 <h3 className="font-semibold mb-2">Free Consultation</h3>
                 <p className="text-blue-100 text-sm mb-3">Schedule an in-home visit</p>
-                <Link href="/contact" className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block">
+                <Link href={`/${location}/contact`} className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block">
                   Book Now
                 </Link>
               </div>

@@ -124,9 +124,78 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Legacy redirect
       {
         source: '/Tola',
-        destination: '/',
+        destination: '/florida',
+        permanent: true,
+      },
+
+      // Root to Florida
+      {
+        source: '/',
+        destination: '/florida',
+        permanent: true,
+      },
+
+      // Old service URLs with location suffix to new location-prefixed URLs
+      {
+        source: '/services/:slug-jacksonville',
+        destination: '/jacksonville/services/:slug',
+        permanent: true,
+      },
+      {
+        source: '/services/:slug-st-augustine',
+        destination: '/st-augustine/services/:slug',
+        permanent: true,
+      },
+
+      // Florida services (no location suffix) to /florida/services
+      {
+        source: '/services/:slug',
+        destination: '/florida/services/:slug',
+        permanent: true,
+      },
+      {
+        source: '/services',
+        destination: '/florida/services',
+        permanent: true,
+      },
+
+      // Global pages to /florida
+      {
+        source: '/gallery/:path*',
+        destination: '/florida/gallery/:path*',
+        permanent: true,
+      },
+      {
+        source: '/gallery',
+        destination: '/florida/gallery',
+        permanent: true,
+      },
+      {
+        source: '/about',
+        destination: '/florida/about',
+        permanent: true,
+      },
+      {
+        source: '/blog/:path*',
+        destination: '/florida/blog/:path*',
+        permanent: true,
+      },
+      {
+        source: '/blog',
+        destination: '/florida/blog',
+        permanent: true,
+      },
+      {
+        source: '/faqs',
+        destination: '/florida/faqs',
+        permanent: true,
+      },
+      {
+        source: '/contact',
+        destination: '/florida/contact',
         permanent: true,
       },
     ];

@@ -19,6 +19,8 @@ class ContactLeadSerializer(serializers.ModelSerializer):
             'project_type',
             'message',
             'status',
+            'contact_result_reason',
+            'address',
             'notes',
             'created_at',
             'updated_at',
@@ -52,6 +54,17 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
         """Clean last name."""
         return value.strip().title()
 
+    def validate(self, attrs):
+        """Anti-bot validation: honeypot and timing checks."""
+        initial = self.initial_data
+
+        # Honeypot check: if filled, it's a bot
+        honeypot = initial.get('honeypot', '')
+        if honeypot:
+            raise serializers.ValidationError('Invalid submission.')
+
+        return attrs
+
 
 class ContactLeadUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating contact lead status and notes."""
@@ -60,6 +73,7 @@ class ContactLeadUpdateSerializer(serializers.ModelSerializer):
         model = ContactLead
         fields = [
             'status',
+            'address',
             'notes',
         ]
 

@@ -10,34 +10,17 @@ const currentDate = new Date().toISOString().split('T')[0];
 // Static dates for truly static pages
 const STATIC_PAGE_DATE = '2024-01-15';
 
-// Florida (generic) service slugs
-const floridaServiceSlugs = [
+// Locations
+const locations = ['florida', 'jacksonville', 'st-augustine'];
+
+// Service slugs (same for all locations now)
+const serviceSlugs = [
   'kitchen-backsplash',
   'bathroom-tile',
   'floor-tile',
   'patio-tile',
   'fireplace-tile',
   'shower-tile',
-];
-
-// Jacksonville service slugs
-const jacksonvilleServiceSlugs = [
-  'kitchen-backsplash-jacksonville',
-  'bathroom-tile-jacksonville',
-  'floor-tile-jacksonville',
-  'patio-tile-jacksonville',
-  'fireplace-tile-jacksonville',
-  'shower-tile-jacksonville',
-];
-
-// St Augustine service slugs
-const stAugustineServiceSlugs = [
-  'kitchen-backsplash-st-augustine',
-  'bathroom-tile-st-augustine',
-  'floor-tile-st-augustine',
-  'patio-tile-st-augustine',
-  'fireplace-tile-st-augustine',
-  'shower-tile-st-augustine',
 ];
 
 // Gallery categories
@@ -50,7 +33,7 @@ const galleryCategories = [
 ];
 
 // Fetch blog posts for sitemap
-async function getBlogSitemapData(): Promise<Array<{ slug: string; last_updated: string; publish_date: string }>> {
+async function getBlogSitemapData(): Promise<Array<{ slug: string; location: string; last_updated: string; publish_date: string }>> {
   try {
     const response = await fetch(`${API_BASE}/blog/posts/sitemap_data/`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
@@ -85,132 +68,134 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getBlogCategories(),
   ]);
 
-  // Static pages
-  const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-    {
-      url: `${BASE_URL}/services`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/gallery`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/about`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/contact`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/faqs`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/blog`,
-      lastModified: currentDate,
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/privacy-policy`,
-      lastModified: STATIC_PAGE_DATE,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/terms-of-service`,
-      lastModified: STATIC_PAGE_DATE,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    // Location landing pages - increased priority for local SEO
-    {
-      url: `${BASE_URL}/jacksonville`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.95,
-    },
-    {
-      url: `${BASE_URL}/st-augustine`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.95,
-    },
-  ];
-
-  // Florida service detail pages
-  const floridaServicePages: MetadataRoute.Sitemap = floridaServiceSlugs.map((slug) => ({
-    url: `${BASE_URL}/services/${slug}`,
+  // Location home pages - ALL city pages get equal priority for local SEO
+  // Do NOT give Florida higher priority - this causes Google to prefer it over city pages
+  const locationHomePages: MetadataRoute.Sitemap = locations.map((loc) => ({
+    url: `${BASE_URL}/${loc}`,
     lastModified: currentDate,
     changeFrequency: 'weekly' as const,
-    priority: 0.85,
+    priority: 1.0, // All locations get top priority
   }));
 
-  // Jacksonville service detail pages (high priority for local SEO)
-  const jacksonvilleServicePages: MetadataRoute.Sitemap = jacksonvilleServiceSlugs.map((slug) => ({
-    url: `${BASE_URL}/services/${slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly' as const,
-    priority: 0.9,
-  }));
+  // Service pages for all locations
+  const servicePages: MetadataRoute.Sitemap = [];
+  for (const loc of locations) {
+    // Services index page
+    servicePages.push({
+      url: `${BASE_URL}/${loc}/services`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    });
 
-  // St Augustine service detail pages (high priority for local SEO)
-  const stAugustineServicePages: MetadataRoute.Sitemap = stAugustineServiceSlugs.map((slug) => ({
-    url: `${BASE_URL}/services/${slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly' as const,
-    priority: 0.9,
-  }));
+    // Individual service pages
+    for (const slug of serviceSlugs) {
+      servicePages.push({
+        url: `${BASE_URL}/${loc}/services/${slug}`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly' as const,
+        priority: loc === 'florida' ? 0.85 : 0.9,
+      });
+    }
+  }
 
-  // Gallery category pages
-  const galleryPages: MetadataRoute.Sitemap = galleryCategories.map((category) => ({
-    url: `${BASE_URL}/gallery/${category}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  // Gallery pages for all locations
+  const galleryPages: MetadataRoute.Sitemap = [];
+  for (const loc of locations) {
+    // Gallery index page
+    galleryPages.push({
+      url: `${BASE_URL}/${loc}/gallery`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    });
 
-  // Blog post pages
+    // Gallery category pages
+    for (const category of galleryCategories) {
+      galleryPages.push({
+        url: `${BASE_URL}/${loc}/gallery/${category}`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      });
+    }
+  }
+
+  // Static pages for all locations
+  const locationStaticPages: MetadataRoute.Sitemap = [];
+  for (const loc of locations) {
+    locationStaticPages.push(
+      {
+        url: `${BASE_URL}/${loc}/about`,
+        lastModified: currentDate,
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/${loc}/contact`,
+        lastModified: currentDate,
+        changeFrequency: 'monthly' as const,
+        priority: 0.9,
+      },
+      {
+        url: `${BASE_URL}/${loc}/faqs`,
+        lastModified: currentDate,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      },
+      {
+        url: `${BASE_URL}/${loc}/blog`,
+        lastModified: currentDate,
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      }
+    );
+  }
+
+  // Blog post pages (use post's location)
   const blogPostPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
+    url: `${BASE_URL}/${post.location || 'florida'}/blog/${post.slug}`,
     lastModified: post.last_updated?.split('T')[0] || post.publish_date?.split('T')[0] || currentDate,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
 
-  // Blog category pages
-  const blogCategoryPages: MetadataRoute.Sitemap = blogCategories.map((category) => ({
-    url: `${BASE_URL}/blog/category/${category.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  // Blog category pages for all locations
+  const blogCategoryPages: MetadataRoute.Sitemap = [];
+  for (const loc of locations) {
+    for (const category of blogCategories) {
+      blogCategoryPages.push({
+        url: `${BASE_URL}/${loc}/blog/category/${category.slug}`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      });
+    }
+  }
+
+  // Global static pages (not location-specific)
+  const globalStaticPages: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/privacy-policy`,
+      lastModified: STATIC_PAGE_DATE,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms-of-service`,
+      lastModified: STATIC_PAGE_DATE,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+  ];
 
   return [
-    ...staticPages,
-    ...floridaServicePages,
-    ...jacksonvilleServicePages,
-    ...stAugustineServicePages,
+    ...locationHomePages,
+    ...servicePages,
     ...galleryPages,
+    ...locationStaticPages,
     ...blogPostPages,
     ...blogCategoryPages,
+    ...globalStaticPages,
   ];
 }

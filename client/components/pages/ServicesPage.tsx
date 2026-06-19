@@ -13,26 +13,94 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = 
   Wrench,
 };
 
-const serviceUrlMap: Record<string, string> = {
-  'kitchen-backsplash': '/services/kitchen-backsplash-installation-jacksonville',
-  bathroom: '/services/bathroom-tile-installation-jacksonville',
-  flooring: '/services/floor-tile-installation-jacksonville',
-  patio: '/services/patio-tile-installation-jacksonville',
-  fireplace: '/services/fireplace-tile-installation-jacksonville',
-  shower: '/services/shower-tile-installation-jacksonville',
+const serviceIdToSlug: Record<string, string> = {
+  'kitchen-backsplash': 'kitchen-backsplash',
+  bathroom: 'bathroom-tile',
+  flooring: 'floor-tile',
+  patio: 'patio-tile',
+  fireplace: 'fireplace-tile',
+  shower: 'shower-tile',
 };
 
-const ServicesPage = () => {
+interface ServicesLocationContent {
+  locationName: string;
+  heroH1: string;
+  heroDescription: string;
+  processConsultation: string;
+  serviceAreasHeading: string;
+  serviceAreasSubheading: string;
+  serviceAreaCards: { title: string; description: string }[];
+  ctaDescription: string;
+}
+
+const locationContent: Record<string, ServicesLocationContent> = {
+  jacksonville: {
+    locationName: 'Jacksonville',
+    heroH1: 'Tile Installation Services Jacksonville FL',
+    heroDescription:
+      'Expert tile solutions for homes and businesses across Duval County. From Riverside kitchens to San Marco bathrooms, Mandarin floors to Jacksonville Beach patios — we bring precision craftsmanship to every corner of the River City.',
+    processConsultation: 'Free in-home consultation and design planning anywhere in Duval County',
+    serviceAreasHeading: 'Serving Jacksonville & Duval County',
+    serviceAreasSubheading: 'Professional tile installation throughout the River City and surrounding neighborhoods',
+    serviceAreaCards: [
+      { title: 'Downtown & Riverside', description: 'Riverside, San Marco, Avondale, Ortega, Springfield, Murray Hill' },
+      { title: 'Beaches & Intracoastal', description: 'Jacksonville Beach, Neptune Beach, Atlantic Beach, Ponte Vedra' },
+      { title: 'Mandarin & Southside', description: 'Mandarin, Baymeadows, Southside, Tinseltown, Deerwood, Fruit Cove' },
+    ],
+    ctaDescription:
+      'Get a free consultation and detailed quote for your tile installation project in Jacksonville. Our Duval County experts are ready to help bring your vision to life with professional craftsmanship and premium materials.',
+  },
+  'st-augustine': {
+    locationName: 'St. Augustine',
+    heroH1: 'Tile Installation Services St Augustine FL',
+    heroDescription:
+      'Trusted tile installation for the Ancient City and St. Johns County. Whether you need custom tile for a historic downtown renovation, a Vilano Beach condo remodel, or a new build in Nocatee — our craftsmen understand the unique demands of coastal living.',
+    processConsultation: 'Free in-home consultation and design planning throughout St. Johns County',
+    serviceAreasHeading: 'Serving St. Augustine & St. Johns County',
+    serviceAreasSubheading: 'Expert tile installation from the historic district to the newest communities',
+    serviceAreaCards: [
+      { title: 'Historic & Downtown', description: 'Historic District, Lincolnville, North City, Davis Shores, Lighthouse Park' },
+      { title: 'Beaches & Islands', description: 'Vilano Beach, Anastasia Island, Butler Beach, Crescent Beach, St. Augustine Beach' },
+      { title: 'Nocatee & World Golf Village', description: 'Nocatee, World Golf Village, Palencia, Julington Creek, Murabella' },
+    ],
+    ctaDescription:
+      'Get a free consultation and detailed quote for your tile installation project in St. Augustine. Our St. Johns County team specializes in both historic renovations and modern coastal installations.',
+  },
+  florida: {
+    locationName: 'Northeast Florida',
+    heroH1: 'Professional Tile Installation Services in Northeast Florida',
+    heroDescription:
+      'Comprehensive tile solutions for residential and commercial properties across Northeast Florida. From Duval County to St. Johns County and beyond, our team delivers expert craftsmanship backed by 15+ years of regional experience.',
+    processConsultation: 'Free in-home consultation and design planning across Northeast Florida',
+    serviceAreasHeading: 'Serving Northeast Florida',
+    serviceAreasSubheading: 'Professional tile installation across the greater Northeast Florida region',
+    serviceAreaCards: [
+      { title: 'Jacksonville Area', description: 'Riverside, San Marco, Mandarin, Southside, Jax Beach, Ortega, Avondale' },
+      { title: 'St. Augustine Area', description: 'Historic District, Vilano Beach, Anastasia Island, Nocatee, World Golf Village' },
+      { title: 'Surrounding Communities', description: 'Ponte Vedra, Palm Coast, Flagler Beach, Green Cove Springs, Palatka' },
+    ],
+    ctaDescription:
+      'Get a free consultation and detailed quote for your tile installation needs anywhere in Northeast Florida. Our regional experts are ready to help bring your vision to life with professional craftsmanship and premium materials.',
+  },
+};
+
+interface ServicesPageProps {
+  location?: string;
+}
+
+const ServicesPage = ({ location = 'florida' }: ServicesPageProps) => {
+  const content = locationContent[location] || locationContent.florida;
+
   const createQuoteEmailLink = (serviceName: string) => {
-    const subject = encodeURIComponent(`Quote Request - ${serviceName} in Jacksonville`);
+    const subject = encodeURIComponent(`Quote Request - ${serviceName} in ${content.locationName}`);
     const body = encodeURIComponent(`
 Hello Tola Tiles,
 
-I would like to request a quote for ${serviceName} in Jacksonville.
+I would like to request a quote for ${serviceName} in ${content.locationName}.
 
 Project Details:
 - Service: ${serviceName}
-- Location: Jacksonville, FL
+- Location: ${content.locationName}
 - Timeline:
 - Budget Range:
 - Additional Notes:
@@ -51,10 +119,9 @@ Thank you,
       <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <header>
-            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">Professional Tile Installation Services in Jacksonville</h1>
+            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 animate-slideInUp">
-              Comprehensive tile solutions for residential and commercial properties in Jacksonville, FL. From design consultation to installation and
-              maintenance, we&apos;re your trusted tile experts.
+              {content.heroDescription}
             </p>
           </header>
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600 animate-slideInUp">
@@ -84,7 +151,8 @@ Thank you,
           <div className="grid lg:grid-cols-2 gap-8 mb-16">
             {services.map((service, index) => {
               const IconComponent = iconMap[service.icon];
-              const serviceUrl = serviceUrlMap[service.id];
+              const serviceSlug = serviceIdToSlug[service.id];
+              const serviceUrl = `/${location}/services/${serviceSlug}`;
 
               return (
                 <article
@@ -163,7 +231,7 @@ Thank you,
 
             <div className="grid md:grid-cols-4 gap-8">
               {[
-                { step: '01', title: 'Consultation', description: 'Free in-home consultation and design planning in Jacksonville' },
+                { step: '01', title: 'Consultation', description: content.processConsultation },
                 { step: '02', title: 'Material Selection', description: 'Choose from our extensive tile and material library' },
                 { step: '03', title: 'Professional Installation', description: 'Expert installation by certified craftsmen' },
                 { step: '04', title: 'Quality Inspection', description: 'Thorough quality check and customer walkthrough' },
@@ -183,24 +251,18 @@ Thank you,
           <section className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-12 mb-16" aria-labelledby="service-areas-heading">
             <header className="text-center mb-8">
               <h2 id="service-areas-heading" className="text-3xl font-bold text-gray-900 mb-4">
-                Serving Jacksonville & Surrounding Areas
+                {content.serviceAreasHeading}
               </h2>
-              <p className="text-xl text-gray-600">Professional tile installation throughout Northeast Florida</p>
+              <p className="text-xl text-gray-600">{content.serviceAreasSubheading}</p>
             </header>
 
             <div className="grid md:grid-cols-3 gap-6 text-center">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Jacksonville</h3>
-                <p className="text-gray-600 text-sm">All neighborhoods and districts</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">St. Augustine</h3>
-                <p className="text-gray-600 text-sm">Historic and modern areas</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="font-semibold text-lg text-gray-900 mb-2">Surrounding Areas</h3>
-                <p className="text-gray-600 text-sm">Contact us for availability</p>
-              </div>
+              {content.serviceAreaCards.map((card, index) => (
+                <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">{card.title}</h3>
+                  <p className="text-gray-600 text-sm">{card.description}</p>
+                </div>
+              ))}
             </div>
           </section>
 
@@ -210,12 +272,11 @@ Thank you,
               Ready to Start Your Project?
             </h2>
             <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
-              Get a free consultation and detailed quote for your tile installation needs in Jacksonville. Our experts are ready to help bring your vision
-              to life with professional craftsmanship and premium materials.
+              {content.ctaDescription}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/contact"
+                href={`/${location}/contact`}
                 className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Schedule Free Consultation

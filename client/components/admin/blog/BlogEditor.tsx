@@ -23,6 +23,7 @@ import type {
   BlogPostUpdate,
   BlogCategory,
   BlogPostStatus,
+  BlogLocation,
   FAQItem,
 } from '@/types/api';
 import TipTapEditor from './TipTapEditor';
@@ -62,6 +63,7 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
     post?.categories?.map((c) => c.id) || []
   );
   const [status, setStatus] = useState<BlogPostStatus>(post?.status || 'draft');
+  const [location, setLocation] = useState<BlogLocation>(post?.location || 'florida');
   const [scheduledDate, setScheduledDate] = useState(
     post?.scheduled_publish_date
       ? new Date(post.scheduled_publish_date).toISOString().slice(0, 16)
@@ -161,6 +163,7 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
         has_faq_schema: hasFaqSchema,
         faq_data: faqData,
         category_ids: selectedCategories,
+        location,
         status: finalStatus,
         scheduled_publish_date: finalStatus === 'scheduled' ? scheduledDate : null,
       };
@@ -511,6 +514,23 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Location */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="font-medium text-gray-900 mb-4">Target Location</h3>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value as BlogLocation)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="florida">Florida</option>
+                <option value="jacksonville">Jacksonville</option>
+                <option value="st-augustine">St. Augustine</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Determines which location this post appears under (e.g., /{location}/blog/...)
+              </p>
             </div>
 
             {/* Categories */}

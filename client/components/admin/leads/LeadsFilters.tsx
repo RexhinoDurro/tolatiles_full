@@ -5,57 +5,104 @@ import { Filter, X, Calendar } from 'lucide-react';
 import type { LeadStatus, LocalAdsLeadStatus, LocalAdsChargeStatus } from '@/types/api';
 
 // Website Leads Filters
+export type WebsiteLeadFilterStatus = LeadStatus | 'all' | 'contacted_group' | 'qualified_group';
+
 export interface WebsiteLeadsFiltersState {
-  status: LeadStatus | 'all';
+  status: WebsiteLeadFilterStatus;
 }
 
 interface WebsiteLeadsFiltersProps {
   filters: WebsiteLeadsFiltersState;
   onFiltersChange: (filters: WebsiteLeadsFiltersState) => void;
-  statusCounts?: Record<LeadStatus | 'all', number>;
+  statusCounts?: Record<string, number>;
 }
-
-const websiteStatusOptions: { value: LeadStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'new', label: 'New' },
-  { value: 'contacted', label: 'Contacted' },
-  { value: 'qualified', label: 'Qualified' },
-  { value: 'converted', label: 'Converted' },
-  { value: 'closed', label: 'Closed' },
-];
 
 export function WebsiteLeadsFilters({
   filters,
   onFiltersChange,
   statusCounts,
 }: WebsiteLeadsFiltersProps) {
+  const mainOptions: { value: WebsiteLeadFilterStatus; label: string; count: number }[] = [
+    { value: 'all', label: 'All', count: statusCounts?.['all'] ?? 0 },
+    { value: 'new', label: 'New', count: statusCounts?.['new'] ?? 0 },
+    { value: 'contacted_group', label: 'Contacted', count: (statusCounts?.['contacted'] ?? 0) + (statusCounts?.['failed_contact'] ?? 0) },
+    { value: 'qualified_group', label: 'Qualified', count: (statusCounts?.['qualified'] ?? 0) + (statusCounts?.['failed_qualified'] ?? 0) },
+  ];
+
+  const isContactedGroup = filters.status === 'contacted_group' || filters.status === 'contacted' || filters.status === 'failed_contact';
+  const isQualifiedGroup = filters.status === 'qualified_group' || filters.status === 'qualified' || filters.status === 'failed_qualified';
+
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-2">
-      <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
-      {websiteStatusOptions.map((option) => (
-        <button
-          key={option.value}
-          onClick={() => onFiltersChange({ status: option.value })}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
-            filters.status === option.value
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          {option.label}
-          {statusCounts && statusCounts[option.value] !== undefined && (
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs ${
-                filters.status === option.value
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-600'
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        {mainOptions.map((option) => {
+          const isActive = option.value === 'contacted_group'
+            ? isContactedGroup
+            : option.value === 'qualified_group'
+            ? isQualifiedGroup
+            : filters.status === option.value;
+
+          return (
+            <button
+              key={option.value}
+              onClick={() => onFiltersChange({ status: option.value })}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
+                isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              {statusCounts[option.value]}
-            </span>
-          )}
-        </button>
-      ))}
+              {option.label}
+              <span className={`px-2 py-0.5 rounded-full text-xs ${isActive ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                {option.count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Sub-filters for Contacted group */}
+      {isContactedGroup && (
+        <div className="flex items-center gap-2 ml-6">
+          <span className="text-xs text-gray-500">Show:</span>
+          {[
+            { value: 'contacted_group' as WebsiteLeadFilterStatus, label: 'All Contacted' },
+            { value: 'contacted' as WebsiteLeadFilterStatus, label: 'Contacted' },
+            { value: 'failed_contact' as WebsiteLeadFilterStatus, label: 'Failed Contact' },
+          ].map((sub) => (
+            <button
+              key={sub.value}
+              onClick={() => onFiltersChange({ status: sub.value })}
+              className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                filters.status === sub.value ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {sub.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Sub-filters for Qualified group */}
+      {isQualifiedGroup && (
+        <div className="flex items-center gap-2 ml-6">
+          <span className="text-xs text-gray-500">Show:</span>
+          {[
+            { value: 'qualified_group' as WebsiteLeadFilterStatus, label: 'All Qualified' },
+            { value: 'qualified' as WebsiteLeadFilterStatus, label: 'Qualified' },
+            { value: 'failed_qualified' as WebsiteLeadFilterStatus, label: 'Failed Qualified' },
+          ].map((sub) => (
+            <button
+              key={sub.value}
+              onClick={() => onFiltersChange({ status: sub.value })}
+              className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                filters.status === sub.value ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {sub.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

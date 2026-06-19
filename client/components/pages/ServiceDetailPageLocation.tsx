@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
 import type { Service } from '@/data/services';
+import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Hammer,
@@ -25,6 +26,15 @@ const serviceToGalleryPath: Record<string, string> = {
   patio: 'patios',
   fireplace: 'fireplaces',
   shower: 'showers',
+};
+
+const serviceIdToProjectSlug: Record<string, string> = {
+  'kitchen-backsplash': 'kitchen-backsplash',
+  bathroom: 'bathroom-tile',
+  flooring: 'floor-tile',
+  patio: 'patio-tile',
+  fireplace: 'fireplace-tile',
+  shower: 'shower-tile',
 };
 
 // Map service IDs to location-specific slugs
@@ -356,7 +366,7 @@ Thank you,
 
           <div className="text-center">
             <Link
-              href={`/gallery/${galleryKey}`}
+              href={`/${location}/gallery/${galleryKey}`}
               className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
             >
               View Full Gallery
@@ -400,14 +410,14 @@ Thank you,
             <p className="text-gray-600 mb-4">This service is also available in:</p>
             <div className="flex justify-center gap-4 flex-wrap">
               <Link
-                href={`/services/${getLocationSlug(service.id, otherLocation)}`}
+                href={`/${otherLocation}/services/${serviceIdToSlug[service.id]}`}
                 className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
               >
                 <MapPin className="h-4 w-4" />
                 {otherLocationName}
               </Link>
               <Link
-                href={`/services/${getLocationSlug(service.id, 'florida')}`}
+                href={`/florida/services/${serviceIdToSlug[service.id]}`}
                 className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
               >
                 <MapPin className="h-4 w-4" />
@@ -417,6 +427,15 @@ Thank you,
           </div>
         </div>
       </section>
+
+      {/* Project Portfolio Section */}
+      {serviceIdToProjectSlug[service.id] && (
+        <ServiceProjectsSection
+          location={location}
+          serviceSlug={serviceIdToProjectSlug[service.id]}
+          serviceName={service.title}
+        />
+      )}
 
       {/* Related Services */}
       <section className="py-16 bg-gray-50">
@@ -432,7 +451,7 @@ Thank you,
               return (
                 <Link
                   key={index}
-                  href={`/services/${serviceIdToSlug[relatedService.id]}`}
+                  href={`/${location}/services/${serviceIdToSlug[relatedService.id]}`}
                   className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
                 >
                   <div className="flex items-center gap-4 mb-4">
@@ -460,7 +479,7 @@ Thank you,
           <p className="text-xl text-blue-100 mb-8">Get a free consultation and quote for your {service.title.toLowerCase()} project in {locationName}.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/contact"
+              href={`/${location}/contact`}
               className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
             >
               Schedule Free Consultation

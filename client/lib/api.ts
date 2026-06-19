@@ -12,6 +12,7 @@ import type {
   CompanySettings,
   Customer,
   CustomerCreate,
+  CustomerPhoto,
   Quote,
   QuoteListItem,
   QuoteCreate,
@@ -22,6 +23,8 @@ import type {
   InvoiceCreate,
   InvoiceStats,
   InvoiceStatus,
+  InvoiceInstallment,
+  InvoiceInstallmentCreate,
   PublicQuote,
   PublicInvoice,
   LocalAdsLead,
@@ -55,6 +58,34 @@ import type {
   AIImageOptionsResponse,
   CalendarBlogPost,
   QuickDraftCreate,
+  Estimate,
+  EstimateListItem,
+  EstimateCreate,
+  EstimateStats,
+  EstimatePhoto,
+  Deal,
+  DealCreate,
+  DealStage,
+  CustomJobType,
+  CustomLeadSource,
+  EstimateVisit,
+  EstimateVisitCreate,
+  EstimateVisitPhoto,
+  Appointment,
+  AppointmentCreate,
+  Project,
+  ProjectListItem,
+  ProjectCreate,
+  Phase,
+  PhaseCreate,
+  ProjectMedia,
+  HomepageSlot,
+  HomepageSlotUpdate,
+  ServicePin,
+  ServicePinItem,
+  ProjectLocation,
+  ServiceTypeSlug,
+  ProjectStatus,
 } from '@/types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -452,6 +483,13 @@ class ApiClient {
     return this.fetch<LeadStats>('/leads/stats/');
   }
 
+  async convertLeadToCustomer(id: number, data: { address: string }): Promise<{ customer_id: number; customer_name: string }> {
+    return this.fetch<{ customer_id: number; customer_name: string }>(`/leads/${id}/convert_to_customer/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async createWebsiteLead(data: WebsiteLeadCreate): Promise<ContactLead> {
     return this.fetch<ContactLead>('/leads/admin_create/', {
       method: 'POST',
@@ -581,6 +619,40 @@ class ApiClient {
   async searchCustomers(query: string): Promise<Customer[]> {
     if (query.length < 2) return [];
     return this.fetch<Customer[]>(`/customers/search/?q=${encodeURIComponent(query)}`);
+  }
+
+  async archiveCustomer(id: number): Promise<void> {
+    await this.fetch<void>(`/customers/${id}/archive/`, { method: 'POST' });
+  }
+
+  async unarchiveCustomer(id: number): Promise<Customer> {
+    return this.fetch<Customer>(`/customers/${id}/unarchive/`, { method: 'POST' });
+  }
+
+  async hardDeleteCustomer(id: number): Promise<void> {
+    await this.fetch<void>(`/customers/${id}/hard_delete/`, { method: 'DELETE' });
+  }
+
+  async getArchivedCustomers(): Promise<Customer[]> {
+    return this.fetch<Customer[]>('/customers/archived_list/');
+  }
+
+  async getCustomerPhotos(customerId: number): Promise<CustomerPhoto[]> {
+    return this.fetch<CustomerPhoto[]>(`/customers/${customerId}/photos/`);
+  }
+
+  async uploadCustomerPhoto(customerId: number, image: File, caption?: string): Promise<CustomerPhoto> {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (caption) formData.append('caption', caption);
+    return this.fetch<CustomerPhoto>(`/customers/${customerId}/upload_photo/`, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  async deleteCustomerPhoto(customerId: number, photoId: number): Promise<void> {
+    return this.fetch<void>(`/customers/${customerId}/photos/${photoId}/`, { method: 'DELETE' });
   }
 
   // ============ Quotes ============
@@ -729,6 +801,46 @@ class ApiClient {
 
   async getPublicInvoice(reference: string): Promise<PublicInvoice> {
     return this.fetch<PublicInvoice>(`/invoices/public/${reference}/`);
+  }
+
+  // ── Installment actions ───────────────────────────────────────────────
+
+  async addInstallment(invoiceId: number, data: InvoiceInstallmentCreate): Promise<InvoiceInstallment> {
+    return this.fetch<InvoiceInstallment>(`/invoices/${invoiceId}/installments/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateInstallment(invoiceId: number, installmentId: number, data: Partial<InvoiceInstallmentCreate>): Promise<InvoiceInstallment> {
+    return this.fetch<InvoiceInstallment>(`/invoices/${invoiceId}/installments/${installmentId}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async removeInstallment(invoiceId: number, installmentId: number): Promise<void> {
+    await this.fetch<void>(`/invoices/${invoiceId}/installments/${installmentId}/`, {
+      method: 'DELETE',
+    });
+  }
+
+  async markInstallmentPaid(invoiceId: number, installmentId: number): Promise<InvoiceInstallment> {
+    return this.fetch<InvoiceInstallment>(`/invoices/${invoiceId}/installments/${installmentId}/mark_paid/`, {
+      method: 'POST',
+    });
+  }
+
+  async generateInstallmentReceipt(invoiceId: number, installmentId: number): Promise<{ message: string; receipt_url: string }> {
+    return this.fetch<{ message: string; receipt_url: string }>(`/invoices/${invoiceId}/installments/${installmentId}/generate_receipt/`, {
+      method: 'POST',
+    });
+  }
+
+  async generateInvoiceReceipt(invoiceId: number): Promise<{ message: string; receipt_url: string }> {
+    return this.fetch<{ message: string; receipt_url: string }>(`/invoices/${invoiceId}/generate_receipt/`, {
+      method: 'POST',
+    });
   }
 
   // ============ Search Console Integration ============
@@ -1039,6 +1151,393 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  // ============ Estimates ============
+
+  async getEstimates(): Promise<EstimateListItem[]> {
+    const response = await this.fetch<PaginatedResponse<EstimateListItem> | EstimateListItem[]>('/estimates/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getEstimate(id: number): Promise<Estimate> {
+    return this.fetch<Estimate>(`/estimates/${id}/`);
+  }
+
+  async createEstimate(data: EstimateCreate): Promise<Estimate> {
+    return this.fetch<Estimate>('/estimates/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateEstimate(id: number, data: Partial<EstimateCreate>): Promise<Estimate> {
+    return this.fetch<Estimate>(`/estimates/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteEstimate(id: number): Promise<void> {
+    return this.fetch<void>(`/estimates/${id}/`, { method: 'DELETE' });
+  }
+
+  async uploadEstimatePhoto(id: number, image: File, caption?: string): Promise<EstimatePhoto> {
+    const form = new FormData();
+    form.append('image', image);
+    if (caption) form.append('caption', caption);
+    return this.fetch<EstimatePhoto>(`/estimates/${id}/upload_photo/`, {
+      method: 'POST',
+      body: form,
+    });
+  }
+
+  async deleteEstimatePhoto(estimateId: number, photoId: number): Promise<void> {
+    return this.fetch<void>(`/estimates/${estimateId}/photos/${photoId}/`, { method: 'DELETE' });
+  }
+
+  async convertEstimateToQuote(id: number): Promise<Quote> {
+    return this.fetch<Quote>(`/estimates/${id}/convert_to_quote/`, { method: 'POST' });
+  }
+
+  async getEstimateStats(): Promise<EstimateStats> {
+    return this.fetch<EstimateStats>('/estimates/stats/');
+  }
+
+  // ============ Deals / Pipeline ============
+
+  async getDeals(): Promise<Deal[]> {
+    const response = await this.fetch<PaginatedResponse<Deal> | Deal[]>('/deals/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getDeal(id: number): Promise<Deal> {
+    return this.fetch<Deal>(`/deals/${id}/`);
+  }
+
+  async createDeal(data: DealCreate): Promise<Deal> {
+    return this.fetch<Deal>('/deals/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateDeal(id: number, data: Partial<DealCreate>): Promise<Deal> {
+    return this.fetch<Deal>(`/deals/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateDealStage(id: number, stage: DealStage, order?: number): Promise<Deal> {
+    return this.fetch<Deal>(`/deals/${id}/update_stage/`, {
+      method: 'PATCH',
+      body: JSON.stringify({ stage, order }),
+    });
+  }
+
+  async deleteDeal(id: number): Promise<void> {
+    return this.fetch<void>(`/deals/${id}/`, { method: 'DELETE' });
+  }
+
+  async archiveDeal(id: number): Promise<void> {
+    await this.fetch<void>(`/deals/${id}/archive/`, { method: 'POST' });
+  }
+
+  async unarchiveDeal(id: number): Promise<Deal> {
+    return this.fetch<Deal>(`/deals/${id}/unarchive/`, { method: 'POST' });
+  }
+
+  async hardDeleteDeal(id: number): Promise<void> {
+    await this.fetch<void>(`/deals/${id}/hard_delete/`, { method: 'DELETE' });
+  }
+
+  async getArchivedDeals(customerId?: number): Promise<Deal[]> {
+    const params = customerId ? `?is_archived=true&customer=${customerId}` : '?is_archived=true';
+    const response = await this.fetch<{ results: Deal[] } | Deal[]>(`/deals/${params}`);
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async reviewDeal(id: number): Promise<void> {
+    await this.fetch<void>(`/deals/${id}/review/`, { method: 'POST' });
+  }
+
+  async unreviewDeal(id: number): Promise<Deal> {
+    return this.fetch<Deal>(`/deals/${id}/unreview/`, { method: 'POST' });
+  }
+
+  async getReviewedDeals(): Promise<Deal[]> {
+    const response = await this.fetch<{ results: Deal[] } | Deal[]>('/deals/reviewed_list/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  // ============ Custom Job Types ============
+
+  async getJobTypes(): Promise<CustomJobType[]> {
+    const response = await this.fetch<{ results: CustomJobType[] } | CustomJobType[]>('/job-types/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async createJobType(data: { name: string; slug: string; order?: number; is_active?: boolean }): Promise<CustomJobType> {
+    return this.fetch<CustomJobType>('/job-types/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateJobType(id: number, data: Partial<{ name: string; slug: string; order: number; is_active: boolean }>): Promise<CustomJobType> {
+    return this.fetch<CustomJobType>(`/job-types/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteJobType(id: number): Promise<void> {
+    return this.fetch<void>(`/job-types/${id}/`, { method: 'DELETE' });
+  }
+
+  // ============ Custom Lead Sources ============
+
+  async getLeadSources(): Promise<CustomLeadSource[]> {
+    const response = await this.fetch<{ results: CustomLeadSource[] } | CustomLeadSource[]>('/lead-sources/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async createLeadSource(data: { name: string; slug: string; order?: number; is_active?: boolean }): Promise<CustomLeadSource> {
+    return this.fetch<CustomLeadSource>('/lead-sources/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateLeadSource(id: number, data: Partial<{ name: string; slug: string; order: number; is_active: boolean }>): Promise<CustomLeadSource> {
+    return this.fetch<CustomLeadSource>(`/lead-sources/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLeadSource(id: number): Promise<void> {
+    return this.fetch<void>(`/lead-sources/${id}/`, { method: 'DELETE' });
+  }
+
+  // ============ Estimate Visits ============
+
+  async getAllEstimateVisits(): Promise<EstimateVisit[]> {
+    const response = await this.fetch<{ results: EstimateVisit[] } | EstimateVisit[]>('/estimate-visits/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getAllAppointments(): Promise<Appointment[]> {
+    const response = await this.fetch<{ results: Appointment[] } | Appointment[]>('/appointments/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getEstimateVisits(dealId: number): Promise<EstimateVisit[]> {
+    return this.fetch<EstimateVisit[]>(`/deals/${dealId}/estimate_visits/`);
+  }
+
+  async createEstimateVisit(data: EstimateVisitCreate): Promise<EstimateVisit> {
+    return this.fetch<EstimateVisit>(`/deals/${data.deal}/estimate_visits/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateEstimateVisit(id: number, data: Partial<EstimateVisitCreate>): Promise<EstimateVisit> {
+    return this.fetch<EstimateVisit>(`/estimate-visits/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteEstimateVisit(id: number): Promise<void> {
+    return this.fetch<void>(`/estimate-visits/${id}/`, { method: 'DELETE' });
+  }
+
+  async uploadEstimateVisitPhoto(visitId: number, image: File, caption?: string): Promise<EstimateVisitPhoto> {
+    const formData = new FormData();
+    formData.append('image', image);
+    if (caption) formData.append('caption', caption);
+    return this.fetch<EstimateVisitPhoto>(`/estimate-visits/${visitId}/upload_photo/`, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  async deleteEstimateVisitPhoto(visitId: number, photoId: number): Promise<void> {
+    return this.fetch<void>(`/estimate-visits/${visitId}/photos/${photoId}/`, { method: 'DELETE' });
+  }
+
+  // ============ Appointments ============
+
+  async getAppointments(dealId: number): Promise<Appointment[]> {
+    return this.fetch<Appointment[]>(`/deals/${dealId}/appointments/`);
+  }
+
+  async createAppointment(data: AppointmentCreate): Promise<Appointment> {
+    return this.fetch<Appointment>(`/deals/${data.deal}/appointments/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async createAppointmentDirect(data: AppointmentCreate): Promise<Appointment> {
+    return this.fetch<Appointment>('/appointments/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAppointment(id: number, data: Partial<AppointmentCreate>): Promise<Appointment> {
+    return this.fetch<Appointment>(`/appointments/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAppointment(id: number): Promise<void> {
+    return this.fetch<void>(`/appointments/${id}/`, { method: 'DELETE' });
+  }
+
+  async getDealsForCustomer(customerId: number): Promise<Deal[]> {
+    const all = await this.getDeals();
+    return all.filter((d) => d.customer === customerId);
+  }
+
+  async getDealQuotes(dealId: number): Promise<QuoteListItem[]> {
+    const all = await this.getQuotes();
+    return all.filter((q) => q.deal === dealId);
+  }
+
+  async getDealInvoices(dealId: number): Promise<InvoiceListItem[]> {
+    const all = await this.getInvoices();
+    return all.filter((i) => i.deal === dealId);
+  }
+
+  // ============================================================
+  // Projects API
+  // ============================================================
+
+  async getProjects(filters?: {
+    status?: ProjectStatus;
+    location?: ProjectLocation;
+    job_type?: ServiceTypeSlug;
+    is_featured?: boolean;
+  }): Promise<ProjectListItem[]> {
+    const params = new URLSearchParams();
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.location) params.set('location', filters.location);
+    if (filters?.job_type) params.set('job_type', filters.job_type);
+    if (filters?.is_featured !== undefined) params.set('is_featured', String(filters.is_featured));
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.fetch<ProjectListItem[]>(`/projects/${query}`);
+  }
+
+  async getProject(id: number): Promise<Project> {
+    return this.fetch<Project>(`/projects/${id}/`);
+  }
+
+  async createProject(data: ProjectCreate): Promise<Project> {
+    return this.fetch<Project>('/projects/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateProject(id: number, data: Partial<ProjectCreate>): Promise<Project> {
+    return this.fetch<Project>(`/projects/${id}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    await this.fetch<void>(`/projects/${id}/`, { method: 'DELETE' });
+  }
+
+  async getPhases(projectId: number): Promise<Phase[]> {
+    return this.fetch<Phase[]>(`/projects/${projectId}/phases/`);
+  }
+
+  async createPhase(projectId: number, data: PhaseCreate): Promise<Phase> {
+    return this.fetch<Phase>(`/projects/${projectId}/phases/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePhase(projectId: number, phaseId: number, data: Partial<PhaseCreate>): Promise<Phase> {
+    return this.fetch<Phase>(`/projects/${projectId}/phases/${phaseId}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePhase(projectId: number, phaseId: number): Promise<void> {
+    await this.fetch<void>(`/projects/${projectId}/phases/${phaseId}/`, { method: 'DELETE' });
+  }
+
+  async reorderPhases(projectId: number, items: { id: number; order: number }[]): Promise<Phase[]> {
+    return this.fetch<Phase[]>(`/projects/${projectId}/phases/reorder/`, {
+      method: 'POST',
+      body: JSON.stringify(items),
+    });
+  }
+
+  async getPhaseMedia(projectId: number, phaseId: number): Promise<ProjectMedia[]> {
+    return this.fetch<ProjectMedia[]>(`/projects/${projectId}/phases/${phaseId}/media/`);
+  }
+
+  async uploadMedia(projectId: number, phaseId: number, file: File, altText?: string): Promise<ProjectMedia> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (altText) formData.append('alt_text', altText);
+    return this.fetch<ProjectMedia>(`/projects/${projectId}/phases/${phaseId}/media/`, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
+  async deleteMedia(projectId: number, phaseId: number, mediaId: number): Promise<void> {
+    await this.fetch<void>(`/projects/${projectId}/phases/${phaseId}/media/${mediaId}/`, { method: 'DELETE' });
+  }
+
+  async reorderMedia(projectId: number, phaseId: number, items: { id: number; order: number }[]): Promise<ProjectMedia[]> {
+    return this.fetch<ProjectMedia[]>(`/projects/${projectId}/phases/${phaseId}/media/reorder/`, {
+      method: 'POST',
+      body: JSON.stringify(items),
+    });
+  }
+
+  async getHomepageSlots(location: ProjectLocation): Promise<HomepageSlot[]> {
+    return this.fetch<HomepageSlot[]>(`/projects/homepage-slots/${location}/`);
+  }
+
+  async updateHomepageSlot(location: ProjectLocation, data: HomepageSlotUpdate): Promise<HomepageSlot> {
+    return this.fetch<HomepageSlot>(`/projects/homepage-slots/${location}/`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getServicePins(location: ProjectLocation, serviceSlug: ServiceTypeSlug): Promise<ServicePin[]> {
+    return this.fetch<ServicePin[]>(`/projects/service-pins/${location}/${serviceSlug}/`);
+  }
+
+  async updateServicePins(location: ProjectLocation, serviceSlug: ServiceTypeSlug, pins: ServicePinItem[]): Promise<ServicePin[]> {
+    return this.fetch<ServicePin[]>(`/projects/service-pins/${location}/${serviceSlug}/`, {
+      method: 'PUT',
+      body: JSON.stringify(pins),
+    });
+  }
+
+  async getPublicHomepage(location: ProjectLocation): Promise<HomepageSlot[]> {
+    return this.fetch<HomepageSlot[]>(`/projects/public/homepage/${location}/`);
+  }
+
+  async getPublicServiceProjects(location: ProjectLocation, serviceSlug: string): Promise<ProjectListItem[]> {
+    return this.fetch<ProjectListItem[]>(`/projects/public/service/${location}/${serviceSlug}/`);
   }
 }
 

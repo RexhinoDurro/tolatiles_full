@@ -329,8 +329,27 @@
 
         .status-draft { background: #fef3c7; color: #92400e; }
         .status-sent { background: #dbeafe; color: #1e40af; }
+        .status-partial { background: #e0f2fe; color: #0369a1; }
         .status-paid { background: #d1fae5; color: #065f46; }
         .status-overdue { background: #fee2e2; color: #991b1b; }
+
+        .installment-heading {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: #f0fdf4;
+            border-left: 3px solid #059669;
+        }
+
+        .installment-meta {
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 6px;
+            padding-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -393,9 +412,19 @@
         </div>
     </div>
 
-    <!-- Line Items Table -->
+    <!-- Installments / Line Items -->
     <div class="line-items">
         <h2 class="section-heading">Invoice Details</h2>
+        {% for installment in installments %}
+        {% if installments|length > 1 %}
+        <div class="installment-heading">
+            {{ installment.title }}
+            {% if installment.status == 'paid' %}&nbsp;&#10003; Paid{% endif %}
+        </div>
+        {% if installment.due_date %}
+        <div class="installment-meta">Due: {{ installment.due_date|date:"F d, Y" }}{% if installment.paid_date %} &mdash; Paid: {{ installment.paid_date|date:"F d, Y" }}{% endif %}</div>
+        {% endif %}
+        {% endif %}
         <table>
             <thead>
                 <tr>
@@ -406,7 +435,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in line_items %}
+                {% for item in installment.line_items.all %}
                 <tr>
                     <td>
                         <div class="item-name">{{ item.name }}</div>
@@ -421,6 +450,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endfor %}
     </div>
 
     <!-- Totals Section -->

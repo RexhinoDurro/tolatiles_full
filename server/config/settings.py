@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'integrations',
     'notifications',
     'blog',
+    'projects',
 ]
 
 MIDDLEWARE = [
@@ -96,18 +97,26 @@ ASGI_APPLICATION = 'config.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# Use SQLite for local development, PostgreSQL for production
-if os.environ.get('USE_POSTGRES', 'False') == 'True':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'tolatiles_db'),
-            'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
+# Parse DATABASE_URL if available, otherwise fall back to SQLite
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Parse postgres://user:password@host:port/dbname
+    import re
+    match = re.match(r'postgres://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)', DATABASE_URL)
+    if match:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'USER': match.group(1),
+                'PASSWORD': match.group(2),
+                'HOST': match.group(3),
+                'PORT': match.group(4),
+                'NAME': match.group(5),
+            }
         }
-    }
+    else:
+        raise ValueError(f"Invalid DATABASE_URL format: {DATABASE_URL}")
 else:
     DATABASES = {
         'default': {
@@ -310,5 +319,9 @@ VAPID_CLAIMS_EMAIL = os.environ.get('VAPID_CLAIMS_EMAIL', 'menitola@tolatiles.co
 
 
 # Gemini AI Configuration
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyAjUNaAV8QVUz9FgVCpdeacJY3QVl_sirQ')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 GEMINI_IMAGE_API_KEY = os.environ.get('GEMINI_IMAGE_API_KEY', '')
+
+
+# Cloudflare Turnstile
+CLOUDFLARE_TURNSTILE_SECRET_KEY = os.environ.get('CLOUDFLARE_TURNSTILE_SECRET_KEY', '')

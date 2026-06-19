@@ -34,6 +34,12 @@ class BlogPost(models.Model):
         ('scheduled', 'Scheduled'),
     ]
 
+    LOCATION_CHOICES = [
+        ('florida', 'Florida'),
+        ('jacksonville', 'Jacksonville'),
+        ('st-augustine', 'St. Augustine'),
+    ]
+
     # Core content
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
@@ -97,6 +103,14 @@ class BlogPost(models.Model):
         BlogCategory,
         related_name='posts',
         blank=True
+    )
+
+    # Location targeting
+    location = models.CharField(
+        max_length=20,
+        choices=LOCATION_CHOICES,
+        default='florida',
+        help_text='Target location for this blog post'
     )
 
     # Publishing

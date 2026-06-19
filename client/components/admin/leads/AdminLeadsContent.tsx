@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { RefreshCw, AlertCircle, Plus, Loader2, Link2 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import CrmLayout from '@/components/admin/crm/CrmLayout';
 import LeadsTabs, { type LeadTabType } from './LeadsTabs';
 import WebsiteLeadsTable from './WebsiteLeadsTable';
 import LocalAdsLeadsTable from './LocalAdsLeadsTable';
@@ -15,6 +16,7 @@ import Pagination from './Pagination';
 import { WebsiteLeadsFilters, LocalAdsLeadsFilters, type WebsiteLeadsFiltersState, type LocalAdsLeadsFiltersState } from './LeadsFilters';
 import { api } from '@/lib/api';
 import type { ContactLead, LeadStatus, LocalAdsLead, LocalAdsLeadStatus, LocalAdsLeadsResponse, WebsiteLeadCreate, LocalAdsLeadCreate } from '@/types/api';
+import type { WebsiteLeadFilterStatus } from './LeadsFilters';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -58,7 +60,7 @@ interface TabCache {
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-export default function AdminLeadsContent() {
+export default function AdminLeadsContent({ crmMode }: { crmMode?: boolean } = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,7 +75,7 @@ export default function AdminLeadsContent() {
   // Website leads state
   const [websiteLeads, setWebsiteLeads] = useState<ContactLead[]>([]);
   const [websiteFilters, setWebsiteFilters] = useState<WebsiteLeadsFiltersState>({
-    status: (searchParams.get('status') as LeadStatus) || 'all',
+    status: (searchParams.get('status') as WebsiteLeadFilterStatus) || 'all',
   });
   const [websiteLoading, setWebsiteLoading] = useState(true);
   const [websiteError, setWebsiteError] = useState<string | null>(null);
@@ -276,7 +278,7 @@ export default function AdminLeadsContent() {
   };
 
   // Website lead handlers
-  const handleWebsiteLeadUpdate = async (id: number, data: { status?: LeadStatus; notes?: string }) => {
+  const handleWebsiteLeadUpdate = async (id: number, data: Partial<import('@/types/api').ContactLead>) => {
     await api.updateLead(id, data);
 
     setWebsiteLeads((prev) =>
@@ -357,20 +359,23 @@ export default function AdminLeadsContent() {
   };
 
   // Filter website leads
-  const filteredWebsiteLeads =
-    websiteFilters.status === 'all'
-      ? websiteLeads
-      : websiteLeads.filter((lead) => lead.status === websiteFilters.status);
+  const filteredWebsiteLeads = (() => {
+    const s = websiteFilters.status;
+    if (s === 'all') return websiteLeads;
+    if (s === 'contacted_group') return websiteLeads.filter((l) => l.status === 'contacted' || l.status === 'failed_contact');
+    if (s === 'qualified_group') return websiteLeads.filter((l) => l.status === 'qualified' || l.status === 'failed_qualified');
+    return websiteLeads.filter((l) => l.status === s);
+  })();
 
   // Get status counts for website leads
   const getWebsiteStatusCounts = () => {
-    const counts: Record<LeadStatus | 'all', number> = {
+    const counts: Record<string, number> = {
       all: websiteLeads.length,
       new: 0,
       contacted: 0,
+      failed_contact: 0,
       qualified: 0,
-      converted: 0,
-      closed: 0,
+      failed_qualified: 0,
     };
 
     websiteLeads.forEach((lead) => {
@@ -387,8 +392,10 @@ export default function AdminLeadsContent() {
     ? Math.ceil(localAdsData.count / DEFAULT_PAGE_SIZE)
     : 1;
 
+  const Layout = crmMode ? CrmLayout : AdminLayout;
+
   return (
-    <AdminLayout title="Leads Management">
+    <Layout title="Leads Management">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -628,6 +635,12 @@ export default function AdminLeadsContent() {
         isOpen={!!selectedWebsiteLead}
         onClose={() => setSelectedWebsiteLead(null)}
         onUpdate={handleWebsiteLeadUpdate}
+        onConverted={(customerId) => {
+          if (selectedWebsiteLead) {
+            handleWebsiteLeadUpdate(selectedWebsiteLead.id, { status: 'converted' });
+          }
+          setSelectedWebsiteLead(null);
+        }}
       />
 
       {/* Delete Confirmation Modal */}
@@ -655,6 +668,6 @@ export default function AdminLeadsContent() {
         onSubmit={handleCreateLead}
         type={activeTab}
       />
-    </AdminLayout>
+    </Layout>
   );
 }

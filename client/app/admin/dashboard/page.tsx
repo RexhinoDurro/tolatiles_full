@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Image as ImageIcon, Users, TrendingUp, TrendingDown, Clock, ArrowRight, Loader2, MousePointer, Eye, BarChart3 } from 'lucide-react';
+import { Image as ImageIcon, Users, TrendingUp, TrendingDown, Clock, ArrowRight, Loader2, MousePointer, Eye, BarChart3, CalendarDays } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ScheduleFeed from '@/components/admin/crm/ScheduleFeed';
 import { api, SearchConsolePerformance } from '@/lib/api';
 import type { ContactLead, Category } from '@/types/api';
 
@@ -144,6 +145,23 @@ export default function AdminDashboardPage() {
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6">
+          {/* Schedule Feed */}
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900">Today's Schedule</h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+              <Link href="/admin/crm/calendar" className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700">
+                <CalendarDays className="w-4 h-4" />
+                Calendar
+              </Link>
+            </div>
+            <ScheduleFeed compact />
+          </div>
+
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {statCards.map((stat) => {

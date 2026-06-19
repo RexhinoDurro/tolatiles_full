@@ -32,6 +32,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAdminUser()]
 
+    def get_authenticators(self):
+        action = getattr(self, 'action', None)
+        if action in ['list', 'retrieve']:
+            return []  # No auth for public actions — prevents 401 on expired tokens
+        return super().get_authenticators()
+
 
 class GalleryImageViewSet(viewsets.ModelViewSet):
     """ViewSet for gallery images."""
@@ -50,6 +56,12 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]
         return [IsAdminUser()]
+
+    def get_authenticators(self):
+        action = getattr(self, 'action', None)
+        if action in ['list', 'retrieve', 'all_images']:
+            return []  # No auth for public actions — prevents 401 on expired tokens
+        return super().get_authenticators()
 
     def get_queryset(self):
         queryset = GalleryImage.objects.all()

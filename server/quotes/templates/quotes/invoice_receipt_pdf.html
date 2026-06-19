@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt — {{ invoice.reference }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: letter; margin: 0.75in; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #333; line-height: 1.5; }
+
+        .receipt-stamp {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-stamp .word {
+            font-size: 28pt;
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border: 3px solid;
+            display: inline-block;
+            padding: 4px 20px;
+        }
+        .stamp-paid { color: #059669; border-color: #059669; }
+        .stamp-partial { color: #0369a1; border-color: #0369a1; }
+
+        .header { display: flex; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #059669; }
+        .header-left { flex: 1; }
+        .logo { max-width: 140px; max-height: 55px; margin-bottom: 8px; }
+        .doc-title { font-size: 20pt; font-weight: 700; color: #1e3a5f; }
+        .header-right { text-align: right; }
+        .ref-label { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ref-value { font-size: 11pt; font-weight: 600; }
+
+        .parties { display: flex; justify-content: space-between; margin-bottom: 24px; gap: 30px; }
+        .party { flex: 1; }
+        .party-label { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
+        .party-name { font-size: 12pt; font-weight: 600; color: #1e3a5f; }
+        .party-detail { font-size: 9pt; color: #444; }
+
+        .section-heading { font-size: 11pt; font-weight: 600; color: #1e3a5f; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+
+        .installment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+        }
+        .inst-paid { background: #f0fdf4; border: 1px solid #a7f3d0; }
+        .inst-pending { background: #fafafa; border: 1px solid #e5e7eb; }
+        .inst-title { font-weight: 600; color: #1e3a5f; }
+        .inst-meta { font-size: 9pt; color: #555; }
+        .inst-amount { font-family: 'Courier New', monospace; font-size: 11pt; font-weight: 600; }
+        .inst-amount-paid { color: #065f46; }
+        .inst-amount-pending { color: #999; }
+        .inst-badge { font-size: 8pt; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 10px; }
+        .badge-paid { background: #d1fae5; color: #065f46; }
+        .badge-pending { background: #e5e7eb; color: #555; }
+
+        table { width: 100%; border-collapse: collapse; }
+        .totals-table { width: 280px; margin-left: auto; margin-top: 16px; }
+        .totals-table td { padding: 7px 8px; border: none; }
+        .totals-table .label { text-align: right; color: #555; }
+        .totals-table .value { text-align: right; font-family: 'Courier New', monospace; }
+        .totals-table .paid-row { border-top: 2px solid #059669; }
+        .totals-table .paid-row td { padding-top: 10px; font-size: 13pt; font-weight: 700; color: #065f46; }
+        .totals-table .balance-row td { font-size: 11pt; font-weight: 600; }
+        .totals-table .balance-row .label, .totals-table .balance-row .value { color: #b45309; }
+
+        .footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 9pt; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-stamp">
+        {% if invoice.status == 'paid' %}
+        <span class="word stamp-paid">Paid Receipt</span>
+        {% else %}
+        <span class="word stamp-partial">Partially Paid</span>
+        {% endif %}
+    </div>
+
+    <div class="header">
+        <div class="header-left">
+            {% if company.company_logo %}<img src="{{ company.company_logo.path }}" alt="{{ company.company_name }}" class="logo">{% endif %}
+            <div class="doc-title">{{ invoice.title }}</div>
+        </div>
+        <div class="header-right">
+            <div class="ref-label">Invoice #</div>
+            <div class="ref-value">{{ invoice.reference }}</div>
+            <div style="margin-top:8px">
+                <div class="ref-label">Invoice Date</div>
+                <div class="ref-value">{{ invoice.created_at|date:"F d, Y" }}</div>
+            </div>
+            {% if invoice.paid_at %}
+            <div style="margin-top:8px">
+                <div class="ref-label">Paid On</div>
+                <div class="ref-value">{{ invoice.paid_at|date:"F d, Y" }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="parties">
+        <div class="party">
+            <div class="party-label">Received From</div>
+            <div class="party-name">{{ invoice.customer.name }}</div>
+            {% if invoice.customer.address %}<div class="party-detail">{{ invoice.customer.address }}</div>{% endif %}
+            {% if invoice.customer.email %}<div class="party-detail">{{ invoice.customer.email }}</div>{% endif %}
+        </div>
+        <div class="party">
+            <div class="party-label">Received By</div>
+            <div class="party-name">{{ company.company_name }}</div>
+            <div class="party-detail">{{ company.sender_name }}</div>
+            <div class="party-detail">{{ company.email }}</div>
+        </div>
+    </div>
+
+    <h2 class="section-heading">Payment Schedule</h2>
+    {% for installment in installments %}
+    <div class="installment-row {% if installment.status == 'paid' %}inst-paid{% else %}inst-pending{% endif %}">
+        <div>
+            <div class="inst-title">{{ installment.title }}</div>
+            <div class="inst-meta">
+                {% if installment.due_date %}Due: {{ installment.due_date|date:"M d, Y" }}{% endif %}
+                {% if installment.paid_date %} &mdash; Paid: {{ installment.paid_date|date:"M d, Y" }}{% endif %}
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="inst-amount {% if installment.status == 'paid' %}inst-amount-paid{% else %}inst-amount-pending{% endif %}">${{ installment.total|floatformat:2 }}</span>
+            <span class="inst-badge {% if installment.status == 'paid' %}badge-paid{% else %}badge-pending{% endif %}">{{ installment.get_status_display }}</span>
+        </div>
+    </div>
+    {% endfor %}
+
+    <table class="totals-table">
+        <tr>
+            <td class="label">Invoice Total</td>
+            <td class="value">${{ invoice.total|floatformat:2 }}</td>
+        </tr>
+        {% if invoice.amount_paid > 0 %}
+        <tr class="paid-row">
+            <td class="label">Amount Paid</td>
+            <td class="value">${{ invoice.amount_paid|floatformat:2 }}</td>
+        </tr>
+        {% endif %}
+        {% if invoice.balance_due > 0 %}
+        <tr class="balance-row">
+            <td class="label">Balance Due</td>
+            <td class="value">${{ invoice.balance_due|floatformat:2 }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    {% if invoice.payment_terms %}
+    <div style="margin-top:20px;padding:14px;background:#f8fafc;border-radius:6px">
+        <div style="font-size:10pt;font-weight:600;color:#1e3a5f;margin-bottom:6px">Payment Information</div>
+        <div style="font-size:9pt;color:#444;white-space:pre-wrap">{{ invoice.payment_terms }}</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        {{ company.company_name }} &bull; {{ company.email }}{% if company.phone %} &bull; {{ company.phone }}{% endif %}
+    </div>
+</body>
+</html>

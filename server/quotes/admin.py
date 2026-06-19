@@ -2,7 +2,7 @@
 Django Admin configuration for the Quote Generator and Invoice system.
 """
 from django.contrib import admin
-from .models import CompanySettings, Customer, Quote, LineItem, Invoice, InvoiceLineItem
+from .models import CompanySettings, Customer, Quote, LineItem, Invoice, InvoiceInstallment, InvoiceLineItem
 
 
 @admin.register(CompanySettings)
@@ -125,10 +125,18 @@ class QuoteAdmin(admin.ModelAdmin):
 
 
 class InvoiceLineItemInline(admin.TabularInline):
-    """Inline editor for invoice line items."""
+    """Inline editor for installment line items."""
     model = InvoiceLineItem
     extra = 1
     fields = ['name', 'description', 'quantity', 'unit_price', 'order']
+    ordering = ['order', 'id']
+
+
+class InvoiceInstallmentInline(admin.TabularInline):
+    """Inline editor for invoice installments."""
+    model = InvoiceInstallment
+    extra = 0
+    fields = ['title', 'order', 'start_date', 'due_date', 'paid_date', 'status']
     ordering = ['order', 'id']
 
 
@@ -147,7 +155,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     ]
     date_hierarchy = 'created_at'
     list_editable = ['status']
-    inlines = [InvoiceLineItemInline]
+    inlines = [InvoiceInstallmentInline]
     ordering = ['-created_at']
 
     fieldsets = (

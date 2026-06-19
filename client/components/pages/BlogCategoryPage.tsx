@@ -7,12 +7,24 @@ import type { BlogCategory, BlogPostListItem } from '@/types/api';
 
 const PHONE_NUMBER = '(904) 866-1738';
 
+const ctaDescriptions: Record<string, string> = {
+  jacksonville:
+    'Contact Tola Tiles today for a free estimate. We serve all of Jacksonville and Duval County, from Riverside and San Marco to Mandarin, Southside, and the Beaches.',
+  'st-augustine':
+    'Contact Tola Tiles today for a free estimate. We serve all of St. Augustine and St. Johns County, including the Historic District, Vilano Beach, Anastasia Island, Nocatee, and World Golf Village.',
+  florida:
+    'Contact Tola Tiles today for a free estimate. We serve Jacksonville, St. Augustine, Ponte Vedra, Palm Coast, and the greater Northeast Florida area.',
+};
+
 interface BlogCategoryPageProps {
   category: BlogCategory;
   posts: BlogPostListItem[];
+  location?: string;
 }
 
-export default function BlogCategoryPage({ category, posts }: BlogCategoryPageProps) {
+export default function BlogCategoryPage({ category, posts, location = 'florida' }: BlogCategoryPageProps) {
+  const ctaDescription = ctaDescriptions[location] || ctaDescriptions.florida;
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -30,11 +42,11 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
           <div className="max-w-3xl mx-auto">
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-blue-200 text-sm mb-6">
-              <Link href="/" className="hover:text-white">
+              <Link href={`/${location}`} className="hover:text-white">
                 Home
               </Link>
               <span>/</span>
-              <Link href="/blog" className="hover:text-white">
+              <Link href={`/${location}/blog`} className="hover:text-white">
                 Blog
               </Link>
               <span>/</span>
@@ -63,7 +75,7 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
           {posts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-4">No articles in this category yet</p>
-              <Link href="/blog" className="text-blue-600 hover:underline">
+              <Link href={`/${location}/blog`} className="text-blue-600 hover:underline">
                 Browse all articles
               </Link>
             </div>
@@ -74,7 +86,7 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow group"
                 >
-                  <Link href={`/blog/${post.slug}`}>
+                  <Link href={`/${location}/blog/${post.slug}`}>
                     <div className="relative aspect-video overflow-hidden bg-gray-100">
                       {post.featured_image ? (
                         <Image
@@ -131,7 +143,7 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
       {/* Back to Blog */}
       <div className="container mx-auto px-4 py-8">
         <Link
-          href="/blog"
+          href={`/${location}/blog`}
           className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -144,8 +156,7 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Your Tile Project?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Contact Tola Tiles today for a free estimate. We serve St. Augustine, Jacksonville,
-            and the surrounding North Florida area.
+            {ctaDescription}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
@@ -156,7 +167,7 @@ export default function BlogCategoryPage({ category, posts }: BlogCategoryPagePr
               {PHONE_NUMBER}
             </a>
             <Link
-              href="/contact"
+              href={`/${location}/contact`}
               className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
             >
               Get Free Estimate

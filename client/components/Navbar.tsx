@@ -14,53 +14,28 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Determine current location based on pathname
+  // Determine current location based on pathname (location is now the first segment)
   const currentLocation: LocationType = useMemo(() => {
-    if (pathname.startsWith('/st-augustine') || pathname.includes('-st-augustine')) {
-      return 'st-augustine';
-    }
-    if (pathname.startsWith('/jacksonville') || pathname.includes('-jacksonville')) {
-      return 'jacksonville';
-    }
+    const firstSegment = pathname.split('/')[1];
+    if (firstSegment === 'st-augustine') return 'st-augustine';
+    if (firstSegment === 'jacksonville') return 'jacksonville';
     return 'florida';
   }, [pathname]);
 
-  // Get home link based on location
-  const homeLink = currentLocation === 'st-augustine' ? '/st-augustine' : currentLocation === 'jacksonville' ? '/jacksonville' : '/';
+  // Get home link based on location (all locations now have explicit paths)
+  const homeLink = `/${currentLocation}`;
 
-  // Get service categories based on location
+  // Get service categories based on location (now using location-prefixed URLs)
   const serviceCategories = useMemo(() => {
-    if (currentLocation === 'st-augustine') {
-      return [
-        { id: 'all', label: 'All Services', href: '/st-augustine' },
-        { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-st-augustine' },
-        { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-st-augustine' },
-        { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-st-augustine' },
-        { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-st-augustine' },
-        { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-st-augustine' },
-        { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-st-augustine' },
-      ];
-    }
-    if (currentLocation === 'jacksonville') {
-      return [
-        { id: 'all', label: 'All Services', href: '/jacksonville' },
-        { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash-jacksonville' },
-        { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile-jacksonville' },
-        { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile-jacksonville' },
-        { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile-jacksonville' },
-        { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile-jacksonville' },
-        { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile-jacksonville' },
-      ];
-    }
-    // Default Florida
+    const loc = currentLocation;
     return [
-      { id: 'all', label: 'All Services', href: '/services' },
-      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: '/services/kitchen-backsplash' },
-      { id: 'bathroom', label: 'Bathroom Tile', href: '/services/bathroom-tile' },
-      { id: 'flooring', label: 'Floor Tiling', href: '/services/floor-tile' },
-      { id: 'patio', label: 'Patio & Outdoor', href: '/services/patio-tile' },
-      { id: 'fireplace', label: 'Fireplace Tile', href: '/services/fireplace-tile' },
-      { id: 'shower', label: 'Shower Installation', href: '/services/shower-tile' },
+      { id: 'all', label: 'All Services', href: `/${loc}/services` },
+      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `/${loc}/services/kitchen-backsplash` },
+      { id: 'bathroom', label: 'Bathroom Tile', href: `/${loc}/services/bathroom-tile` },
+      { id: 'flooring', label: 'Floor Tiling', href: `/${loc}/services/floor-tile` },
+      { id: 'patio', label: 'Patio & Outdoor', href: `/${loc}/services/patio-tile` },
+      { id: 'fireplace', label: 'Fireplace Tile', href: `/${loc}/services/fireplace-tile` },
+      { id: 'shower', label: 'Shower Installation', href: `/${loc}/services/shower-tile` },
     ];
   }, [currentLocation]);
 
@@ -89,19 +64,21 @@ const Navbar = () => {
   }, [pathname]);
 
   const navigationItems = [
-    { id: '/', label: 'Home', href: homeLink },
-    { id: '/services', label: 'Services', href: '/services', hasDropdown: true },
-    { id: '/gallery', label: 'Gallery', href: '/gallery' },
-    { id: '/about', label: 'About', href: '/about' },
-    { id: '/blog', label: 'Blog', href: '/blog' },
-    { id: '/faqs', label: 'FAQs', href: '/faqs' },
-    { id: '/contact', label: 'Contact Us', href: '/contact' },
+    { id: 'home', label: 'Home', href: `/${currentLocation}` },
+    { id: 'services', label: 'Services', href: `/${currentLocation}/services`, hasDropdown: true },
+    { id: 'gallery', label: 'Gallery', href: `/${currentLocation}/gallery` },
+    { id: 'about', label: 'About', href: `/${currentLocation}/about` },
+    { id: 'blog', label: 'Blog', href: `/${currentLocation}/blog` },
+    { id: 'faqs', label: 'FAQs', href: `/${currentLocation}/faqs` },
+    { id: 'contact', label: 'Contact Us', href: `/${currentLocation}/contact` },
   ];
 
   const isActiveRoute = (href: string) => {
-    if (href === '/' || href === '/jacksonville' || href === '/st-augustine') {
-      return pathname === href || pathname === '/';
+    // For home links, exact match
+    if (href === `/${currentLocation}`) {
+      return pathname === href;
     }
+    // For other pages, check if pathname starts with the href
     return pathname.startsWith(href);
   };
 
@@ -183,28 +160,36 @@ const Navbar = () => {
               ))}
             </nav>
 
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`md:hidden transition-all duration-300 p-2 rounded-lg relative z-50 ${
-                isScrolled
-                  ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                  : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
-              }`}
-              aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={isMobileMenuOpen}
-            >
-              <div className="relative w-6 h-6">
-                <span
-                  className={`absolute top-1 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 top-3' : ''}`}
-                ></span>
-                <span
-                  className={`absolute top-3 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
-                ></span>
-                <span
-                  className={`absolute top-5 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 top-3' : ''}`}
-                ></span>
-              </div>
-            </button>
+            <div className="md:hidden flex items-center gap-2">
+              <Link
+                href={`/${currentLocation}/contact`}
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors"
+              >
+                Contact
+              </Link>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`transition-all duration-300 p-2 rounded-lg relative z-50 ${
+                  isScrolled
+                    ? 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                    : 'text-white hover:text-blue-300 hover:bg-white/10 drop-shadow-md'
+                }`}
+                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+              >
+                <div className="relative w-6 h-6">
+                  <span
+                    className={`absolute top-1 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 top-3' : ''}`}
+                  ></span>
+                  <span
+                    className={`absolute top-3 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
+                  ></span>
+                  <span
+                    className={`absolute top-5 left-0 w-6 h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 top-3' : ''}`}
+                  ></span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </header>

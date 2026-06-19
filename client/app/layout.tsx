@@ -150,28 +150,38 @@ const siteNavigationSchema = {
     },
     {
       '@type': 'SiteNavigationElement',
+      name: 'Jacksonville',
+      url: 'https://tolatiles.com/jacksonville',
+    },
+    {
+      '@type': 'SiteNavigationElement',
+      name: 'St. Augustine',
+      url: 'https://tolatiles.com/st-augustine',
+    },
+    {
+      '@type': 'SiteNavigationElement',
       name: 'Services',
-      url: 'https://tolatiles.com/services',
+      url: 'https://tolatiles.com/florida/services',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'Gallery',
-      url: 'https://tolatiles.com/gallery',
+      url: 'https://tolatiles.com/florida/gallery',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'About',
-      url: 'https://tolatiles.com/about',
+      url: 'https://tolatiles.com/florida/about',
     },
     {
       '@type': 'SiteNavigationElement',
-      name: 'FAQs',
-      url: 'https://tolatiles.com/faqs',
+      name: 'Blog',
+      url: 'https://tolatiles.com/florida/blog',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'Contact',
-      url: 'https://tolatiles.com/contact',
+      url: 'https://tolatiles.com/florida/contact',
     },
   ],
 };

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { X, Phone, MessageSquare, MapPin, Briefcase, Clock, DollarSign, Calendar } from 'lucide-react';
 import LocalAdsStatusBadge from './LocalAdsStatusBadge';
+import PhoneCopy from './PhoneCopy';
 import type { LocalAdsLead, LocalAdsLeadStatus } from '@/types/api';
 
 interface LocalAdsDetailDrawerProps {
@@ -140,12 +141,7 @@ export default function LocalAdsDetailDrawer({
                     <Phone className="w-5 h-5 text-gray-400" />
                     <div>
                       <p className="text-xs text-gray-500">Phone Number</p>
-                      <a
-                        href={`tel:${lead.customer_phone}`}
-                        className="text-sm font-medium text-blue-600 hover:underline"
-                      >
-                        {lead.customer_phone}
-                      </a>
+                      <PhoneCopy phone={lead.customer_phone} />
                     </div>
                   </div>
                   {lead.customer_name && (

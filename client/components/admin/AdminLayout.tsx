@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Image as ImageIcon, Users, FileText, Receipt, UserCircle, BarChart3, Settings, PenSquare } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, BarChart3, Settings, PenSquare, Briefcase, FolderKanban } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import ProtectedRoute from './ProtectedRoute';
@@ -16,11 +16,9 @@ interface AdminLayoutProps {
 const bottomNavItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Gallery', href: '/admin/gallery', icon: ImageIcon },
-  { name: 'Leads', href: '/admin/leads', icon: Users },
+  { name: 'CRM', href: '/admin/crm', icon: Briefcase },
   { name: 'Blog', href: '/admin/blog', icon: PenSquare },
-  { name: 'Quotes', href: '/admin/quotes', icon: FileText },
-  { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
-  { name: 'Customers', href: '/admin/customers', icon: UserCircle },
+  { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
   { name: 'Stats', href: '/admin/stats', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

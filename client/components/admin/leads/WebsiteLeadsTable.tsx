@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Eye, Trash2, ChevronUp, ChevronDown, MoreVertical } from 'lucide-react';
 import LeadStatusBadge from './LeadStatusBadge';
+import { displayPhoneNumber } from '@/lib/phoneUtils';
 import type { ContactLead } from '@/types/api';
 
 interface WebsiteLeadsTableProps {
@@ -140,7 +141,7 @@ export default function WebsiteLeadsTable({ leads, onView, onDelete }: WebsiteLe
               >
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-900">{lead.full_name}</div>
-                  {lead.phone && <div className="text-sm text-gray-500">{lead.phone}</div>}
+                  {lead.phone && <div className="text-sm text-gray-500">{displayPhoneNumber(lead.phone)}</div>}
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-gray-600">{lead.email}</div>

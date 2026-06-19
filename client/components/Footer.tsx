@@ -13,49 +13,36 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const pathname = usePathname();
 
-  // Determine current location based on pathname
+  // Determine current location based on pathname (location is now the first segment)
   const currentLocation: LocationType = useMemo(() => {
-    if (pathname.startsWith('/st-augustine') || pathname.includes('-st-augustine')) {
-      return 'st-augustine';
-    }
-    if (pathname.startsWith('/jacksonville') || pathname.includes('-jacksonville')) {
-      return 'jacksonville';
-    }
+    const firstSegment = pathname.split('/')[1];
+    if (firstSegment === 'st-augustine') return 'st-augustine';
+    if (firstSegment === 'jacksonville') return 'jacksonville';
     return 'florida';
   }, [pathname]);
 
-  // Get service links based on location
+  // Get base path for current location
+  const basePath = `/${currentLocation}`;
+
+  // Get service links using new location-prefixed URLs
   const serviceLinks = useMemo(() => {
-    if (currentLocation === 'st-augustine') {
-      return {
-        all: '/st-augustine',
-        kitchenBacksplash: '/services/kitchen-backsplash-st-augustine',
-        bathroom: '/services/bathroom-tile-st-augustine',
-        floor: '/services/floor-tile-st-augustine',
-        patio: '/services/patio-tile-st-augustine',
-        fireplace: '/services/fireplace-tile-st-augustine',
-      };
-    }
-    if (currentLocation === 'jacksonville') {
-      return {
-        all: '/jacksonville',
-        kitchenBacksplash: '/services/kitchen-backsplash-jacksonville',
-        bathroom: '/services/bathroom-tile-jacksonville',
-        floor: '/services/floor-tile-jacksonville',
-        patio: '/services/patio-tile-jacksonville',
-        fireplace: '/services/fireplace-tile-jacksonville',
-      };
-    }
-    // Default Florida
     return {
-      all: '/services',
-      kitchenBacksplash: '/services/kitchen-backsplash',
-      bathroom: '/services/bathroom-tile',
-      floor: '/services/floor-tile',
-      patio: '/services/patio-tile',
-      fireplace: '/services/fireplace-tile',
+      all: `${basePath}/services`,
+      kitchenBacksplash: `${basePath}/services/kitchen-backsplash`,
+      bathroom: `${basePath}/services/bathroom-tile`,
+      floor: `${basePath}/services/floor-tile`,
+      patio: `${basePath}/services/patio-tile`,
+      fireplace: `${basePath}/services/fireplace-tile`,
+      shower: `${basePath}/services/shower-tile`,
     };
-  }, [currentLocation]);
+  }, [basePath]);
+
+  // Location display name
+  const locationName = currentLocation === 'st-augustine'
+    ? 'St Augustine'
+    : currentLocation === 'jacksonville'
+      ? 'Jacksonville'
+      : 'Florida';
 
   return (
     <footer className="bg-gray-900 text-white py-16" role="contentinfo">
@@ -74,7 +61,7 @@ const Footer = () => {
               <h2 className="text-2xl font-bold">Tola Tiles</h2>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Premium tile installation services for residential and commercial properties. Creating beautiful, lasting spaces since 2008.
+              Premium tile installation services for residential and commercial properties in {locationName}. Creating beautiful, lasting spaces since 2008.
             </p>
 
             {/* Social Media */}
@@ -106,14 +93,14 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Services */}
+          {/* Services - with location-aware links and anchor text */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Our Services</h3>
+            <h3 className="text-lg font-semibold mb-6">Our Services in {locationName}</h3>
             <nav aria-label="Services">
               <ul className="space-y-3 text-gray-300">
                 <li>
                   <Link href={serviceLinks.all} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    Tile Installation
+                    All Tile Installation Services
                   </Link>
                 </li>
                 <li>
@@ -121,7 +108,7 @@ const Footer = () => {
                     href={serviceLinks.kitchenBacksplash}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    Kitchen Backsplashes
+                    Kitchen Backsplash {locationName}
                   </Link>
                 </li>
                 <li>
@@ -129,7 +116,7 @@ const Footer = () => {
                     href={serviceLinks.bathroom}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    Bathroom Remodeling
+                    Bathroom Tile {locationName}
                   </Link>
                 </li>
                 <li>
@@ -137,7 +124,7 @@ const Footer = () => {
                     href={serviceLinks.floor}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    Floor Tiling
+                    Floor Tiling {locationName}
                   </Link>
                 </li>
                 <li>
@@ -145,7 +132,7 @@ const Footer = () => {
                     href={serviceLinks.patio}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    Outdoor Patios
+                    Outdoor Patios {locationName}
                   </Link>
                 </li>
                 <li>
@@ -153,7 +140,7 @@ const Footer = () => {
                     href={serviceLinks.fireplace}
                     className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block"
                   >
-                    Fireplace Surrounds
+                    Fireplace Surrounds {locationName}
                   </Link>
                 </li>
               </ul>
@@ -166,23 +153,28 @@ const Footer = () => {
             <nav aria-label="Quick links">
               <ul className="space-y-3 text-gray-300 mb-6">
                 <li>
-                  <Link href="/about" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    About Us
+                  <Link href={`${basePath}/about`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    About Tola Tiles {locationName}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/gallery" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    Project Gallery
+                  <Link href={`${basePath}/gallery`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    {locationName} Project Gallery
                   </Link>
                 </li>
                 <li>
-                  <Link href="/faqs" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                  <Link href={`${basePath}/blog`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    Tile Tips & Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`${basePath}/faqs`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
                     Frequently Asked Questions
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    Contact Us
+                  <Link href={`${basePath}/contact`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    Contact Us - Free Estimate
                   </Link>
                 </li>
               </ul>
@@ -199,6 +191,11 @@ const Footer = () => {
                 <li>
                   <Link href="/st-augustine" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
                     Tile Installer St Augustine FL
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/florida" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                    All Florida Services
                   </Link>
                 </li>
                 <li>
@@ -220,6 +217,7 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Contact Info</h3>
             <div className="space-y-4 text-gray-300" itemScope itemType="https://schema.org/LocalBusiness">
+              <meta itemProp="name" content={`Tola Tiles - ${locationName}`} />
               <div className="flex items-start group">
                 <Phone
                   className="h-4 w-4 mr-3 mt-1 text-blue-400 group-hover:text-blue-300 transition-colors flex-shrink-0"
@@ -228,7 +226,7 @@ const Footer = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Call us today</div>
                   <a href="tel:+1-904-866-1738" className="hover:text-white transition-colors font-medium" itemProp="telephone">
-                    +1 (904) 866-1738
+                    (904) 866-1738
                   </a>
                 </div>
               </div>
@@ -252,11 +250,11 @@ const Footer = () => {
                   aria-hidden="true"
                 />
                 <div>
-                  <div className="text-sm text-gray-400 mb-1">Where we are established</div>
+                  <div className="text-sm text-gray-400 mb-1">Serving {locationName}</div>
                   <address className="not-italic" itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
                     <span itemProp="streetAddress">445 Hutchinson Ln</span>
                     <br />
-                    <span itemProp="addressLocality">Saint Augustine</span>, <span itemProp="addressRegion">FL</span>{' '}
+                    <span itemProp="addressLocality">St Augustine</span>, <span itemProp="addressRegion">FL</span>{' '}
                     <span itemProp="postalCode">32084</span>
                   </address>
                 </div>

@@ -49,12 +49,15 @@ export interface ContactLead {
   project_type: string;
   message: string;
   status: LeadStatus;
+  contact_result_reason: ContactResultReason | '';
+  address: string;
   notes: string;
   created_at: string;
   updated_at: string;
 }
 
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'closed';
+export type LeadStatus = 'new' | 'contacted' | 'failed_contact' | 'qualified' | 'failed_qualified' | 'converted' | 'closed';
+export type ContactResultReason = 'no_answer' | 'phone_off' | 'wrong_number' | 'not_interested' | 'other';
 
 export interface ContactFormData {
   first_name: string;
@@ -63,6 +66,9 @@ export interface ContactFormData {
   phone?: string;
   project_type: string;
   message: string;
+  honeypot?: string;
+  form_fill_time?: number;
+  cf_turnstile_response?: string;
 }
 
 export interface LeadStats {
@@ -220,6 +226,8 @@ export interface Customer {
   invoice_count: number;
   created_at: string;
   updated_at: string;
+  is_archived: boolean;
+  archived_at: string | null;
 }
 
 export interface CustomerCreate {
@@ -253,8 +261,16 @@ export interface LineItemCreate {
   order?: number;
 }
 
+export type DiscountType = 'percent' | 'fixed';
+
 // Quote Types
 export type QuoteStatus = 'draft' | 'sent' | 'accepted' | 'expired';
+
+export interface PdfVersionEntry {
+  version: number;
+  file: string;
+  generated_at: string | null;
+}
 
 export interface Quote {
   id: number;
@@ -270,16 +286,20 @@ export interface Quote {
   comments_text: string;
   terms: string[];
   subtotal: number;
+  discount_type: DiscountType;
   discount_amount: number;
   discount_percent: number;
   tax_rate: number;
   tax_amount: number;
   shipping_amount: number;
   total: number;
+  payment_terms: string;
   line_items: LineItem[];
   pdf_file: string | null;
   pdf_url: string | null;
   pdf_generated_at: string | null;
+  pdf_version: number;
+  pdf_versions: PdfVersionEntry[];
   public_url: string;
   invoice_id: number | null;
 }
@@ -291,6 +311,7 @@ export interface QuoteListItem {
   customer: number;
   customer_name: string;
   customer_phone: string;
+  deal: number | null;
   status: QuoteStatus;
   total: number;
   currency: string;
@@ -303,15 +324,18 @@ export interface QuoteListItem {
 export interface QuoteCreate {
   title: string;
   customer_id: number;
+  deal_id?: number | null;
   expires_at: string;
   timeline?: string;
   currency?: 'USD' | 'EUR';
   comments_text?: string;
   terms?: string[];
+  discount_type?: DiscountType;
   discount_amount?: number;
   discount_percent?: number;
   tax_rate?: number;
   shipping_amount?: number;
+  payment_terms?: string;
   line_items: LineItemCreate[];
 }
 
@@ -323,7 +347,8 @@ export interface QuoteStats {
 }
 
 // Invoice Types
-export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue';
+export type InvoiceStatus = 'draft' | 'sent' | 'partial' | 'paid' | 'overdue';
+export type InstallmentStatus = 'pending' | 'paid' | 'overdue';
 
 export interface InvoiceLineItem {
   id?: number;
@@ -335,11 +360,45 @@ export interface InvoiceLineItem {
   line_total?: number;
 }
 
+export interface InvoiceLineItemCreate {
+  name: string;
+  description?: string;
+  quantity: number;
+  unit_price: number;
+  order?: number;
+}
+
+export interface InvoiceInstallment {
+  id: number;
+  title: string;
+  order: number;
+  start_date: string | null;
+  due_date: string | null;
+  paid_date: string | null;
+  status: InstallmentStatus;
+  notes: string;
+  total: number;
+  line_items: InvoiceLineItem[];
+  receipt_pdf_file: string | null;
+  receipt_url: string | null;
+  receipt_generated_at: string | null;
+}
+
+export interface InvoiceInstallmentCreate {
+  title?: string;
+  order?: number;
+  start_date?: string | null;
+  due_date?: string | null;
+  notes?: string;
+  line_items: InvoiceLineItemCreate[];
+}
+
 export interface Invoice {
   id: number;
   reference: string;
   title: string;
   customer: Customer;
+  deal: number | null;
   quote: number | null;
   created_at: string;
   updated_at: string;
@@ -350,17 +409,24 @@ export interface Invoice {
   notes: string;
   payment_terms: string;
   subtotal: number;
+  discount_type: DiscountType;
   discount_amount: number;
+  discount_percent: number;
   tax_rate: number;
   tax_amount: number;
   shipping_amount: number;
   total: number;
   amount_paid: number;
   balance_due: number;
-  line_items: InvoiceLineItem[];
+  installments: InvoiceInstallment[];
   pdf_file: string | null;
   pdf_url: string | null;
   pdf_generated_at: string | null;
+  pdf_version: number;
+  pdf_versions: PdfVersionEntry[];
+  receipt_pdf_file: string | null;
+  receipt_url: string | null;
+  receipt_generated_at: string | null;
   public_url: string;
 }
 
@@ -370,6 +436,7 @@ export interface InvoiceListItem {
   title: string;
   customer: number;
   customer_name: string;
+  deal: number | null;
   status: InvoiceStatus;
   total: number;
   balance_due: number;
@@ -380,14 +447,17 @@ export interface InvoiceListItem {
 export interface InvoiceCreate {
   title: string;
   customer_id: number;
+  deal_id?: number | null;
   due_date: string;
   currency?: 'USD' | 'EUR';
   notes?: string;
   payment_terms?: string;
+  discount_type?: DiscountType;
   discount_amount?: number;
+  discount_percent?: number;
   tax_rate?: number;
   shipping_amount?: number;
-  line_items: Omit<InvoiceLineItem, 'id' | 'line_total'>[];
+  installments?: InvoiceInstallmentCreate[];
 }
 
 export interface InvoiceStats {
@@ -446,6 +516,229 @@ export interface PublicInvoice {
   line_items: InvoiceLineItem[];
   company: CompanySettings;
   pdf_file: string | null;
+}
+
+// ==================== ESTIMATE TYPES ====================
+
+export type VisitStatus = 'not_scheduled' | 'scheduled' | 'in_progress' | 'completed';
+export type EstimateFinancialStatus = 'draft' | 'sent' | 'approved' | 'rejected';
+
+export interface EstimateLineItem {
+  id?: number;
+  name: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  order: number;
+  line_total?: number;
+}
+
+export interface EstimatePhoto {
+  id: number;
+  image: string;
+  image_url: string;
+  caption: string;
+  uploaded_at: string;
+}
+
+export interface Estimate {
+  id: number;
+  reference: string;
+  title: string;
+  customer: Customer;
+  scheduled_date: string | null;
+  visit_status: VisitStatus;
+  visit_notes: string;
+  job_address: string;
+  financial_status: EstimateFinancialStatus;
+  subtotal: number;
+  discount_amount: number;
+  tax_rate: number;
+  tax_amount: number;
+  total: number;
+  quote: number | null;
+  pdf_file: string | null;
+  pdf_url: string | null;
+  pdf_generated_at: string | null;
+  line_items: EstimateLineItem[];
+  photos: EstimatePhoto[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EstimateListItem {
+  id: number;
+  reference: string;
+  title: string;
+  customer: number;
+  customer_name: string;
+  customer_phone: string;
+  scheduled_date: string | null;
+  visit_status: VisitStatus;
+  financial_status: EstimateFinancialStatus;
+  total: number;
+  created_at: string;
+}
+
+export interface EstimateCreate {
+  title: string;
+  customer_id: number;
+  scheduled_date?: string | null;
+  visit_status?: VisitStatus;
+  visit_notes?: string;
+  job_address?: string;
+  financial_status?: EstimateFinancialStatus;
+  discount_amount?: number;
+  tax_rate?: number;
+  line_items: Omit<EstimateLineItem, 'id' | 'line_total'>[];
+}
+
+export interface EstimateStats {
+  total: number;
+  pending: number;
+  by_visit_status: Record<VisitStatus, number>;
+  by_financial_status: Record<EstimateFinancialStatus, number>;
+}
+
+// ==================== DEAL (PIPELINE) TYPES ====================
+
+export type DealStage =
+  | 'new_deal'
+  | 'estimate_scheduled'
+  | 'quote_sent'
+  | 'job_scheduled'
+  | 'job_completed'
+  | 'job_lost';
+
+export interface CustomJobType {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+  is_active: boolean;
+}
+
+export interface CustomLeadSource {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+  is_active: boolean;
+}
+
+export interface Deal {
+  id: number;
+  customer: number;
+  customer_name: string;
+  customer_phone: string;
+  stage: DealStage;
+  value: number | null;
+  address: string;
+  job_type: string;
+  estimated_sqft: number | null;
+  lead_source: string;
+  notes: string;
+  reason: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+  is_archived: boolean;
+  archived_at: string | null;
+  is_reviewed: boolean;
+  reviewed_at: string | null;
+}
+
+export interface DealCreate {
+  customer_id: number;
+  stage?: DealStage;
+  value?: number | null;
+  address?: string;
+  job_type?: string;
+  estimated_sqft?: number | null;
+  lead_source?: string;
+  notes?: string;
+  reason?: string;
+  order?: number;
+}
+
+// ==================== ESTIMATE VISIT TYPES ====================
+
+export interface CustomerPhoto {
+  id: number;
+  image: string;
+  image_url: string;
+  caption: string;
+  uploaded_at: string;
+}
+
+export type VisitStatusNew = 'scheduled' | 'in_progress' | 'completed';
+
+export interface EstimateVisitPhoto {
+  id: number;
+  image: string;
+  image_url: string;
+  caption: string;
+  uploaded_at: string;
+}
+
+export interface EstimateVisit {
+  id: number;
+  deal: number;
+  title: string;
+  scheduled_date: string;
+  status: VisitStatusNew;
+  notes: string;
+  photos: EstimateVisitPhoto[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EstimateVisitCreate {
+  deal: number;
+  title: string;
+  scheduled_date: string;
+  status?: VisitStatusNew;
+  notes?: string;
+}
+
+// ==================== APPOINTMENT TYPES ====================
+
+export type AppointmentType = 'consultation' | 'follow_up' | 'measurement' | 'other';
+export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled';
+
+export interface AppointmentDay {
+  id: number;
+  appointment: number;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+}
+
+export interface Appointment {
+  id: number;
+  deal: number | null;
+  title: string;
+  scheduled_date: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  appointment_type: AppointmentType;
+  status: AppointmentStatus;
+  notes: string;
+  days: AppointmentDay[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AppointmentCreate {
+  deal?: number | null;
+  title: string;
+  scheduled_date?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  appointment_type?: AppointmentType;
+  status?: AppointmentStatus;
+  notes?: string;
+  days?: { date: string; start_time?: string | null; end_time?: string | null }[];
 }
 
 // ==================== NOTIFICATION TYPES ====================
@@ -542,6 +835,7 @@ export interface DailyStatsResponse {
 // ==================== BLOG TYPES ====================
 
 export type BlogPostStatus = 'draft' | 'published' | 'scheduled';
+export type BlogLocation = 'florida' | 'jacksonville' | 'st-augustine';
 
 export interface BlogCategory {
   id: number;
@@ -586,6 +880,7 @@ export interface BlogPost {
   has_faq_schema: boolean;
   faq_data: FAQItem[];
   categories: BlogCategoryMinimal[];
+  location: BlogLocation;
   status: BlogPostStatus;
   publish_date: string | null;
   scheduled_publish_date: string | null;
@@ -605,6 +900,7 @@ export interface BlogPostListItem {
   featured_image: string | null;
   featured_image_alt: string;
   categories: BlogCategoryMinimal[];
+  location: BlogLocation;
   status: BlogPostStatus;
   publish_date: string | null;
   reading_time: number;
@@ -627,6 +923,7 @@ export interface BlogPostCreate {
   has_faq_schema?: boolean;
   faq_data?: FAQItem[];
   category_ids?: number[];
+  location?: BlogLocation;
   status?: BlogPostStatus;
   scheduled_publish_date?: string;
 }
@@ -646,12 +943,14 @@ export interface BlogPostUpdate {
   has_faq_schema?: boolean;
   faq_data?: FAQItem[];
   category_ids?: number[];
+  location?: BlogLocation;
   status?: BlogPostStatus;
   scheduled_publish_date?: string | null;
 }
 
 export interface BlogPostSitemapItem {
   slug: string;
+  location: BlogLocation;
   last_updated: string;
   publish_date: string;
 }
@@ -744,6 +1043,7 @@ export interface CalendarBlogPost {
   title: string;
   slug: string;
   status: BlogPostStatus;
+  location: BlogLocation;
   scheduled_publish_date: string | null;
   publish_date: string | null;
   created_at: string;
@@ -761,4 +1061,110 @@ export interface QuickDraftCreate {
 
 export interface RescheduleRequest {
   scheduled_publish_date: string;
+}
+
+// ============================================================
+// Projects Module Types
+// ============================================================
+
+export const SERVICE_TYPES = [
+  { slug: 'kitchen-backsplash', name: 'Kitchen Backsplash' },
+  { slug: 'bathroom-tile', name: 'Bathroom Tile' },
+  { slug: 'floor-tile', name: 'Floor Tiling' },
+  { slug: 'patio-tile', name: 'Patio & Outdoor' },
+  { slug: 'fireplace-tile', name: 'Fireplace Tile' },
+  { slug: 'shower-tile', name: 'Shower Installation' },
+] as const;
+
+export type ServiceTypeSlug = typeof SERVICE_TYPES[number]['slug'];
+export type ProjectLocation = 'florida' | 'jacksonville' | 'st-augustine';
+export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'archived';
+export type DisplayStyle = 'before_after_slider' | 'cinematic_video_header' | 'process_grid';
+export type SlotType = 'hero' | 'mid_slider' | 'bottom_grid';
+
+export interface ProjectMedia {
+  id: number;
+  file: string;
+  media_type: 'image' | 'video';
+  order: number;
+  alt_text: string;
+  created_at: string;
+}
+
+export interface Phase {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+  media: ProjectMedia[];
+  created_at: string;
+}
+
+export interface Project {
+  id: number;
+  title: string;
+  description: string;
+  status: ProjectStatus;
+  is_featured: boolean;
+  location: ProjectLocation;
+  job_types: ServiceTypeSlug[];
+  phases: Phase[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectListItem {
+  id: number;
+  title: string;
+  status: ProjectStatus;
+  location: ProjectLocation;
+  is_featured: boolean;
+  job_types: ServiceTypeSlug[];
+  phase_count: number;
+  cover_image: string | null;
+  cover_media_type: 'image' | 'video';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HomepageSlot {
+  slot_type: SlotType;
+  project: ProjectListItem | null;
+  display_style: DisplayStyle | '';
+  before_media: ProjectMedia | null;
+  after_media: ProjectMedia | null;
+  updated_at: string;
+}
+
+export interface ServicePin {
+  project: ProjectListItem;
+  order: number;
+}
+
+export interface ProjectCreate {
+  title: string;
+  description?: string;
+  status?: ProjectStatus;
+  is_featured?: boolean;
+  location: ProjectLocation;
+  job_types?: ServiceTypeSlug[];
+}
+
+export interface PhaseCreate {
+  title: string;
+  description?: string;
+  order?: number;
+}
+
+export interface HomepageSlotUpdate {
+  slot_type: SlotType;
+  project_id?: number | null;
+  display_style?: DisplayStyle | '';
+  before_media_id?: number | null;
+  after_media_id?: number | null;
+}
+
+export interface ServicePinItem {
+  project_id: number;
+  order: number;
 }

@@ -7,9 +7,19 @@ class ContactLead(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
         ('contacted', 'Contacted'),
+        ('failed_contact', 'Failed Contact'),
         ('qualified', 'Qualified'),
+        ('failed_qualified', 'Failed Qualified'),
         ('converted', 'Converted'),
         ('closed', 'Closed'),
+    ]
+
+    CONTACT_RESULT_REASON_CHOICES = [
+        ('no_answer', 'No Answer'),
+        ('phone_off', 'Phone Off'),
+        ('wrong_number', 'Wrong Number'),
+        ('not_interested', 'Not Interested'),
+        ('other', 'Other'),
     ]
 
     PROJECT_TYPE_CHOICES = [
@@ -29,6 +39,13 @@ class ContactLead(models.Model):
     project_type = models.CharField(max_length=50, choices=PROJECT_TYPE_CHOICES)
     message = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    contact_result_reason = models.CharField(
+        max_length=20,
+        choices=CONTACT_RESULT_REASON_CHOICES,
+        blank=True,
+        help_text='Reason for failed contact attempt'
+    )
+    address = models.TextField(blank=True, help_text='Customer address (added by admin after contact)')
     notes = models.TextField(blank=True, help_text='Internal notes about this lead')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -55,6 +72,7 @@ class LocalAdsLead(models.Model):
     STATUS_CHOICES = [
         ('new', 'New'),
         ('contacted', 'Contacted'),
+        ('failed_contact', 'Failed Contact'),
         ('closed', 'Closed'),
     ]
 

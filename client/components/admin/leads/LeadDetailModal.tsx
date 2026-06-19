@@ -1,15 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Phone, Mail, Calendar, FileText, Loader2, Save } from 'lucide-react';
+import { X, Phone, Mail, Calendar, FileText, Loader2, Save, MapPin, UserCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import LeadStatusBadge from './LeadStatusBadge';
-import type { ContactLead, LeadStatus } from '@/types/api';
+import PhoneCopy from './PhoneCopy';
+import { api } from '@/lib/api';
+import type { ContactLead, LeadStatus, ContactResultReason } from '@/types/api';
 
 interface LeadDetailModalProps {
   lead: ContactLead | null;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (id: number, data: { status?: LeadStatus; notes?: string }) => Promise<void>;
+  onUpdate: (id: number, data: Partial<ContactLead>) => Promise<void>;
+  onConverted?: (id: number) => void;
 }
 
 const projectTypeLabels: Record<string, string> = {
@@ -22,36 +26,52 @@ const projectTypeLabels: Record<string, string> = {
   other: 'Other',
 };
 
-const statusOptions: { value: LeadStatus; label: string }[] = [
+const statusOptions: { value: LeadStatus; label: string; color?: string }[] = [
   { value: 'new', label: 'New' },
   { value: 'contacted', label: 'Contacted' },
+  { value: 'failed_contact', label: 'Failed Contact', color: 'orange' },
   { value: 'qualified', label: 'Qualified' },
-  { value: 'converted', label: 'Converted' },
-  { value: 'closed', label: 'Closed' },
+  { value: 'failed_qualified', label: 'Failed Qualified', color: 'orange' },
 ];
 
-export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: LeadDetailModalProps) {
+const contactReasonOptions: { value: ContactResultReason; label: string }[] = [
+  { value: 'no_answer', label: 'No Answer' },
+  { value: 'phone_off', label: 'Phone Off' },
+  { value: 'wrong_number', label: 'Wrong Number' },
+  { value: 'not_interested', label: 'Not Interested' },
+  { value: 'other', label: 'Other' },
+];
+
+export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate, onConverted }: LeadDetailModalProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<LeadStatus>('new');
   const [notes, setNotes] = useState('');
+  const [address, setAddress] = useState('');
+  const [contactReason, setContactReason] = useState<ContactResultReason | ''>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [convertError, setConvertError] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     if (lead) {
       setStatus(lead.status);
       setNotes(lead.notes || '');
+      setAddress(lead.address || '');
+      setContactReason(lead.contact_result_reason || '');
       setHasChanges(false);
+      setConvertError('');
     }
   }, [lead]);
 
   const handleStatusChange = (newStatus: LeadStatus) => {
     setStatus(newStatus);
-    setHasChanges(newStatus !== lead?.status || notes !== (lead?.notes || ''));
+    setHasChanges(true);
   };
 
   const handleNotesChange = (newNotes: string) => {
     setNotes(newNotes);
-    setHasChanges(status !== lead?.status || newNotes !== (lead?.notes || ''));
+    setHasChanges(true);
   };
 
   const handleSave = async () => {
@@ -59,14 +79,42 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
 
     setIsSaving(true);
     try {
-      const updates: { status?: LeadStatus; notes?: string } = {};
+      const updates: Partial<ContactLead> = {};
       if (status !== lead.status) updates.status = status;
       if (notes !== (lead.notes || '')) updates.notes = notes;
+      if (address !== (lead.address || '')) updates.address = address;
+      if (status === 'failed_contact' && contactReason !== lead.contact_result_reason) {
+        updates.contact_result_reason = contactReason;
+      }
 
       await onUpdate(lead.id, updates);
       setHasChanges(false);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleConvert = async () => {
+    if (!lead) return;
+    if (!address.trim()) {
+      setConvertError('Please fill in the address before converting.');
+      return;
+    }
+    setConvertError('');
+    setIsConverting(true);
+    try {
+      // Save address if it changed
+      if (address !== (lead.address || '')) {
+        await onUpdate(lead.id, { address });
+      }
+      const result = await api.convertLeadToCustomer(lead.id, { address });
+      onConverted?.(result.customer_id);
+      onClose();
+      router.push(`/admin/crm/customers/${result.customer_id}`);
+    } catch (err) {
+      setConvertError(err instanceof Error ? err.message : 'Failed to convert lead.');
+    } finally {
+      setIsConverting(false);
     }
   };
 
@@ -117,16 +165,7 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
                 <Phone className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="text-xs text-gray-500">Phone</p>
-                  {lead.phone ? (
-                    <a
-                      href={`tel:${lead.phone}`}
-                      className="text-sm font-medium text-blue-600 hover:underline"
-                    >
-                      {lead.phone}
-                    </a>
-                  ) : (
-                    <span className="text-sm text-gray-400">Not provided</span>
-                  )}
+                  <PhoneCopy phone={lead.phone} />
                 </div>
               </div>
             </div>
@@ -159,6 +198,20 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
               </div>
             </div>
 
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> Address</span>
+              </label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => { setAddress(e.target.value); setHasChanges(true); setConvertError(''); }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Customer address (required to convert)"
+              />
+            </div>
+
             {/* Message */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
@@ -177,7 +230,9 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
                     onClick={() => handleStatusChange(option.value)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       status === option.value
-                        ? 'bg-blue-600 text-white'
+                        ? option.color === 'orange'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -185,6 +240,21 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
                   </button>
                 ))}
               </div>
+              {status === 'failed_contact' && (
+                <div className="mt-3">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Reason for failed contact</label>
+                  <select
+                    value={contactReason}
+                    onChange={(e) => { setContactReason(e.target.value as ContactResultReason | ''); setHasChanges(true); }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select reason...</option>
+                    {contactReasonOptions.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Notes */}
@@ -205,34 +275,46 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate }: Lea
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-500">
-            {hasChanges && <span className="text-orange-600">Unsaved changes</span>}
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              Close
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  Save Changes
-                </>
+        <div className="flex flex-col gap-2 px-6 py-4 border-t border-gray-200 bg-gray-50">
+          {convertError && (
+            <p className="text-sm text-red-600">{convertError}</p>
+          )}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-500">
+              {hasChanges && <span className="text-orange-600">Unsaved changes</span>}
+            </div>
+            <div className="flex items-center gap-3">
+              {status === 'qualified' && (
+                <button
+                  onClick={handleConvert}
+                  disabled={isConverting || isSaving}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isConverting ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" />Converting...</>
+                  ) : (
+                    <><UserCheck className="w-4 h-4" />Convert to Customer</>
+                  )}
+                </button>
               )}
-            </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={!hasChanges || isSaving}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" />Saving...</>
+                ) : (
+                  <><Save className="w-4 h-4" />Save Changes</>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

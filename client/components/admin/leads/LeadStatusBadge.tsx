@@ -16,9 +16,17 @@ const statusConfig: Record<LeadStatus, { label: string; className: string }> = {
     label: 'Contacted',
     className: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   },
+  failed_contact: {
+    label: 'Failed Contact',
+    className: 'bg-orange-100 text-orange-700 border-orange-200',
+  },
   qualified: {
     label: 'Qualified',
     className: 'bg-purple-100 text-purple-700 border-purple-200',
+  },
+  failed_qualified: {
+    label: 'Failed Qualified',
+    className: 'bg-red-100 text-red-700 border-red-200',
   },
   converted: {
     label: 'Converted',

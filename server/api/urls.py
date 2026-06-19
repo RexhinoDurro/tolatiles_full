@@ -12,6 +12,12 @@ from quotes.views import (
     InvoiceViewSet,
     PublicQuoteView,
     PublicInvoiceView,
+    EstimateViewSet,
+    DealViewSet,
+    EstimateVisitViewSet,
+    AppointmentViewSet,
+    CustomJobTypeViewSet,
+    CustomLeadSourceViewSet,
 )
 from api.views import GoogleReviewsView
 from integrations.urls import api_urlpatterns as integration_api_urls
@@ -26,6 +32,12 @@ router.register('admin/leads/local-ads', LocalAdsLeadViewSet, basename='local-ad
 router.register('customers', CustomerViewSet, basename='customer')
 router.register('quotes', QuoteViewSet, basename='quote')
 router.register('invoices', InvoiceViewSet, basename='invoice')
+router.register('estimates', EstimateViewSet, basename='estimate')
+router.register('deals', DealViewSet, basename='deal')
+router.register('estimate-visits', EstimateVisitViewSet, basename='estimate-visit')
+router.register('appointments', AppointmentViewSet, basename='appointment')
+router.register('job-types', CustomJobTypeViewSet, basename='job-type')
+router.register('lead-sources', CustomLeadSourceViewSet, basename='lead-source')
 
 
 urlpatterns = [
@@ -56,4 +68,7 @@ urlpatterns = [
 
     # Blog API
     path('blog/', include('blog.urls')),
+
+    # Projects API
+    path('projects/', include('projects.urls')),
 ]

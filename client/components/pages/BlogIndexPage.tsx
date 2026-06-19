@@ -9,7 +9,39 @@ import type { BlogPostListItem, BlogCategory } from '@/types/api';
 
 const PHONE_NUMBER = '(904) 866-1738';
 
-export default function BlogIndexPage() {
+interface BlogLocationContent {
+  heroH1: string;
+  heroSubtitle: string;
+  ctaDescription: string;
+}
+
+const locationContent: Record<string, BlogLocationContent> = {
+  jacksonville: {
+    heroH1: 'Tile Installation Blog - Jacksonville FL',
+    heroSubtitle: 'Expert tips, design inspiration, and tile installation insights for Jacksonville and Duval County homeowners',
+    ctaDescription:
+      'Contact Tola Tiles today for a free estimate. We serve all of Jacksonville, from Riverside and San Marco to Mandarin, Southside, and the Beaches.',
+  },
+  'st-augustine': {
+    heroH1: 'Tile Installation Blog - St Augustine FL',
+    heroSubtitle: 'Expert tips, design inspiration, and tile installation insights for St. Augustine and St. Johns County homeowners',
+    ctaDescription:
+      'Contact Tola Tiles today for a free estimate. We serve all of St. Augustine and St. Johns County, including the Historic District, Vilano Beach, Nocatee, and World Golf Village.',
+  },
+  florida: {
+    heroH1: 'Tile Installation Blog - Northeast Florida',
+    heroSubtitle: 'Expert tips, design inspiration, and industry insights from the Tola Tiles team',
+    ctaDescription:
+      'Contact Tola Tiles today for a free estimate. We serve Jacksonville, St. Augustine, Ponte Vedra, Palm Coast, and the greater Northeast Florida area.',
+  },
+};
+
+interface BlogIndexPageProps {
+  location?: string;
+}
+
+export default function BlogIndexPage({ location = 'florida' }: BlogIndexPageProps) {
+  const content = locationContent[location] || locationContent.florida;
   const [posts, setPosts] = useState<BlogPostListItem[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,9 +82,9 @@ export default function BlogIndexPage() {
       <section className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Tile Installation Blog</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{content.heroH1}</h1>
             <p className="text-xl text-blue-100 mb-8">
-              Expert tips, design inspiration, and industry insights from the Tola Tiles team
+              {content.heroSubtitle}
             </p>
             <a
               href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
@@ -133,7 +165,7 @@ export default function BlogIndexPage() {
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow group"
                 >
-                  <Link href={`/blog/${post.slug}`}>
+                  <Link href={`/${location}/blog/${post.slug}`}>
                     <div className="relative aspect-video overflow-hidden bg-gray-100">
                       {post.featured_image ? (
                         <Image
@@ -209,8 +241,7 @@ export default function BlogIndexPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Your Tile Project?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Contact Tola Tiles today for a free estimate. We serve St. Augustine, Jacksonville,
-            and the surrounding North Florida area.
+            {content.ctaDescription}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
@@ -221,7 +252,7 @@ export default function BlogIndexPage() {
               {PHONE_NUMBER}
             </a>
             <Link
-              href="/contact"
+              href={`/${location}/contact`}
               className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
             >
               Get Free Estimate

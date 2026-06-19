@@ -16,6 +16,10 @@ const statusConfig: Record<InvoiceStatus, { label: string; className: string }> 
     label: 'Sent',
     className: 'bg-blue-100 text-blue-700',
   },
+  partial: {
+    label: 'Partially Paid',
+    className: 'bg-sky-100 text-sky-700',
+  },
   paid: {
     label: 'Paid',
     className: 'bg-green-100 text-green-700',

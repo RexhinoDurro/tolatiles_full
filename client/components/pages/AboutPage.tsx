@@ -5,17 +5,56 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Award, Users, Clock, Shield, Star, Heart, Target, Lightbulb } from 'lucide-react';
 import { teamMembers } from '@/data/team';
 
-const AboutPage = () => {
+interface AboutLocationContent {
+  heroH1: string;
+  heroSubtitle: string;
+  localStoryParagraph: string;
+  whyChooseHeading: string;
+}
+
+const locationContent: Record<string, AboutLocationContent> = {
+  jacksonville: {
+    heroH1: "About Tola Tiles - Jacksonville's Premier Tile Installation Company",
+    heroSubtitle:
+      "Transforming homes across Duval County with exceptional craftsmanship since 2008. From Riverside lofts to Mandarin family homes, we're the River City's most trusted tile artisans.",
+    localStoryParagraph:
+      "Over the years, we've completed hundreds of projects across Jacksonville and Duval County — from elegant kitchen backsplashes in San Marco bungalows to expansive floor installations in Ortega estates. Our deep familiarity with Jacksonville's diverse architectural styles, from historic Riverside homes to modern Southside condos, allows us to recommend the perfect materials and techniques for every project. We understand the River City's humidity and climate demands, ensuring every installation is built to last in Northeast Florida conditions.",
+    whyChooseHeading: "Why Jacksonville Homeowners Choose Tola Tiles",
+  },
+  'st-augustine': {
+    heroH1: "About Tola Tiles - St Augustine's Trusted Tile Installation Experts",
+    heroSubtitle:
+      "Bringing masterful tile craftsmanship to the Ancient City and St. Johns County since 2008. We specialize in both historic renovations and modern coastal installations.",
+    localStoryParagraph:
+      "Based right here in St. Augustine, we've earned the trust of homeowners throughout St. Johns County — from meticulous restorations in the Historic District to contemporary builds in Nocatee and World Golf Village. Our team understands the unique challenges of coastal construction, including salt air exposure, humidity management, and preserving the character of older homes on Anastasia Island and in Lincolnville. Living and working in the Ancient City gives us first-hand knowledge of what materials and methods perform best in our coastal climate.",
+    whyChooseHeading: "Why St. Augustine Homeowners Choose Tola Tiles",
+  },
+  florida: {
+    heroH1: "About Tola Tiles - Northeast Florida's Trusted Tile Installers",
+    heroSubtitle:
+      "Transforming spaces across Northeast Florida with exceptional craftsmanship since 2008. We're not just tile installers — we're artisans who bring your vision to life with precision, passion, and an unwavering commitment to quality.",
+    localStoryParagraph:
+      "From our home base in St. Augustine, we serve homeowners and businesses throughout the greater Northeast Florida region — including Jacksonville, Ponte Vedra, Palm Coast, and surrounding communities. Our broad regional experience means we've worked with every style of home in the area, from historic properties along the coast to brand-new construction in master-planned communities. With over 1,500 completed projects across Duval, St. Johns, and Flagler counties, we bring unmatched local expertise to every tile installation.",
+    whyChooseHeading: "Why Northeast Florida Chooses Tola Tiles",
+  },
+};
+
+interface AboutPageProps {
+  location?: string;
+}
+
+const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
+  const content = locationContent[location] || locationContent.florida;
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-16">
-            <h1 className="text-6xl font-bold text-gray-900 mb-6 animate-fadeIn">About Tola Tiles</h1>
+            <h1 className="text-6xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
             <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed animate-slideInUp">
-              Transforming spaces with exceptional craftsmanship since 2008. We&apos;re not just tile installers—we&apos;re artisans who bring your
-              vision to life with precision, passion, and an unwavering commitment to quality.
+              {content.heroSubtitle}
             </p>
           </header>
 
@@ -56,9 +95,7 @@ const AboutPage = () => {
                   at a time.
                 </p>
                 <p>
-                  We believe that your home or business deserves nothing less than perfection. Every project, whether it&apos;s a single bathroom
-                  renovation or a large commercial installation, receives the same meticulous attention to detail and commitment to quality that has
-                  defined us for over a decade.
+                  {content.localStoryParagraph}
                 </p>
                 <p>
                   Today, our team of certified craftsmen and design experts continues to push the boundaries of what&apos;s possible in tile
@@ -163,7 +200,7 @@ const AboutPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-16">
             <h2 id="why-choose-heading" className="text-4xl font-bold text-white mb-6">
-              Why Tola Tiles?
+              {content.whyChooseHeading}
             </h2>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
               When you choose us, you&apos;re not just hiring contractors—you&apos;re partnering with passionate craftsmen who care about your project

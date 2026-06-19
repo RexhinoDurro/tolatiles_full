@@ -1,11 +1,17 @@
+import hashlib
+import json
+import logging
+import urllib.parse
+import urllib.request
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.mail import send_mail
+from django.core.cache import cache
 from django.conf import settings
-import logging
 
 from .models import ContactLead, LocalAdsLead
 from .serializers import (
@@ -42,11 +48,82 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
         return [IsAdminUser()]
 
+    def _get_client_ip(self, request):
+        """Extract client IP from request."""
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR', '')
+
+    def _verify_turnstile(self, token: str, ip: str) -> bool:
+        """Verify a Cloudflare Turnstile token via the siteverify API."""
+        secret_key = getattr(settings, 'CLOUDFLARE_TURNSTILE_SECRET_KEY', '')
+        if not secret_key:
+            logger.warning('CLOUDFLARE_TURNSTILE_SECRET_KEY not set — skipping Turnstile check')
+            return True  # Fail open in dev when key is absent
+
+        payload = urllib.parse.urlencode({
+            'secret': secret_key,
+            'response': token,
+            'remoteip': ip,
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            data=payload,
+            method='POST',
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result = json.loads(resp.read())
+                return bool(result.get('success', False))
+        except Exception as exc:
+            logger.error('Turnstile siteverify request failed: %s', exc)
+            return False
+
     def create(self, request, *args, **kwargs):
         """Handle public contact form submission."""
+        # IP-based rate limiting: max 3 submissions per IP per hour
+        client_ip = self._get_client_ip(request)
+        ip_hash = hashlib.sha256(client_ip.encode()).hexdigest()[:16]
+        cache_key = f'contact_form_rate:{ip_hash}'
+        submission_count = cache.get(cache_key, 0)
+
+        if submission_count >= 3:
+            return Response(
+                {'error': 'Too many submissions. Please try again later.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
+        # User-Agent validation
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        if not user_agent or len(user_agent) < 10:
+            return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Origin/Referer validation (skip in DEBUG mode)
+        if not settings.DEBUG:
+            allowed_origins = ['https://tolatiles.com', 'https://www.tolatiles.com']
+            origin = request.META.get('HTTP_ORIGIN', '')
+            referer = request.META.get('HTTP_REFERER', '')
+            if origin and not any(origin.startswith(o) for o in allowed_origins):
+                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+            if not origin and referer and not any(referer.startswith(o) for o in allowed_origins):
+                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Cloudflare Turnstile verification (skip in DEBUG mode)
+        if not settings.DEBUG:
+            turnstile_token = request.data.get('cf_turnstile_response', '')
+            if not turnstile_token:
+                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+            if not self._verify_turnstile(turnstile_token, client_ip):
+                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        # Increment rate limit counter
+        cache.set(cache_key, submission_count + 1, 3600)  # 1 hour TTL
 
         # Get the created lead data
         lead = serializer.instance
@@ -121,6 +198,7 @@ View all leads in the admin dashboard.''',
         """Quick action to update lead status."""
         lead = self.get_object()
         new_status = request.data.get('status')
+        contact_result_reason = request.data.get('contact_result_reason', '')
 
         if new_status not in dict(ContactLead.STATUS_CHOICES):
             return Response(
@@ -129,9 +207,42 @@ View all leads in the admin dashboard.''',
             )
 
         lead.status = new_status
+        if contact_result_reason:
+            valid_reasons = dict(ContactLead.CONTACT_RESULT_REASON_CHOICES).keys()
+            if contact_result_reason in valid_reasons:
+                lead.contact_result_reason = contact_result_reason
         lead.save()
         serializer = ContactLeadSerializer(lead)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
+    def convert_to_customer(self, request, pk=None):
+        """Convert a qualified lead to a Customer."""
+        lead = self.get_object()
+        address = request.data.get('address', '').strip() or lead.address
+
+        if not address:
+            return Response(
+                {'error': 'Address is required to convert a lead to a customer.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from quotes.models import Customer
+        customer = Customer.objects.create(
+            name=lead.full_name,
+            email=lead.email,
+            phone=lead.phone or '',
+            address=address,
+        )
+
+        lead.status = 'converted'
+        lead.address = address
+        lead.save()
+
+        return Response({
+            'customer_id': customer.id,
+            'customer_name': customer.name,
+        }, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def admin_create(self, request):

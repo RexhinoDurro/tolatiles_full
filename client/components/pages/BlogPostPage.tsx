@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import Script from 'next/script';
 import { Calendar, Clock, User, Tag, Phone, ArrowRight, ArrowLeft, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
 import type { BlogPost, BlogPostListItem } from '@/types/api';
 
@@ -13,9 +12,10 @@ const COMPANY_ADDRESS = '445 Hutchinson Ln, St. Augustine, FL 32095';
 interface BlogPostPageProps {
   post: BlogPost;
   relatedPosts: BlogPostListItem[];
+  location?: string;
 }
 
-export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) {
+export default function BlogPostPage({ post, relatedPosts, location = 'florida' }: BlogPostPageProps) {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -29,63 +29,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(post.title);
 
-  // BlogPosting Schema
-  const blogPostingSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://tolatiles.com/blog/${post.slug}`,
-    },
-    headline: post.title,
-    description: post.effective_meta_description,
-    image: post.featured_image || 'https://tolatiles.com/images/logo.webp',
-    author: {
-      '@type': 'Person',
-      name: post.author_name,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: COMPANY_NAME,
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://tolatiles.com/images/logo.webp',
-      },
-    },
-    datePublished: post.publish_date,
-    dateModified: post.last_updated,
-  };
-
-  // FAQ Schema (if enabled)
-  const faqSchema = post.has_faq_schema && post.faq_data?.length > 0 ? {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: post.faq_data.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  } : null;
-
   return (
-    <>
-      {/* Schema Markup */}
-      <Script
-        id="blog-posting-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
-      />
-      {faqSchema && (
-        <Script
-          id="faq-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )}
-
       <article className="min-h-screen bg-white">
         {/* Hero Section */}
         <header className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-12 md:py-20">
@@ -93,11 +37,11 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
             <div className="max-w-4xl mx-auto">
               {/* Breadcrumbs */}
               <nav className="flex items-center gap-2 text-blue-200 text-sm mb-6">
-                <Link href="/" className="hover:text-white">
+                <Link href={`/${location}`} className="hover:text-white">
                   Home
                 </Link>
                 <span>/</span>
-                <Link href="/blog" className="hover:text-white">
+                <Link href={`/${location}/blog`} className="hover:text-white">
                   Blog
                 </Link>
                 <span>/</span>
@@ -110,7 +54,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
                   {post.categories.map((cat) => (
                     <Link
                       key={cat.id}
-                      href={`/blog/category/${cat.slug}`}
+                      href={`/${location}/blog/category/${cat.slug}`}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-white/20 text-white text-sm rounded-full hover:bg-white/30 transition-colors"
                     >
                       <Tag className="w-3 h-3" />
@@ -214,7 +158,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
                       {PHONE_NUMBER}
                     </a>
                     <Link
-                      href="/contact"
+                      href={`/${location}/contact`}
                       className="inline-flex items-center gap-2 px-6 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
                     >
                       Get Free Estimate
@@ -300,7 +244,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
                   {relatedPosts.map((relatedPost) => (
                     <Link
                       key={relatedPost.id}
-                      href={`/blog/${relatedPost.slug}`}
+                      href={`/${location}/blog/${relatedPost.slug}`}
                       className="flex gap-4 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
                       {relatedPost.featured_image ? (
@@ -337,7 +281,7 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <Link
-              href="/blog"
+              href={`/${location}/blog`}
               className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -346,6 +290,5 @@ export default function BlogPostPage({ post, relatedPosts }: BlogPostPageProps) 
           </div>
         </div>
       </article>
-    </>
   );
 }

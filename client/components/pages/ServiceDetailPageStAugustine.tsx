@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
 import type { Service } from '@/data/services';
+import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   Hammer,
@@ -26,6 +27,15 @@ const serviceToGalleryPath: Record<string, string> = {
   patio: 'patios',
   fireplace: 'fireplaces',
   shower: 'showers',
+};
+
+const serviceIdToProjectSlug: Record<string, string> = {
+  'kitchen-backsplash': 'kitchen-backsplash',
+  bathroom: 'bathroom-tile',
+  flooring: 'floor-tile',
+  patio: 'patio-tile',
+  fireplace: 'fireplace-tile',
+  shower: 'shower-tile',
 };
 
 interface DisplayImage {
@@ -293,6 +303,15 @@ Thank you,
           </div>
         </div>
       </section>
+
+      {/* Project Portfolio Section */}
+      {serviceIdToProjectSlug[service.id] && (
+        <ServiceProjectsSection
+          location="st-augustine"
+          serviceSlug={serviceIdToProjectSlug[service.id]}
+          serviceName={service.title}
+        />
+      )}
 
       {/* Related Services */}
       <section className="py-16 bg-gray-50">

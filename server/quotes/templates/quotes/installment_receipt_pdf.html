@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Receipt — {{ invoice.reference }} / {{ installment.title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: letter; margin: 0.75in; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #333; line-height: 1.5; }
+
+        .receipt-stamp {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-stamp .word {
+            font-size: 28pt;
+            font-weight: 700;
+            color: #059669;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            border: 3px solid #059669;
+            display: inline-block;
+            padding: 4px 20px;
+        }
+
+        .header { display: flex; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #059669; }
+        .header-left { flex: 1; }
+        .logo { max-width: 140px; max-height: 55px; margin-bottom: 8px; }
+        .doc-title { font-size: 20pt; font-weight: 700; color: #1e3a5f; }
+        .header-right { text-align: right; }
+        .ref-label { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ref-value { font-size: 11pt; font-weight: 600; }
+
+        .parties { display: flex; justify-content: space-between; margin-bottom: 24px; gap: 30px; }
+        .party { flex: 1; }
+        .party-label { font-size: 8pt; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
+        .party-name { font-size: 12pt; font-weight: 600; color: #1e3a5f; }
+        .party-detail { font-size: 9pt; color: #444; }
+
+        .installment-box {
+            background: #f0fdf4;
+            border: 1px solid #a7f3d0;
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+        }
+        .installment-box-title { font-size: 13pt; font-weight: 700; color: #065f46; margin-bottom: 6px; }
+        .installment-meta { font-size: 9pt; color: #555; margin-bottom: 2px; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: #f0fdf4; font-size: 9pt; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 8px; text-align: left; border-bottom: 2px solid #d1fae5; }
+        th.money, td.money { text-align: right; font-family: 'Courier New', monospace; }
+        td { padding: 10px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+        .item-name { font-weight: 500; color: #1e3a5f; }
+        .item-desc { font-size: 9pt; color: #666; margin-top: 3px; }
+
+        .totals-table { width: 260px; margin-left: auto; }
+        .totals-table td { padding: 6px 8px; border: none; }
+        .totals-table .label { text-align: right; color: #555; }
+        .totals-table .value { text-align: right; font-family: 'Courier New', monospace; }
+        .totals-table .paid-row { border-top: 2px solid #059669; }
+        .totals-table .paid-row td { padding-top: 10px; font-size: 13pt; font-weight: 700; color: #065f46; }
+
+        .footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 9pt; color: #666; }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-stamp"><span class="word">Receipt</span></div>
+
+    <div class="header">
+        <div class="header-left">
+            {% if company.company_logo %}<img src="{{ company.company_logo.path }}" alt="{{ company.company_name }}" class="logo">{% endif %}
+            <div class="doc-title">{{ invoice.title }}</div>
+        </div>
+        <div class="header-right">
+            <div class="ref-label">Invoice #</div>
+            <div class="ref-value">{{ invoice.reference }}</div>
+            <div style="margin-top:8px">
+                <div class="ref-label">Payment Date</div>
+                <div class="ref-value">{{ installment.paid_date|date:"F d, Y" }}</div>
+            </div>
+            <div style="margin-top:8px">
+                <div class="ref-label">Installment</div>
+                <div class="ref-value">{{ installment.title }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="parties">
+        <div class="party">
+            <div class="party-label">Received From</div>
+            <div class="party-name">{{ invoice.customer.name }}</div>
+            {% if invoice.customer.address %}<div class="party-detail">{{ invoice.customer.address }}</div>{% endif %}
+            {% if invoice.customer.email %}<div class="party-detail">{{ invoice.customer.email }}</div>{% endif %}
+        </div>
+        <div class="party">
+            <div class="party-label">Received By</div>
+            <div class="party-name">{{ company.company_name }}</div>
+            <div class="party-detail">{{ company.sender_name }}</div>
+            <div class="party-detail">{{ company.email }}</div>
+        </div>
+    </div>
+
+    <div class="installment-box">
+        <div class="installment-box-title">{{ installment.title }} — PAID</div>
+        {% if installment.due_date %}<div class="installment-meta">Due date: {{ installment.due_date|date:"F d, Y" }}</div>{% endif %}
+        <div class="installment-meta">Paid on: {{ installment.paid_date|date:"F d, Y" }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width:50%">Description</th>
+                <th style="width:15%" class="money">Qty</th>
+                <th style="width:17%" class="money">Unit Price</th>
+                <th style="width:18%" class="money">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in installment.line_items.all %}
+            <tr>
+                <td>
+                    <div class="item-name">{{ item.name }}</div>
+                    {% if item.description %}<div class="item-desc">{{ item.description }}</div>{% endif %}
+                </td>
+                <td class="money">{{ item.quantity|floatformat:"-2" }}</td>
+                <td class="money">${{ item.unit_price|floatformat:2 }}</td>
+                <td class="money">${{ item.line_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="totals-table">
+        <tr>
+            <td class="label">Installment Total</td>
+            <td class="value">${{ installment.total|floatformat:2 }}</td>
+        </tr>
+        <tr class="paid-row">
+            <td class="label">Amount Paid</td>
+            <td class="value">${{ installment.total|floatformat:2 }}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        {{ company.company_name }} &bull; {{ company.email }}{% if company.phone %} &bull; {{ company.phone }}{% endif %}
+    </div>
+</body>
+</html>

@@ -80,6 +80,11 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         if category_slug:
             queryset = queryset.filter(categories__slug=category_slug)
 
+        # Filter by location
+        location = self.request.query_params.get('location')
+        if location:
+            queryset = queryset.filter(location=location)
+
         return queryset.prefetch_related('categories')
 
     def perform_create(self, serializer):
@@ -136,7 +141,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         posts = BlogPost.objects.filter(
             status='published',
             is_indexed=True
-        ).values('slug', 'last_updated', 'publish_date')
+        ).values('slug', 'location', 'last_updated', 'publish_date')
 
         return Response(list(posts))
 
