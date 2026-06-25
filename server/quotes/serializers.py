@@ -638,11 +638,17 @@ class EstimateSerializer(serializers.ModelSerializer):
 # ==================== DEAL SERIALIZERS ====================
 
 class DealSerializer(serializers.ModelSerializer):
-    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
-    customer_phone = serializers.CharField(source='customer.phone', read_only=True)
+    customer_name = serializers.SerializerMethodField()
+    customer_phone = serializers.SerializerMethodField()
     customer_id = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.all(), source='customer', write_only=True
     )
+
+    def get_customer_name(self, obj):
+        return obj.customer.name if obj.customer_id else None
+
+    def get_customer_phone(self, obj):
+        return obj.customer.phone if obj.customer_id else None
 
     class Meta:
         model = Deal
