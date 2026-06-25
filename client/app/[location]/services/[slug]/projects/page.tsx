@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -15,11 +15,12 @@ const LOCATION_LABELS: Record<string, string> = {
 };
 
 interface ServiceProjectsGalleryProps {
-  params: { location: string; slug: string };
+  params: Promise<{ location: string; slug: string }>;
 }
 
 export default function ServiceProjectsGallery({ params }: ServiceProjectsGalleryProps) {
-  const { location, slug } = params;
+  const unwrappedParams = use(params);
+  const { location, slug } = unwrappedParams;
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [loading, setLoading] = useState(true);
 

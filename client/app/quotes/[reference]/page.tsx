@@ -163,9 +163,9 @@ export default function PublicQuotePage() {
                 <User className="w-4 h-4" />
                 Quote To
               </div>
-              <p className="font-semibold text-slate-900 text-xl mb-2">{quote.customer_name}</p>
+              <p className="font-semibold text-slate-900 text-xl mb-2">{quote.portal_contact_name || quote.customer_name}</p>
               <div className="space-y-1.5 text-slate-600">
-                <p>{quote.customer_phone}</p>
+                {quote.customer_phone && quote.customer_phone !== 'system' && <p>{quote.customer_phone}</p>}
                 {quote.customer_email && <p>{quote.customer_email}</p>}
               </div>
             </div>

@@ -657,10 +657,18 @@ class ApiClient {
 
   // ============ Quotes ============
 
-  async getQuotes(status?: QuoteStatus): Promise<QuoteListItem[]> {
-    const params = status ? `?status=${status}` : '';
+  async getQuotes(params?: string | { status?: string, created_via_portal?: boolean, deal_id?: number }): Promise<QuoteListItem[]> {
+    const query = new URLSearchParams();
+    if (typeof params === 'string') {
+      query.append('status', params);
+    } else if (params) {
+      if (params.status) query.append('status', params.status);
+      if (params.created_via_portal) query.append('created_via_portal', 'true');
+      if (params.deal_id) query.append('deal_id', params.deal_id.toString());
+    }
+    const qString = query.toString() ? `?${query.toString()}` : '';
     const response = await this.fetch<PaginatedResponse<QuoteListItem> | QuoteListItem[]>(
-      `/quotes/${params}`
+      `/quotes/${qString}`
     );
     return Array.isArray(response) ? response : response.results;
   }
@@ -726,6 +734,13 @@ class ApiClient {
     return this.fetch<Invoice>(`/quotes/${id}/convert_to_invoice/`, {
       method: 'POST',
       body: JSON.stringify({ due_date: dueDate }),
+    });
+  }
+
+  async linkQuoteToDeal(quoteId: number, customerId: number, dealId?: number | null): Promise<Quote> {
+    return this.fetch<Quote>(`/quotes/${quoteId}/link_to_deal/`, {
+      method: 'POST',
+      body: JSON.stringify({ customer_id: customerId, deal_id: dealId ?? null }),
     });
   }
 

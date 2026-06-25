@@ -6,7 +6,7 @@ import CrmLayout from '@/components/admin/crm/CrmLayout';
 import { api } from '@/lib/api';
 import type { CustomJobType, CustomLeadSource, Deal, DealStage } from '@/types/api';
 
-type TabId = 'job_types' | 'lead_sources' | 'notes';
+type TabId = 'job_types' | 'lead_sources' | 'notes' | 'portal_users';
 
 const stageLabels: Record<DealStage, string> = {
   new_deal: 'New Deal',
@@ -432,10 +432,73 @@ export default function CrmSettingsPage() {
     setLeadSources((prev) => prev.filter((ls) => ls.id !== id));
   };
 
+  // Portal users state
+  const [portalUsers, setPortalUsers] = useState<Array<{ id: number; username: string; email: string; first_name: string; last_name: string; is_active: boolean }>>([]);
+  const [portalUsersLoading, setPortalUsersLoading] = useState(false);
+  const [portalUsersLoaded, setPortalUsersLoaded] = useState(false);
+  const [showAddPortalUser, setShowAddPortalUser] = useState(false);
+  const [newPortalUser, setNewPortalUser] = useState({ username: '', password: '', email: '', first_name: '', last_name: '' });
+  const [savingPortalUser, setSavingPortalUser] = useState(false);
+  const [portalUserError, setPortalUserError] = useState<string | null>(null);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+  const loadPortalUsers = useCallback(async () => {
+    if (portalUsersLoaded) return;
+    setPortalUsersLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/quotes-managers/`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('tolatiles_access_token')}` },
+      });
+      if (res.ok) setPortalUsers(await res.json());
+    } finally {
+      setPortalUsersLoading(false);
+      setPortalUsersLoaded(true);
+    }
+  }, [portalUsersLoaded]);
+
+  const handleCreatePortalUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPortalUserError(null);
+    setSavingPortalUser(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/quotes-managers/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('tolatiles_access_token')}`,
+        },
+        body: JSON.stringify(newPortalUser),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to create user');
+      }
+      const created = await res.json();
+      setPortalUsers((prev) => [...prev, created]);
+      setNewPortalUser({ username: '', password: '', email: '', first_name: '', last_name: '' });
+      setShowAddPortalUser(false);
+    } catch (err) {
+      setPortalUserError(err instanceof Error ? err.message : 'Failed to create user');
+    } finally {
+      setSavingPortalUser(false);
+    }
+  };
+
+  const handleDeactivatePortalUser = async (id: number) => {
+    if (!confirm('Deactivate this portal user? They will no longer be able to log in.')) return;
+    await fetch(`${API_BASE}/auth/quotes-managers/${id}/`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${localStorage.getItem('tolatiles_access_token')}` },
+    });
+    setPortalUsers((prev) => prev.map((u) => (u.id === id ? { ...u, is_active: false } : u)));
+  };
+
   const tabs: { id: TabId; label: string }[] = [
     { id: 'job_types', label: 'Job Types' },
     { id: 'lead_sources', label: 'Lead Sources' },
     { id: 'notes', label: 'Notes & Export' },
+    { id: 'portal_users', label: 'Portal Users' },
   ];
 
   return (
@@ -451,7 +514,10 @@ export default function CrmSettingsPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id === 'portal_users') loadPortalUsers();
+              }}
               className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
                 activeTab === tab.id
                   ? 'text-blue-600 border-b-2 border-blue-600 -mb-px bg-white'
@@ -546,6 +612,135 @@ export default function CrmSettingsPage() {
             {/* Notes Tab */}
             {activeTab === 'notes' && (
               <NotesTab jobTypes={jobTypes} leadSources={leadSources} />
+            )}
+
+            {/* Portal Users Tab */}
+            {activeTab === 'portal_users' && (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                  <div>
+                    <h2 className="font-semibold text-gray-900">Portal Users</h2>
+                    <p className="text-xs text-gray-500 mt-0.5">Accounts that can access quotes.tolatiles.com</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddPortalUser((v) => !v)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add User
+                  </button>
+                </div>
+
+                {showAddPortalUser && (
+                  <div className="p-4 border-b border-gray-100 bg-gray-50">
+                    <h3 className="text-sm font-medium text-gray-800 mb-3">New Portal User</h3>
+                    {portalUserError && (
+                      <p className="text-sm text-red-600 mb-3">{portalUserError}</p>
+                    )}
+                    <form onSubmit={handleCreatePortalUser} className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">First Name</label>
+                          <input
+                            value={newPortalUser.first_name}
+                            onChange={(e) => setNewPortalUser((p) => ({ ...p, first_name: e.target.value }))}
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Last Name</label>
+                          <input
+                            value={newPortalUser.last_name}
+                            onChange={(e) => setNewPortalUser((p) => ({ ...p, last_name: e.target.value }))}
+                            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Username <span className="text-red-500">*</span></label>
+                        <input
+                          value={newPortalUser.username}
+                          onChange={(e) => setNewPortalUser((p) => ({ ...p, username: e.target.value }))}
+                          required
+                          className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+                        <input
+                          type="email"
+                          value={newPortalUser.email}
+                          onChange={(e) => setNewPortalUser((p) => ({ ...p, email: e.target.value }))}
+                          className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Password <span className="text-red-500">*</span></label>
+                        <input
+                          type="password"
+                          value={newPortalUser.password}
+                          onChange={(e) => setNewPortalUser((p) => ({ ...p, password: e.target.value }))}
+                          required
+                          className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="submit"
+                          disabled={savingPortalUser}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium disabled:opacity-50 hover:bg-blue-700"
+                        >
+                          {savingPortalUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          Create
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setShowAddPortalUser(false); setPortalUserError(null); }}
+                          className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                <div className="p-4">
+                  {portalUsersLoading && (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                    </div>
+                  )}
+                  {!portalUsersLoading && portalUsers.length === 0 && (
+                    <p className="text-sm text-gray-400 text-center py-4">No portal users yet.</p>
+                  )}
+                  {!portalUsersLoading && portalUsers.map((u) => (
+                    <div key={u.id} className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {u.first_name || u.last_name ? `${u.first_name} ${u.last_name}`.trim() : u.username}
+                          {' '}
+                          <span className="text-gray-400 font-normal">@{u.username}</span>
+                        </p>
+                        {u.email && <p className="text-xs text-gray-400">{u.email}</p>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${u.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                          {u.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                        {u.is_active && (
+                          <button
+                            onClick={() => handleDeactivatePortalUser(u.id)}
+                            className="text-xs text-red-500 hover:text-red-700 hover:underline"
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </>
         )}

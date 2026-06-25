@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { Trash2, Loader2, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import CustomerSelect from './CustomerSelect';
 import LineItemsEditor, { LineItemData } from '@/components/admin/shared/LineItemsEditor';
-import type { Quote, QuoteCreate, LineItem, Customer, DiscountType } from '@/types/api';
+import type { Quote, QuoteCreate, LineItem, Customer, CustomerCreate, DiscountType } from '@/types/api';
 
 interface QuoteFormProps {
   quote?: Quote;
@@ -12,6 +12,10 @@ interface QuoteFormProps {
   dealId?: number;
   onSubmit: (data: QuoteCreate) => Promise<void>;
   isLoading?: boolean;
+  onCustomerSearch?: (q: string) => Promise<Customer[]>;
+  onCreateCustomer?: (data: CustomerCreate) => Promise<Customer>;
+  /** When true, hides the Customer field (e.g. portal new-quote flow). */
+  hideCustomerField?: boolean;
 }
 
 const defaultTerms = [
@@ -43,23 +47,68 @@ function getInitialLineItems(quote?: Quote): LineItemData[] {
   if (quote?.line_items && quote.line_items.length > 0) {
     return quote.line_items.map(toLineItemData);
   }
-  return [
-    {
-      id: `new-${Date.now()}-0`,
-      name: '',
-      description: '',
-      is_service: false,
-      quantity: 1,
-      unit_price: 0,
-      detail_lines: [],
-      order: 0,
-    },
-  ];
+  return [];
 }
 
-export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, isLoading }: QuoteFormProps) {
+// ── Section wrapper ───────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">{title}</h2>
+      </div>
+      <div className="p-4">{children}</div>
+    </div>
+  );
+}
+
+// ── Field wrapper ─────────────────────────────────────────────────────────────
+
+function Field({
+  label,
+  required,
+  error,
+  children,
+  hint,
+}: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {hint && <span className="ml-2 text-xs text-gray-400 font-normal">{hint}</span>}
+      </label>
+      {children}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}
+
+export default function QuoteForm({
+  quote,
+  initialCustomer,
+  dealId,
+  onSubmit,
+  isLoading,
+  onCustomerSearch,
+  onCreateCustomer,
+  hideCustomerField = false,
+}: QuoteFormProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    quote?.customer || initialCustomer || null
+    quote?.customer || initialCustomer || null,
   );
 
   const [formData, setFormData] = useState({
@@ -82,10 +131,13 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [versionsOpen, setVersionsOpen] = useState(false);
 
+  const set = (patch: Partial<typeof formData>) =>
+    setFormData((prev) => ({ ...prev, ...patch }));
+
   const totals = useMemo(() => {
     const subtotal = lineItems.reduce((sum, item) => {
       const itemTotal = item.is_service
-        ? (item.unit_price || 0)
+        ? item.unit_price || 0
         : (item.quantity || 0) * (item.unit_price || 0);
       return sum + itemTotal;
     }, 0);
@@ -97,32 +149,44 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
     const tax = afterDiscount * ((formData.tax_rate || 0) / 100);
     const total = afterDiscount + tax + (formData.shipping_amount || 0);
     return { subtotal, discount, afterDiscount, tax, total };
-  }, [lineItems, formData.discount_type, formData.discount_percent, formData.discount_amount, formData.tax_rate, formData.shipping_amount]);
+  }, [
+    lineItems,
+    formData.discount_type,
+    formData.discount_percent,
+    formData.discount_amount,
+    formData.tax_rate,
+    formData.shipping_amount,
+  ]);
 
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: formData.currency }).format(amount);
+  const fmt = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: formData.currency }).format(
+      amount,
+    );
 
   const addTerm = () => {
     if (!newTerm.trim()) return;
-    setFormData({ ...formData, terms: [...formData.terms, newTerm.trim()] });
+    set({ terms: [...formData.terms, newTerm.trim()] });
     setNewTerm('');
   };
 
   const removeTerm = (index: number) => {
-    setFormData({ ...formData, terms: formData.terms.filter((_, i) => i !== index) });
+    set({ terms: formData.terms.filter((_, i) => i !== index) });
   };
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!selectedCustomer) newErrors.customer = 'Please select a customer';
-    if (!formData.expires_at) newErrors.expires_at = 'Expiry date is required';
+    const errs: Record<string, string> = {};
+    if (!formData.title.trim()) errs.title = 'Title is required';
+    if (!hideCustomerField && !selectedCustomer) errs.customer = 'Please select a customer';
+    if (!formData.expires_at) errs.expires_at = 'Expiry date is required';
     const hasValidItem = lineItems.some((item) =>
-      item.is_service ? item.name.trim() && item.unit_price > 0 : item.name.trim() && (item.quantity || 0) > 0 && item.unit_price > 0
+      item.is_service
+        ? item.name.trim() && item.unit_price > 0
+        : item.name.trim() && (item.quantity || 0) > 0 && item.unit_price > 0,
     );
-    if (!hasValidItem) newErrors.line_items = 'At least one line item with name and price is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!hasValidItem)
+      errs.line_items = 'At least one line item with name and price is required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,7 +195,7 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
 
     const data: QuoteCreate = {
       title: formData.title,
-      customer_id: selectedCustomer!.id,
+      ...(!hideCustomerField && selectedCustomer ? { customer_id: selectedCustomer.id } : {}),
       expires_at: formData.expires_at,
       timeline: formData.timeline,
       currency: formData.currency,
@@ -163,88 +227,89 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
   const pdfVersions = quote?.pdf_versions ?? [];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Basic Info */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Quote Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Quote Title <span className="text-red-500">*</span>
-            </label>
+    <form onSubmit={handleSubmit} className="space-y-4 pb-28 sm:pb-10">
+      {/* ── Quote Details ──────────────────────────────────────────────── */}
+      <Section title="Quote Details">
+        <div className="space-y-3">
+          <Field label="Title" required error={errors.title}>
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.title ? 'border-red-500' : ''}`}
-              placeholder="e.g., Kitchen Backsplash Installation"
+              onChange={(e) => set({ title: e.target.value })}
+              className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.title ? 'border-red-400' : 'border-gray-200'
+              }`}
+              placeholder="e.g. Kitchen Backsplash Installation"
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+          </Field>
+
+          {!hideCustomerField && (
+            <Field label="Customer" required error={errors.customer}>
+              <CustomerSelect
+                value={selectedCustomer}
+                onChange={setSelectedCustomer}
+                onSearch={onCustomerSearch}
+                onCreateCustomer={onCreateCustomer}
+              />
+            </Field>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Valid Until" required>
+              <input
+                type="date"
+                value={formData.expires_at}
+                onChange={(e) => set({ expires_at: e.target.value })}
+                className={`w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.expires_at ? 'border-red-400' : 'border-gray-200'
+                }`}
+              />
+            </Field>
+
+            <Field label="Timeline">
+              <select
+                value={formData.timeline}
+                onChange={(e) => set({ timeline: e.target.value })}
+                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="1 week">1 week</option>
+                <option value="2-3 weeks">2–3 weeks</option>
+                <option value="1 month">1 month</option>
+                <option value="2 months">2 months</option>
+                <option value="3 months">3 months</option>
+                <option value="TBD">TBD</option>
+              </select>
+            </Field>
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Customer <span className="text-red-500">*</span>
-            </label>
-            <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} />
-            {errors.customer && <p className="text-red-500 text-sm mt-1">{errors.customer}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Valid Until <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={formData.expires_at}
-              onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.expires_at ? 'border-red-500' : ''}`}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Timeline</label>
-            <select
-              value={formData.timeline}
-              onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="1 week">1 week</option>
-              <option value="2-3 weeks">2-3 weeks</option>
-              <option value="1 month">1 month</option>
-              <option value="2 months">2 months</option>
-              <option value="3 months">3 months</option>
-              <option value="TBD">TBD</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+
+          <Field label="Currency">
             <select
               value={formData.currency}
-              onChange={(e) => setFormData({ ...formData, currency: e.target.value as 'USD' | 'EUR' })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => set({ currency: e.target.value as 'USD' | 'EUR' })}
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
             </select>
-          </div>
+          </Field>
         </div>
-      </div>
+      </Section>
 
-      {/* Summary */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Summary</h2>
+      {/* ── Summary ────────────────────────────────────────────────────── */}
+      <Section title="Summary">
         <textarea
           value={formData.comments_text}
-          onChange={(e) => setFormData({ ...formData, comments_text: e.target.value })}
-          rows={4}
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Describe the project summary..."
+          onChange={(e) => set({ comments_text: e.target.value })}
+          rows={3}
+          className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          placeholder="Describe the project..."
         />
-      </div>
+      </Section>
 
-      {/* Line Items */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Products &amp; Services</h2>
+      {/* ── Products & Services ────────────────────────────────────────── */}
+      <Section title="Products & Services">
         {errors.line_items && (
-          <p className="text-red-500 text-sm mb-3">{errors.line_items}</p>
+          <p className="text-red-500 text-xs mb-3">{errors.line_items}</p>
         )}
         <LineItemsEditor
           items={lineItems}
@@ -252,168 +317,186 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
           currency={formData.currency}
           showServiceToggle
         />
-      </div>
+      </Section>
 
-      {/* Pricing */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Pricing</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* ── Pricing ────────────────────────────────────────────────────── */}
+      <Section title="Pricing">
+        <div className="space-y-3">
           {/* Discount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Discount</label>
-            {/* Toggle */}
-            <div className="flex rounded-lg border border-gray-300 overflow-hidden mb-2 w-fit">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, discount_type: 'percent', discount_amount: 0 })}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  formData.discount_type === 'percent'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                % Percent
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, discount_type: 'fixed', discount_percent: 0 })}
-                className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-300 ${
-                  formData.discount_type === 'fixed'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                $ Fixed
-              </button>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Discount</label>
+            <div className="flex gap-2 items-start">
+              {/* Toggle */}
+              <div className="flex rounded-lg border border-gray-200 overflow-hidden text-xs font-medium flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => set({ discount_type: 'percent', discount_amount: 0 })}
+                  className={`px-3 py-2 transition-colors ${
+                    formData.discount_type === 'percent'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  %
+                </button>
+                <button
+                  type="button"
+                  onClick={() => set({ discount_type: 'fixed', discount_percent: 0 })}
+                  className={`px-3 py-2 border-l border-gray-200 transition-colors ${
+                    formData.discount_type === 'fixed'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  $
+                </button>
+              </div>
+
+              {formData.discount_type === 'percent' ? (
+                <div className="relative flex-1">
+                  <input
+                    type="number"
+                    value={formData.discount_percent}
+                    onChange={(e) => set({ discount_percent: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 pr-7 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="0"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    %
+                  </span>
+                </div>
+              ) : (
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={formData.discount_amount}
+                    onChange={(e) => set({ discount_amount: parseFloat(e.target.value) || 0 })}
+                    className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
             </div>
-            {formData.discount_type === 'percent' ? (
+          </div>
+
+          {/* Tax + Shipping */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tax Rate
+              </label>
               <div className="relative">
                 <input
                   type="number"
-                  value={formData.discount_percent}
-                  onChange={(e) => setFormData({ ...formData, discount_percent: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-4 py-2 pr-8 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.tax_rate}
+                  onChange={(e) => set({ tax_rate: parseFloat(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 pr-7 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="0"
-                  max="100"
                   step="0.01"
                   placeholder="0"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                  %
+                </span>
               </div>
-            ) : (
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Shipping
+              </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                  $
+                </span>
                 <input
                   type="number"
-                  value={formData.discount_amount}
-                  onChange={(e) => setFormData({ ...formData, discount_amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full pl-7 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.shipping_amount}
+                  onChange={(e) =>
+                    set({ shipping_amount: parseFloat(e.target.value) || 0 })
+                  }
+                  className="w-full pl-7 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   min="0"
                   step="0.01"
                   placeholder="0.00"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Totals */}
+          <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 space-y-2 mt-2">
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Subtotal</span>
+              <span>{fmt(totals.subtotal)}</span>
+            </div>
+            {totals.discount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>
+                  Discount
+                  {formData.discount_type === 'percent'
+                    ? ` (${formData.discount_percent}%)`
+                    : ''}
+                </span>
+                <span>−{fmt(totals.discount)}</span>
+              </div>
             )}
-          </div>
-
-          {/* Tax */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tax Rate (%)</label>
-            <div className="relative">
-              <input
-                type="number"
-                value={formData.tax_rate}
-                onChange={(e) => setFormData({ ...formData, tax_rate: parseFloat(e.target.value) || 0 })}
-                className="w-full px-4 py-2 pr-8 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
-                step="0.01"
-                placeholder="0"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+            {totals.tax > 0 && (
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Tax ({formData.tax_rate}%)</span>
+                <span>{fmt(totals.tax)}</span>
+              </div>
+            )}
+            {formData.shipping_amount > 0 && (
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Shipping</span>
+                <span>{fmt(formData.shipping_amount)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-gray-900 text-base border-t border-gray-200 pt-2">
+              <span>Total</span>
+              <span>{fmt(totals.total)}</span>
             </div>
           </div>
 
-          {/* Shipping */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Shipping</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
-              <input
-                type="number"
-                value={formData.shipping_amount}
-                onChange={(e) => setFormData({ ...formData, shipping_amount: parseFloat(e.target.value) || 0 })}
-                className="w-full pl-7 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
-                step="0.01"
-              />
-            </div>
-          </div>
+          {/* Pricing Notes */}
+          <Field label="Pricing Notes" hint="shown to customer on the PDF">
+            <textarea
+              value={formData.payment_terms}
+              onChange={(e) => set({ payment_terms: e.target.value })}
+              rows={2}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              placeholder="e.g. 50% deposit required. Balance due upon completion."
+            />
+          </Field>
         </div>
+      </Section>
 
-        {/* Totals Summary */}
-        <div className="border-t pt-4 space-y-2">
-          <div className="flex justify-between text-gray-600">
-            <span>Subtotal</span>
-            <span>{formatCurrency(totals.subtotal)}</span>
-          </div>
-          {totals.discount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>
-                Discount{' '}
-                {formData.discount_type === 'percent'
-                  ? `(${formData.discount_percent}%)`
-                  : '(fixed)'}
-              </span>
-              <span>-{formatCurrency(totals.discount)}</span>
-            </div>
-          )}
-          {totals.tax > 0 && (
-            <div className="flex justify-between text-gray-600">
-              <span>Tax ({formData.tax_rate}%)</span>
-              <span>{formatCurrency(totals.tax)}</span>
-            </div>
-          )}
-          {formData.shipping_amount > 0 && (
-            <div className="flex justify-between text-gray-600">
-              <span>Shipping</span>
-              <span>{formatCurrency(formData.shipping_amount)}</span>
-            </div>
-          )}
-          <div className="flex justify-between text-xl font-bold text-gray-900 border-t pt-2">
-            <span>Total</span>
-            <span>{formatCurrency(totals.total)}</span>
-          </div>
-        </div>
-
-        {/* Pricing notes */}
-        <div className="mt-4 pt-4 border-t">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Pricing Notes
-            <span className="ml-2 text-xs text-gray-400 font-normal">shown to customer on the PDF</span>
-          </label>
-          <textarea
-            value={formData.payment_terms}
-            onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-            rows={3}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder="e.g., 50% deposit required. Balance due upon completion. Prices valid for 30 days."
-          />
-        </div>
-      </div>
-
-      {/* Terms */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Terms &amp; Conditions</h2>
-        <div className="space-y-3 mb-4">
+      {/* ── Terms & Conditions ─────────────────────────────────────────── */}
+      <Section title="Terms & Conditions">
+        <div className="space-y-2 mb-3">
           {formData.terms.map((term, index) => (
-            <div key={index} className="flex items-start gap-3 bg-gray-50 px-4 py-3 rounded-lg">
-              <span className="text-gray-600 flex-1">{term}</span>
+            <div
+              key={index}
+              className="flex items-start gap-2 bg-gray-50 px-3 py-2.5 rounded-lg"
+            >
+              <span className="text-xs text-gray-500 flex-1 min-w-0 break-words leading-relaxed">
+                {term}
+              </span>
               <button
                 type="button"
                 onClick={() => removeTerm(index)}
-                className="p-1 text-gray-400 hover:text-red-500"
+                className="flex-shrink-0 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
@@ -424,37 +507,44 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
             value={newTerm}
             onChange={(e) => setNewTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTerm())}
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Add a new term..."
+            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Add a term..."
           />
           <button
             type="button"
             onClick={addTerm}
             disabled={!newTerm.trim()}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-40 text-sm font-medium transition-colors flex-shrink-0"
           >
             Add
           </button>
         </div>
-      </div>
+      </Section>
 
-      {/* PDF Version History (edit mode only) */}
+      {/* ── PDF Version History ────────────────────────────────────────── */}
       {quote && pdfVersions.length > 0 && (
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <Section title="PDF Version History">
           <button
             type="button"
             onClick={() => setVersionsOpen((v) => !v)}
-            className="flex items-center justify-between w-full text-left"
+            className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700"
           >
-            <h2 className="text-lg font-semibold">PDF Version History</h2>
-            {versionsOpen ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+            {pdfVersions.length} version{pdfVersions.length !== 1 ? 's' : ''}
+            {versionsOpen ? (
+              <ChevronUp className="w-4 h-4 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-gray-400" />
+            )}
           </button>
           {versionsOpen && (
-            <div className="mt-4 space-y-2">
+            <div className="mt-3 space-y-2">
               {pdfVersions.map((v) => (
-                <div key={v.version} className="flex items-center justify-between py-2 border-b last:border-0">
+                <div
+                  key={v.version}
+                  className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                >
                   <div>
-                    <span className="text-sm font-medium text-gray-700">Version {v.version}</span>
+                    <span className="text-sm font-medium text-gray-700">v{v.version}</span>
                     {v.generated_at && (
                       <span className="ml-2 text-xs text-gray-400">
                         {new Date(v.generated_at).toLocaleString()}
@@ -465,7 +555,7 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
                     href={`/media/${v.file}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
                   >
                     Download <ExternalLink className="w-3 h-3" />
                   </a>
@@ -473,19 +563,26 @@ export default function QuoteForm({ quote, initialCustomer, dealId, onSubmit, is
               ))}
             </div>
           )}
-        </div>
+        </Section>
       )}
 
-      {/* Submit */}
-      <div className="flex justify-end gap-4">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
-        >
-          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {quote ? 'Update Quote' : 'Create Quote'}
-        </button>
+      {/* ── Sticky submit bar (mobile) / inline (desktop) ─────────────── */}
+      <div className="fixed bottom-0 left-0 right-0 sm:relative sm:bottom-auto z-30 bg-white sm:bg-transparent border-t border-gray-200 sm:border-0 px-4 py-3 sm:p-0 sm:pt-2">
+        <div className="max-w-2xl mx-auto flex items-center gap-3 sm:justify-end">
+          {/* Total preview on mobile */}
+          <div className="sm:hidden flex-1 min-w-0">
+            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-base font-bold text-gray-900 truncate">{fmt(totals.total)}</p>
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="flex-shrink-0 sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 disabled:bg-blue-400 transition-colors text-sm font-semibold shadow-sm"
+          >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {quote ? 'Update Quote' : 'Create Quote'}
+          </button>
+        </div>
       </div>
     </form>
   );

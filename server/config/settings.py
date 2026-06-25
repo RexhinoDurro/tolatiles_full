@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-(s@2kjw9c72^yz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com', 'quotes.tolatiles.com']
 
 # Trust X-Forwarded-Proto header from nginx proxy for HTTPS detection
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -207,6 +207,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
     'https://tolatiles.com',
     'https://www.tolatiles.com',
+    'https://quotes.tolatiles.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

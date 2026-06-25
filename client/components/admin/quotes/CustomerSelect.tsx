@@ -8,9 +8,11 @@ import type { Customer, CustomerCreate } from '@/types/api';
 interface CustomerSelectProps {
   value: Customer | null;
   onChange: (customer: Customer | null) => void;
+  onSearch?: (q: string) => Promise<Customer[]>;
+  onCreateCustomer?: (data: CustomerCreate) => Promise<Customer>;
 }
 
-export default function CustomerSelect({ value, onChange }: CustomerSelectProps) {
+export default function CustomerSelect({ value, onChange, onSearch, onCreateCustomer }: CustomerSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Customer[]>([]);
@@ -46,7 +48,9 @@ export default function CustomerSelect({ value, onChange }: CustomerSelectProps)
       }
       setIsSearching(true);
       try {
-        const results = await api.searchCustomers(searchQuery);
+        const results = onSearch
+          ? await onSearch(searchQuery)
+          : await api.searchCustomers(searchQuery);
         setSearchResults(results);
       } catch (error) {
         console.error('Search failed:', error);
@@ -75,7 +79,9 @@ export default function CustomerSelect({ value, onChange }: CustomerSelectProps)
 
     setIsCreating(true);
     try {
-      const created = await api.createCustomer(newCustomer);
+      const created = onCreateCustomer
+        ? await onCreateCustomer(newCustomer)
+        : await api.createCustomer(newCustomer);
       onChange(created);
       setShowCreateForm(false);
       setIsOpen(false);

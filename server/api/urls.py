@@ -4,7 +4,10 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from gallery.views import CategoryViewSet, GalleryImageViewSet
 from leads.views import ContactLeadViewSet, LocalAdsLeadViewSet
-from authentication.views import LoginView, LogoutView, CurrentUserView
+from authentication.views import (
+    LoginView, LogoutView, CurrentUserView,
+    QuotesPortalLoginView, QuotesManagerListCreateView, QuotesManagerDetailView,
+)
 from quotes.views import (
     CompanySettingsView,
     CustomerViewSet,
@@ -18,6 +21,9 @@ from quotes.views import (
     AppointmentViewSet,
     CustomJobTypeViewSet,
     CustomLeadSourceViewSet,
+    QuotesPortalViewSet,
+    PortalCustomerSearchView,
+    PortalCustomerCreateView,
 )
 from api.views import GoogleReviewsView
 from integrations.urls import api_urlpatterns as integration_api_urls
@@ -38,6 +44,7 @@ router.register('estimate-visits', EstimateVisitViewSet, basename='estimate-visi
 router.register('appointments', AppointmentViewSet, basename='appointment')
 router.register('job-types', CustomJobTypeViewSet, basename='job-type')
 router.register('lead-sources', CustomLeadSourceViewSet, basename='lead-source')
+router.register('portal/quotes', QuotesPortalViewSet, basename='portal-quote')
 
 
 urlpatterns = [
@@ -49,6 +56,11 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='auth_logout'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='auth_refresh'),
     path('auth/me/', CurrentUserView.as_view(), name='auth_me'),
+    path('auth/portal-login/', QuotesPortalLoginView.as_view(), name='portal_login'),
+    path('auth/quotes-managers/', QuotesManagerListCreateView.as_view(), name='quotes_managers'),
+    path('auth/quotes-managers/<int:pk>/', QuotesManagerDetailView.as_view(), name='quotes_manager_detail'),
+    path('portal/customers/', PortalCustomerCreateView.as_view(), name='portal_customer_create'),
+    path('portal/customers/search/', PortalCustomerSearchView.as_view(), name='portal_customer_search'),
 
     # Company settings (singleton)
     path('company-settings/', CompanySettingsView.as_view(), name='company_settings'),

@@ -1,1 +1,38 @@
+# Environment
 server/.env
+.env
+.env.local
+.env.*.local
+
+# Infisical — the .infisical.json is committed (it only holds project ID, no secrets)
+# but never commit any exported secret files
+infisical-export*.env
+
+# Python
+server/venv/
+server/.venv/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Django
+server/db.sqlite3
+server/staticfiles/
+server/media/
+server/*.sock
+server/*.sock.lock
+
+# pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+
+# macOS
+.DS_Store

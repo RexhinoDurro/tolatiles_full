@@ -615,3 +615,68 @@ sudo dpkg-reconfigure -plow unattended-upgrades
 ---
 
 For support, contact: menitola@tolatiles.com
+
+---
+
+## Quotes Portal Subdomain (quotes.tolatiles.com)
+
+The wildcard `*.tolatiles.com` SSL cert already covers this subdomain — no extra certbot run needed.
+
+Add this server block to `/etc/nginx/sites-available/tolatiles` (the same file as the main site):
+
+```nginx
+# ── Quotes Portal subdomain ──────────────────────────────────────────────────
+server {
+    listen 80;
+    server_name quotes.tolatiles.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name quotes.tolatiles.com;
+
+    ssl_certificate /etc/letsencrypt/live/tolatiles.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tolatiles.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Redirect bare subdomain root to portal
+    location = / {
+        return 301 https://$server_name/quotes-portal/quotes;
+    }
+
+    # Static Next.js assets (long cache)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # Django API
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 20M;
+    }
+
+    # Everything else → Next.js (serves /quotes-portal/* routes)
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+After adding the block:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```

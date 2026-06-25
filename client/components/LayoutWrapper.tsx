@@ -11,8 +11,9 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isQuotesPortalRoute = pathname?.startsWith('/quotes-portal');
 
-  if (isAdminRoute) {
+  if (isAdminRoute || isQuotesPortalRoute) {
     // Admin pages render without Navbar/Footer
     return <>{children}</>;
   }

@@ -361,11 +361,11 @@
     <div class="parties">
         <div class="party">
             <div class="party-label">Quote For</div>
-            <div class="party-name">{{ quote.customer.name }}</div>
+            <div class="party-name">{{ quote.display_customer_name }}</div>
             {% if quote.customer.address %}
             <div class="party-address">{{ quote.customer.address|linebreaksbr }}</div>
             {% endif %}
-            {% if quote.customer.phone %}
+            {% if quote.customer.phone and quote.customer.phone != 'system' %}
             <div class="party-contact">{{ quote.customer.phone }}</div>
             {% endif %}
             {% if quote.customer.email %}

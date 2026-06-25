@@ -10,7 +10,7 @@ from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny, BasePermission
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,7 +19,7 @@ from .models import CompanySettings, Customer, CustomerPhoto, Quote, LineItem, I
 from .serializers import (
     CompanySettingsSerializer,
     CustomerSerializer, CustomerCreateSerializer, CustomerPhotoSerializer,
-    QuoteListSerializer, QuoteDetailSerializer, QuoteCreateSerializer,
+    QuoteListSerializer, QuoteDetailSerializer, QuoteCreateSerializer, PortalQuoteCreateSerializer,
     InvoiceListSerializer, InvoiceDetailSerializer, InvoiceCreateSerializer,
     InvoiceInstallmentSerializer, InvoiceInstallmentCreateSerializer,
     PublicQuoteSerializer, PublicInvoiceSerializer,
@@ -27,6 +27,20 @@ from .serializers import (
     DealSerializer, EstimateVisitSerializer, EstimateVisitPhotoSerializer, AppointmentSerializer,
     CustomJobTypeSerializer, CustomLeadSourceSerializer,
 )
+
+
+class IsAdminOrQuotesManager(BasePermission):
+    """Allows access to Admin users or authenticated quotes portal users."""
+
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated and request.user.is_active):
+            return False
+        if request.user.is_staff or request.user.is_superuser:
+            return True
+        try:
+            return request.user.profile.is_quotes_manager
+        except Exception:
+            return False
 
 
 # ==================== COMPANY SETTINGS ====================
@@ -198,7 +212,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
     queryset = Quote.objects.select_related('customer').prefetch_related('line_items')
     permission_classes = [IsAdminUser]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status', 'customer']
+    filterset_fields = ['status', 'customer', 'created_via_portal']
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -221,6 +235,11 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = serializer.save()
+        if instance.created_via_portal:
+            Quote.objects.filter(pk=instance.pk).update(
+                edited_by_admin=True,
+                admin_edited_at=timezone.now()
+            )
         self._generate_pdf_after_save(instance, self.request)
 
     @action(detail=True, methods=['post'])
@@ -413,6 +432,47 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
         serializer = InvoiceDetailSerializer(invoice, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def link_to_deal(self, request, pk=None):
+        """
+        Link a portal (orphan) quote to a real customer and deal.
+
+        Body: { "customer_id": int, "deal_id": int (optional) }
+        """
+        quote = self.get_object()
+        customer_id = request.data.get('customer_id')
+        deal_id = request.data.get('deal_id') or None
+
+        if not customer_id:
+            return Response({'error': 'customer_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            customer = Customer.objects.get(pk=customer_id)
+        except Customer.DoesNotExist:
+            return Response({'error': 'Customer not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        deal = None
+        if deal_id:
+            try:
+                from .models import Deal
+                deal = Deal.objects.get(pk=deal_id)
+                # Ensure deal belongs to the chosen customer
+                if deal.customer_id != customer.id:
+                    return Response(
+                        {'error': 'Deal does not belong to the selected customer'},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except Deal.DoesNotExist:
+                return Response({'error': 'Deal not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        quote.customer = customer
+        quote.deal = deal
+        quote.save()
+
+        serializer = QuoteDetailSerializer(quote, context={'request': request})
+        return Response(serializer.data)
+
 
 
 # ==================== PUBLIC QUOTE VIEW ====================
@@ -841,7 +901,7 @@ class EstimateViewSet(viewsets.ModelViewSet):
 
 class DealViewSet(viewsets.ModelViewSet):
     """ViewSet for pipeline deal management."""
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrQuotesManager]
     serializer_class = DealSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['stage', 'customer', 'is_archived']
@@ -974,7 +1034,7 @@ class DealViewSet(viewsets.ModelViewSet):
 class EstimateVisitViewSet(viewsets.ModelViewSet):
     """ViewSet for estimate visit management."""
     queryset = EstimateVisit.objects.select_related('deal__customer').prefetch_related('photos')
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrQuotesManager]
     serializer_class = EstimateVisitSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend]
@@ -1010,7 +1070,7 @@ class EstimateVisitViewSet(viewsets.ModelViewSet):
 class AppointmentViewSet(viewsets.ModelViewSet):
     """ViewSet for appointment management."""
     queryset = Appointment.objects.select_related('deal__customer').prefetch_related('days')
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrQuotesManager]
     serializer_class = AppointmentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['deal', 'status', 'appointment_type']
@@ -1030,3 +1090,167 @@ class CustomLeadSourceViewSet(viewsets.ModelViewSet):
     queryset = CustomLeadSource.objects.all()
     permission_classes = [IsAdminUser]
     serializer_class = CustomLeadSourceSerializer
+
+
+# ==================== QUOTES PORTAL ====================
+
+from rest_framework.permissions import BasePermission
+
+
+class IsQuotesManager(BasePermission):
+    """Allows access only to authenticated quotes portal users."""
+
+    def has_permission(self, request, view):
+        if not (request.user and request.user.is_authenticated and request.user.is_active):
+            return False
+        try:
+            return request.user.profile.is_quotes_manager
+        except Exception:
+            return False
+
+
+# Name of the system-owned placeholder customer used for all portal quotes.
+# This customer is not shown in the CRM and never appears in customer-facing lists.
+_PORTAL_PLACEHOLDER_NAME = '\u200bPortal Inbox'  # zero-width space prefix keeps it sorted to top
+
+
+def _get_portal_placeholder_customer():
+    """Get or create the system Portal Inbox customer (created once, reused forever)."""
+    customer, _ = Customer.objects.get_or_create(
+        name=_PORTAL_PLACEHOLDER_NAME,
+        defaults={
+            'phone': 'system',
+            'notes': 'System placeholder for unlinked portal quotes. Do not edit.',
+        },
+    )
+    return customer
+
+
+class QuotesPortalViewSet(viewsets.ModelViewSet):
+    """
+    Quotes portal viewset — restricted to is_quotes_manager users.
+    Portal users can list, create, retrieve, and update their quotes.
+    Deletion is not permitted (admin only).
+    The customer field is auto-assigned (Portal Inbox placeholder);
+    the real customer + deal are linked later by an admin via link_to_deal.
+    """
+    permission_classes = [IsQuotesManager]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['status']
+
+    def get_queryset(self):
+        return Quote.objects.filter(created_via_portal=True).select_related('customer').prefetch_related('line_items')
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return QuoteListSerializer
+        if self.action in ['create', 'update', 'partial_update']:
+            return PortalQuoteCreateSerializer
+        return QuoteDetailSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("PORTAL QUOTE CREATE ERRORS:", serializer.errors)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        customer = _get_portal_placeholder_customer()
+        instance = serializer.save(created_via_portal=True, customer=customer)
+        try:
+            from .tasks import generate_quote_pdf
+            generate_quote_pdf(instance.id)
+        except Exception:
+            pass
+
+    def perform_update(self, serializer):
+        # Reset admin-edit flag when portal user edits the quote
+        instance = serializer.save(edited_by_admin=False, admin_edited_at=None)
+        try:
+            from .tasks import generate_quote_pdf
+            generate_quote_pdf(instance.id)
+        except Exception:
+            pass
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {'error': 'Quotes cannot be deleted from the portal.'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    @action(detail=True, methods=['post'])
+    def generate_pdf(self, request, pk=None):
+        """Generate/regenerate PDF for a portal quote."""
+        quote = self.get_object()
+        try:
+            from .tasks import generate_quote_pdf
+            result = generate_quote_pdf(quote.id)
+            if result.get('status') == 'success':
+                quote.refresh_from_db()
+                pdf_url = None
+                if quote.pdf_file:
+                    pdf_url = request.build_absolute_uri(quote.pdf_file.url)
+                return Response({
+                    'message': 'PDF generated successfully',
+                    'quote_id': quote.id,
+                    'pdf_url': pdf_url,
+                })
+            else:
+                return Response(
+                    {'error': result.get('reason', 'PDF generation failed')},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def send_email(self, request, pk=None):
+        """Send quote to customer via email (portal)."""
+        quote = self.get_object()
+        if not quote.customer.email:
+            return Response(
+                {'error': 'Customer has no email address'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from .tasks import send_quote_email
+        send_quote_email.delay(quote.id)
+        return Response({
+            'message': 'Email queued for delivery',
+            'quote_id': quote.id,
+            'email': quote.customer.email,
+        })
+
+
+class PortalCustomerSearchView(APIView):
+    """Customer search endpoint for quotes portal users."""
+
+    permission_classes = [IsQuotesManager]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if len(query) < 2:
+            return Response([])
+
+        customers = Customer.objects.filter(is_archived=False).filter(
+            models.Q(name__icontains=query) |
+            models.Q(email__icontains=query) |
+            models.Q(phone__icontains=query)
+        )[:10]
+
+        serializer = CustomerSerializer(customers, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class PortalCustomerCreateView(APIView):
+    """Create a customer from the quotes portal."""
+
+    permission_classes = [IsQuotesManager]
+
+    def post(self, request):
+        serializer = CustomerCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        customer = serializer.save()
+        return Response(CustomerSerializer(customer).data, status=status.HTTP_201_CREATED)

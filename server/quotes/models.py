@@ -216,6 +216,17 @@ class Quote(models.Model):
     pdf_version = models.PositiveIntegerField(default=1)
     pdf_versions = models.JSONField(default=list, blank=True)
 
+    # Portal tracking
+    created_via_portal = models.BooleanField(default=False, db_index=True)
+    edited_by_admin = models.BooleanField(default=False)
+    admin_edited_at = models.DateTimeField(null=True, blank=True)
+    portal_contact_name = models.CharField(
+        max_length=200,
+        blank=True,
+        default='',
+        help_text='Name entered by the portal user (not linked to a Customer record)',
+    )
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Quote'
@@ -265,6 +276,13 @@ class Quote(models.Model):
     def get_public_url(self):
         """Get the public shareable URL for this quote."""
         return f"/quotes/{self.reference}"
+
+    @property
+    def display_customer_name(self):
+        """Return portal_contact_name if still assigned to Portal Inbox, otherwise real customer name."""
+        if self.created_via_portal and self.customer.name.endswith('Portal Inbox'):
+            return self.portal_contact_name or self.customer.name
+        return self.customer.name
 
 
 class LineItem(models.Model):

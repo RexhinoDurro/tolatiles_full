@@ -59,7 +59,8 @@ class CustomerCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['name', 'phone', 'email', 'address', 'notes']
+        fields = ['id', 'name', 'phone', 'email', 'address', 'notes']
+        read_only_fields = ['id']
 
     def validate_name(self, value):
         return value.strip()
@@ -98,7 +99,7 @@ class LineItemCreateSerializer(serializers.ModelSerializer):
 
 class QuoteListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for quote list views."""
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
     customer_phone = serializers.CharField(source='customer.phone', read_only=True)
     line_item_count = serializers.SerializerMethodField()
 
@@ -106,7 +107,9 @@ class QuoteListSerializer(serializers.ModelSerializer):
         model = Quote
         fields = [
             'id', 'reference', 'title', 'customer', 'customer_name', 'customer_phone',
-            'deal', 'status', 'total', 'currency', 'created_at', 'expires_at', 'timeline', 'line_item_count'
+            'deal', 'status', 'total', 'currency', 'created_at', 'expires_at', 'timeline',
+            'line_item_count', 'created_via_portal', 'edited_by_admin', 'admin_edited_at',
+            'portal_contact_name',
         ]
 
     def get_line_item_count(self, obj):
@@ -130,11 +133,14 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
             'subtotal', 'discount_type', 'discount_amount', 'discount_percent',
             'tax_rate', 'tax_amount', 'shipping_amount', 'total',
             'line_items', 'pdf_file', 'pdf_url', 'pdf_generated_at',
-            'pdf_version', 'pdf_versions', 'public_url', 'invoice_id'
+            'pdf_version', 'pdf_versions', 'public_url', 'invoice_id',
+            'created_via_portal', 'edited_by_admin', 'admin_edited_at',
+            'portal_contact_name',
         ]
         read_only_fields = [
             'reference', 'subtotal', 'tax_amount', 'total',
-            'pdf_file', 'pdf_generated_at', 'pdf_version', 'pdf_versions'
+            'pdf_file', 'pdf_generated_at', 'pdf_version', 'pdf_versions',
+            'created_via_portal', 'edited_by_admin', 'admin_edited_at'
         ]
 
     def get_pdf_url(self, obj):
@@ -212,6 +218,53 @@ class QuoteCreateSerializer(serializers.ModelSerializer):
                 item_data['order'] = item_data.get('order', idx)
                 LineItem.objects.create(quote=instance, **item_data)
 
+        instance.save()
+        return instance
+
+
+class PortalQuoteCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating/updating quotes via the quotes portal.
+    Does NOT require customer_id — the viewset auto-assigns the portal placeholder customer.
+    Accepts portal_contact_name to record who submitted the quote.
+    """
+    line_items = LineItemCreateSerializer(many=True)
+
+    class Meta:
+        model = Quote
+        fields = [
+            'id', 'title', 'portal_contact_name', 'expires_at', 'timeline', 'currency',
+            'comments_text', 'terms', 'payment_terms', 'discount_type', 'discount_amount',
+            'discount_percent', 'tax_rate', 'shipping_amount', 'line_items',
+        ]
+        read_only_fields = ['id']
+
+    def validate_line_items(self, value):
+        if not value:
+            raise serializers.ValidationError(
+                "Please add at least one line item to the quote. "
+                "Each item needs a name, quantity, and unit price."
+            )
+        return value
+
+    def create(self, validated_data):
+        line_items_data = validated_data.pop('line_items')
+        quote = Quote.objects.create(**validated_data)
+        for idx, item_data in enumerate(line_items_data):
+            item_data['order'] = item_data.get('order', idx)
+            LineItem.objects.create(quote=quote, **item_data)
+        quote.save()
+        return quote
+
+    def update(self, instance, validated_data):
+        line_items_data = validated_data.pop('line_items', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if line_items_data is not None:
+            instance.line_items.all().delete()
+            for idx, item_data in enumerate(line_items_data):
+                item_data['order'] = item_data.get('order', idx)
+                LineItem.objects.create(quote=instance, **item_data)
         instance.save()
         return instance
 
@@ -426,7 +479,7 @@ class InvoiceCreateSerializer(serializers.ModelSerializer):
 
 class PublicQuoteSerializer(serializers.ModelSerializer):
     """Serializer for public quote view (limited fields)."""
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
     customer_phone = serializers.CharField(source='customer.phone', read_only=True)
     customer_email = serializers.CharField(source='customer.email', read_only=True)
     line_items = LineItemSerializer(many=True, read_only=True)
@@ -458,7 +511,7 @@ class PublicQuoteSerializer(serializers.ModelSerializer):
 
 class PublicInvoiceSerializer(serializers.ModelSerializer):
     """Serializer for public invoice view (limited fields)."""
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
     customer = CustomerSerializer(read_only=True)
     installments = InvoiceInstallmentSerializer(many=True, read_only=True)
     balance_due = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
@@ -521,7 +574,7 @@ class EstimatePhotoSerializer(serializers.ModelSerializer):
 
 
 class EstimateListSerializer(serializers.ModelSerializer):
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
     customer_phone = serializers.CharField(source='customer.phone', read_only=True)
 
     class Meta:
@@ -585,7 +638,7 @@ class EstimateSerializer(serializers.ModelSerializer):
 # ==================== DEAL SERIALIZERS ====================
 
 class DealSerializer(serializers.ModelSerializer):
-    customer_name = serializers.CharField(source='customer.name', read_only=True)
+    customer_name = serializers.CharField(source='display_customer_name', read_only=True)
     customer_phone = serializers.CharField(source='customer.phone', read_only=True)
     customer_id = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.all(), source='customer', write_only=True

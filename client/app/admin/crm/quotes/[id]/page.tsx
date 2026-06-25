@@ -235,8 +235,8 @@ export default function CrmQuoteDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <div className="text-sm text-gray-500 mb-1">Customer</div>
-              <div className="font-medium text-gray-900">{quote.customer.name}</div>
-              <div className="text-sm text-gray-600">{quote.customer.phone}</div>
+              <div className="font-medium text-gray-900">{quote.portal_contact_name || quote.customer.name}</div>
+              {quote.customer.phone && quote.customer.phone !== 'system' && <div className="text-sm text-gray-600">{quote.customer.phone}</div>}
               {quote.customer.email && <div className="text-sm text-gray-600">{quote.customer.email}</div>}
             </div>
             <div>
@@ -358,3 +358,5 @@ export default function CrmQuoteDetailPage() {
     </CrmLayout>
   );
 }
+
+// Trigger rebuild

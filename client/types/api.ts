@@ -150,6 +150,17 @@ export interface User {
   first_name: string;
   last_name: string;
   is_staff?: boolean;
+  is_quotes_manager?: boolean;
+}
+
+export interface PortalUser {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_quotes_manager: true;
+  is_active?: boolean;
 }
 
 export interface AuthTokens {
@@ -302,6 +313,7 @@ export interface Quote {
   pdf_versions: PdfVersionEntry[];
   public_url: string;
   invoice_id: number | null;
+  portal_contact_name: string;
 }
 
 export interface QuoteListItem {
@@ -319,12 +331,17 @@ export interface QuoteListItem {
   expires_at: string;
   timeline: string;
   line_item_count: number;
+  created_via_portal: boolean;
+  edited_by_admin: boolean;
+  admin_edited_at: string | null;
+  portal_contact_name: string;
 }
 
 export interface QuoteCreate {
   title: string;
-  customer_id: number;
+  customer_id?: number;
   deal_id?: number | null;
+  portal_contact_name?: string;
   expires_at: string;
   timeline?: string;
   currency?: 'USD' | 'EUR';

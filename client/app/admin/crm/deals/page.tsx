@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Loader2, RefreshCw, Briefcase, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Loader2, RefreshCw, Briefcase, X, Trash2, ChevronLeft, ChevronRight, FileText, Link2, CheckCircle2, AlertCircle } from 'lucide-react';
+import CustomerSelect from '@/components/admin/quotes/CustomerSelect';
 import CrmLayout from '@/components/admin/crm/CrmLayout';
 import { api } from '@/lib/api';
 import type {
@@ -137,6 +138,20 @@ function DealsContent() {
   const [jobTypes, setJobTypes] = useState<CustomJobType[]>([]);
   const [leadSources, setLeadSources] = useState<CustomLeadSource[]>([]);
 
+  // MQuotes portal panel
+  const [showPortalPanel, setShowPortalPanel] = useState(false);
+  const [portalQuotes, setPortalQuotes] = useState<QuoteListItem[] | null>(null);
+  const [portalQuotesLoading, setPortalQuotesLoading] = useState(false);
+
+  // Link-to-deal modal
+  const [linkTarget, setLinkTarget] = useState<QuoteListItem | null>(null);
+  const [linkCustomer, setLinkCustomer] = useState<Customer | null>(null);
+  const [linkCustomerId, setLinkCustomerId] = useState<number | ''>('');
+  const [linkDealId, setLinkDealId] = useState<number | ''>('');
+  const [linkDeals, setLinkDeals] = useState<import('@/types/api').Deal[]>([]);
+  const [linkSaving, setLinkSaving] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
   const [form, setForm] = useState<{
     customer_id: number | '';
     address: string;
@@ -204,6 +219,76 @@ function DealsContent() {
   useEffect(() => {
     setDocPage(1);
   }, [docType, docCustomer]);
+
+  const fetchPortalQuotes = useCallback(async () => {
+    setPortalQuotesLoading(true);
+    try {
+      const qs = await api.getQuotes({ created_via_portal: true } as any);
+      setPortalQuotes(qs);
+    } catch {
+      setPortalQuotes([]);
+    } finally {
+      setPortalQuotesLoading(false);
+    }
+  }, []);
+
+  const openPortalPanel = useCallback(async () => {
+    setShowPortalPanel(true);
+    if (portalQuotes !== null) return;
+    fetchPortalQuotes();
+  }, [portalQuotes, fetchPortalQuotes]);
+
+  const openLinkModal = (q: QuoteListItem) => {
+    setLinkTarget(q);
+    setLinkDealId(q.deal ?? '');
+    setLinkDeals([]);
+    setLinkError(null);
+    // Pre-populate customer from already-linked customer
+    if (q.customer) {
+      const preselected = customers.find((c) => c.id === q.customer) ?? null;
+      setLinkCustomer(preselected);
+      setLinkCustomerId(q.customer);
+      api.getDealsForCustomer(q.customer).then(setLinkDeals).catch(() => setLinkDeals([]));
+    } else {
+      setLinkCustomer(null);
+      setLinkCustomerId('');
+    }
+  };
+
+  const handleLinkCustomerChange = async (customer: Customer | null) => {
+    setLinkCustomer(customer);
+    setLinkCustomerId(customer ? customer.id : '');
+    setLinkDealId('');
+    setLinkDeals([]);
+    if (!customer) return;
+    try {
+      const d = await api.getDealsForCustomer(customer.id);
+      setLinkDeals(d);
+    } catch {
+      setLinkDeals([]);
+    }
+  };
+
+  const handleLinkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!linkTarget || !linkCustomerId) return;
+    setLinkSaving(true);
+    setLinkError(null);
+    try {
+      await api.linkQuoteToDeal(
+        linkTarget.id,
+        linkCustomerId as number,
+        linkDealId ? (linkDealId as number) : null,
+      );
+      setLinkTarget(null);
+      // Refresh portal quotes list
+      fetchPortalQuotes();
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : 'Failed to link quote');
+    } finally {
+      setLinkSaving(false);
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this deal? This cannot be undone.')) return;
@@ -338,6 +423,10 @@ function DealsContent() {
               <button onClick={() => fetchData()} disabled={isLoading} className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
                 <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
+              </button>
+              <button onClick={openPortalPanel} className="flex items-center gap-2 px-4 py-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100">
+                <FileText className="w-4 h-4" />
+                MQuotes
               </button>
               <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                 <Plus className="w-5 h-5" />
@@ -656,6 +745,206 @@ function DealsContent() {
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">Cancel</button>
                 <button type="submit" disabled={isSaving} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
                   {isSaving ? 'Creating...' : 'Create Deal'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MQuotes Portal Panel */}
+      {showPortalPanel && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/30"
+            onClick={() => setShowPortalPanel(false)}
+          />
+          {/* Slide-in panel */}
+          <div className="fixed right-0 top-0 h-full w-full max-w-xl z-50 bg-white shadow-xl flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Portal Quotes (MQuotes)</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Quotes submitted via the quotes portal — link each one to a customer &amp; deal</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={fetchPortalQuotes}
+                  disabled={portalQuotesLoading}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded disabled:opacity-40"
+                  title="Refresh"
+                >
+                  <RefreshCw className={`w-4 h-4 ${portalQuotesLoading ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={() => setShowPortalPanel(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              {portalQuotesLoading && (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                </div>
+              )}
+
+              {!portalQuotesLoading && portalQuotes?.length === 0 && (
+                <div className="text-center py-10 text-sm text-gray-500">
+                  No portal quotes yet.
+                </div>
+              )}
+
+              {!portalQuotesLoading && portalQuotes && portalQuotes.length > 0 && (
+                <div className="space-y-3">
+                  {portalQuotes.map((q) => {
+                    const isLinked = !!q.deal;
+                    return (
+                      <div key={q.id} className={`border rounded-xl p-4 ${
+                        isLinked ? 'bg-white border-gray-200' : 'bg-amber-50 border-amber-200'
+                      }`}>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium text-gray-900 truncate">{q.title}</span>
+                              {/* Linked / Unlinked badge */}
+                              {isLinked ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">
+                                  <CheckCircle2 className="w-3 h-3" /> Linked
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 font-medium">
+                                  <AlertCircle className="w-3 h-3" /> Unlinked
+                                </span>
+                              )}
+                              {q.edited_by_admin && (
+                                <span className="px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 font-medium whitespace-nowrap">
+                                  Edited by Admin
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {q.reference} · <strong>{q.portal_contact_name || q.customer_name}</strong>
+                            </p>
+                            {isLinked && (
+                              <p className="text-xs text-green-600 mt-0.5">
+                                Deal #{q.deal}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-semibold text-gray-900">
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: q.currency }).format(q.total)}
+                            </p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              q.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                              q.status === 'sent' ? 'bg-blue-100 text-blue-700' :
+                              q.status === 'expired' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {q.status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-400 mb-3">
+                          Created {formatDate(q.created_at)}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link
+                            href={`/admin/crm/quotes/${q.id}`}
+                            className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                            onClick={() => setShowPortalPanel(false)}
+                          >
+                            View / Edit
+                          </Link>
+                          <button
+                            onClick={() => openLinkModal(q)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                              isLinked
+                                ? 'text-gray-600 bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                : 'text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100'
+                            }`}
+                          >
+                            <Link2 className="w-3 h-3" />
+                            {isLinked ? 'Re-link' : 'Link to Deal'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Link-to-Deal Modal */}
+      {linkTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900">Link to Customer &amp; Deal</h3>
+                <p className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{linkTarget.title}</p>
+              </div>
+              <button onClick={() => setLinkTarget(null)} className="p-2 text-gray-400 hover:text-gray-600 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleLinkSubmit} className="p-4 space-y-4">
+              {linkError && (
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{linkError}</div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Customer <span className="text-red-500">*</span>
+                </label>
+                <CustomerSelect
+                  value={linkCustomer}
+                  onChange={handleLinkCustomerChange}
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Portal submitted name: <strong>{linkTarget.portal_contact_name || linkTarget.customer_name}</strong>
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Deal</label>
+                <select
+                  value={linkDealId}
+                  onChange={(e) => setLinkDealId(e.target.value ? Number(e.target.value) : '')}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  disabled={!linkCustomerId}
+                >
+                  <option value="">No deal (link customer only)</option>
+                  {linkDeals.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      #{d.id} · {d.job_type || 'Deal'} — {d.address || 'no address'}
+                    </option>
+                  ))}
+                </select>
+                {linkCustomerId && linkDeals.length === 0 && (
+                  <p className="text-xs text-gray-400 mt-1">No deals for this customer yet.</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setLinkTarget(null)}
+                  className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={linkSaving || !linkCustomerId}
+                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {linkSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {linkSaving ? 'Linking...' : 'Link Quote'}
                 </button>
               </div>
             </form>
