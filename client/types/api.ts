@@ -490,6 +490,7 @@ export interface PublicQuote {
   reference: string;
   title: string;
   customer_name: string;
+  portal_contact_name?: string;
   customer_phone: string;
   customer_email: string;
   created_at: string;

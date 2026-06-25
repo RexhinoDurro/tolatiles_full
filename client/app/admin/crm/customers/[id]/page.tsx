@@ -71,17 +71,12 @@ export default function CustomerProfilePage() {
     setIsLoading(true);
     setError(null);
     try {
-      const [customersData, allDeals, archivedDealsData] = await Promise.all([
-        api.getCustomers(),
-        api.getDeals(),
+      const [found, activeDeals, archivedDealsData] = await Promise.all([
+        api.getCustomer(customerId),
+        api.getDealsForCustomer(customerId),
         api.getArchivedDeals(customerId),
       ]);
 
-      const found = customersData.find((c) => c.id === customerId);
-      if (!found) {
-        setError('Customer not found');
-        return;
-      }
       setCustomer(found);
       setEditForm({
         name: found.name,
@@ -91,10 +86,10 @@ export default function CustomerProfilePage() {
         notes: found.notes || '',
       });
 
-      setDeals(allDeals.filter((d) => d.customer === customerId));
+      setDeals(activeDeals);
       setArchivedDeals(archivedDealsData);
     } catch {
-      setError('Failed to load customer data');
+      setError('Customer not found');
     } finally {
       setIsLoading(false);
     }

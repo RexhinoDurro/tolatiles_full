@@ -1416,8 +1416,8 @@ class ApiClient {
   }
 
   async getDealsForCustomer(customerId: number): Promise<Deal[]> {
-    const all = await this.getDeals();
-    return all.filter((d) => d.customer === customerId);
+    const response = await this.fetch<PaginatedResponse<Deal> | Deal[]>(`/deals/?customer=${customerId}`);
+    return Array.isArray(response) ? response : response.results;
   }
 
   async getDealQuotes(dealId: number): Promise<QuoteListItem[]> {

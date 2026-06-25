@@ -86,6 +86,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
     - GET /api/customers/search/?q= - Search active customers
     """
     permission_classes = [IsAdminUser]
+    pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['name']
 
@@ -902,6 +903,7 @@ class EstimateViewSet(viewsets.ModelViewSet):
 class DealViewSet(viewsets.ModelViewSet):
     """ViewSet for pipeline deal management."""
     permission_classes = [IsAdminOrQuotesManager]
+    pagination_class = None
     serializer_class = DealSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['stage', 'customer', 'is_archived']

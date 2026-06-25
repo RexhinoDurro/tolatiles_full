@@ -2,7 +2,7 @@
 FROM node:20-alpine AS dev
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
@@ -10,7 +10,7 @@ CMD ["npm", "run", "dev"]
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # NEXT_PUBLIC_* vars must be present at build time (bundled by webpack).
 # Production values come from .env.production (committed to repo).
@@ -53,7 +53,7 @@ ENV NODE_ENV=production
 
 # Only production dependencies at runtime
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev --legacy-peer-deps
 
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public

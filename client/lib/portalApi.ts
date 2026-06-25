@@ -187,6 +187,13 @@ class PortalApiClient {
     const response = await this.fetch<PaginatedResponse<any> | any[]>('/appointments/');
     return Array.isArray(response) ? response : response.results;
   }
+
+  async createAppointmentDirect(data: any): Promise<any> {
+    return this.fetch<any>('/appointments/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const portalApi = new PortalApiClient();

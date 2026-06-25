@@ -3,6 +3,7 @@ server/.env
 .env
 .env.local
 .env.*.local
+db_backup.sql
 
 # Infisical — the .infisical.json is committed (it only holds project ID, no secrets)
 # but never commit any exported secret files
