@@ -142,6 +142,7 @@ function DealsContent() {
   const [showPortalPanel, setShowPortalPanel] = useState(false);
   const [portalQuotes, setPortalQuotes] = useState<QuoteListItem[] | null>(null);
   const [portalQuotesLoading, setPortalQuotesLoading] = useState(false);
+  const [portalFilter, setPortalFilter] = useState<'all' | 'linked' | 'unlinked'>('all');
 
   // Link-to-deal modal
   const [linkTarget, setLinkTarget] = useState<QuoteListItem | null>(null);
@@ -769,6 +770,16 @@ function DealsContent() {
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => setPortalFilter(f => f === 'all' ? 'linked' : f === 'linked' ? 'unlinked' : 'all')}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-full border transition-colors ${
+                    portalFilter === 'all' ? 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200' :
+                    portalFilter === 'linked' ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200' :
+                    'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200'
+                  }`}
+                >
+                  {portalFilter === 'all' ? 'All' : portalFilter === 'linked' ? 'Linked' : 'Unlinked'}
+                </button>
+                <button
                   onClick={fetchPortalQuotes}
                   disabled={portalQuotesLoading}
                   className="p-2 text-gray-400 hover:text-gray-600 rounded disabled:opacity-40"
@@ -798,9 +809,16 @@ function DealsContent() {
                 </div>
               )}
 
-              {!portalQuotesLoading && portalQuotes && portalQuotes.length > 0 && (
+              {!portalQuotesLoading && portalQuotes && portalQuotes.length > 0 && (() => {
+                const visible = portalFilter === 'all' ? portalQuotes : portalQuotes.filter(q => portalFilter === 'linked' ? !!q.deal : !q.deal);
+                if (visible.length === 0) return (
+                  <div className="text-center py-10 text-sm text-gray-500">
+                    No {portalFilter} quotes.
+                  </div>
+                );
+                return (
                 <div className="space-y-3">
-                  {portalQuotes.map((q) => {
+                  {visible.map((q) => {
                     const isLinked = !!q.deal;
                     return (
                       <div key={q.id} className={`border rounded-xl p-4 ${
@@ -876,7 +894,8 @@ function DealsContent() {
                     );
                   })}
                 </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         </>

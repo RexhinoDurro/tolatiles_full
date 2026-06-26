@@ -224,43 +224,43 @@ export default function PublicInvoicePage() {
           <div className="p-6 sm:p-8">
             <h3 className="text-lg font-semibold text-slate-900 mb-6">Invoice Items</h3>
             <div className="overflow-x-auto -mx-6 sm:-mx-8 px-6 sm:px-8">
-              <table className="w-full min-w-[600px]">
-                <thead>
-                  <tr className="border-b-2 border-slate-200">
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">
-                      Qty
-                    </th>
-                    <th className="py-3 px-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">
-                      Unit Price
-                    </th>
-                    <th className="py-3 px-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {invoice.line_items.map((item, index) => (
-                    <tr key={index} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-4 px-4">
-                        <div className="font-medium text-slate-900">{item.name}</div>
-                        {item.description && (
-                          <div className="text-sm text-slate-500 mt-1">{item.description}</div>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-center text-slate-700">{item.quantity}</td>
-                      <td className="py-4 px-4 text-right text-slate-700">
-                        {formatCurrency(Number(item.unit_price))}
-                      </td>
-                      <td className="py-4 px-4 text-right font-semibold text-slate-900">
-                        {formatCurrency(item.line_total ?? 0)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {invoice.installments.map((inst, instIdx) => (
+                <div key={inst.id} className={instIdx > 0 ? 'mt-6' : ''}>
+                  {invoice.installments.length > 1 && (
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-200">
+                      <span className="text-sm font-semibold text-slate-700">{inst.title}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${inst.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {inst.status === 'paid' ? 'Paid' : 'Pending'}
+                      </span>
+                    </div>
+                  )}
+                  <table className="w-full min-w-[600px]">
+                    <thead>
+                      <tr className="border-b-2 border-slate-200">
+                        <th className="py-3 px-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</th>
+                        <th className="py-3 px-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">Qty</th>
+                        <th className="py-3 px-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">Unit Price</th>
+                        <th className="py-3 px-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {inst.line_items.map((item, index) => (
+                        <tr key={index} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-4 px-4">
+                            <div className="font-medium text-slate-900">{item.name}</div>
+                            {item.description && (
+                              <div className="text-sm text-slate-500 mt-1">{item.description}</div>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-center text-slate-700">{item.quantity}</td>
+                          <td className="py-4 px-4 text-right text-slate-700">{formatCurrency(Number(item.unit_price))}</td>
+                          <td className="py-4 px-4 text-right font-semibold text-slate-900">{formatCurrency(item.line_total ?? 0)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
             </div>
 
             {/* Totals */}

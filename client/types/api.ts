@@ -531,7 +531,7 @@ export interface PublicInvoice {
   total: number;
   amount_paid: number;
   balance_due: number;
-  line_items: InvoiceLineItem[];
+  installments: InvoiceInstallment[];
   company: CompanySettings;
   pdf_file: string | null;
 }

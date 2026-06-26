@@ -16,6 +16,10 @@ interface QuoteFormProps {
   onCreateCustomer?: (data: CustomerCreate) => Promise<Customer>;
   /** When true, hides the Customer field (e.g. portal new-quote flow). */
   hideCustomerField?: boolean;
+  /** HTML id placed on the <form> so external submit buttons can reference it. */
+  formId?: string;
+  /** When true, hides the sticky bottom bar on mobile (total + submit). */
+  hideBottomBarOnMobile?: boolean;
 }
 
 const defaultTerms = [
@@ -106,6 +110,8 @@ export default function QuoteForm({
   onCustomerSearch,
   onCreateCustomer,
   hideCustomerField = false,
+  formId,
+  hideBottomBarOnMobile = false,
 }: QuoteFormProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     quote?.customer || initialCustomer || null,
@@ -227,7 +233,7 @@ export default function QuoteForm({
   const pdfVersions = quote?.pdf_versions ?? [];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pb-28 sm:pb-10">
+    <form id={formId} onSubmit={handleSubmit} className={`space-y-4 sm:pb-10 ${hideBottomBarOnMobile ? 'pb-4' : 'pb-28'}`}>
       {/* ── Quote Details ──────────────────────────────────────────────── */}
       <Section title="Quote Details">
         <div className="space-y-3">
@@ -567,7 +573,7 @@ export default function QuoteForm({
       )}
 
       {/* ── Sticky submit bar (mobile) / inline (desktop) ─────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 sm:relative sm:bottom-auto z-30 bg-white sm:bg-transparent border-t border-gray-200 sm:border-0 px-4 py-3 sm:p-0 sm:pt-2">
+      <div className={`fixed bottom-0 left-0 right-0 sm:relative sm:bottom-auto z-30 bg-white sm:bg-transparent border-t border-gray-200 sm:border-0 px-4 py-3 sm:p-0 sm:pt-2 ${hideBottomBarOnMobile ? 'hidden sm:block' : ''}`}>
         <div className="max-w-2xl mx-auto flex items-center gap-3 sm:justify-end">
           {/* Total preview on mobile */}
           <div className="sm:hidden flex-1 min-w-0">

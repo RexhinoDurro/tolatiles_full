@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import PortalProtectedRoute from '@/components/quotes-portal/PortalProtectedRoute';
 import QuoteForm from '@/components/admin/quotes/QuoteForm';
 import { portalApi } from '@/lib/portalApi';
@@ -59,7 +59,17 @@ function NewPortalQuoteContent() {
             <ArrowLeft size={16} />
             <span className="hidden sm:inline">Back</span>
           </button>
-          <h1 className="text-base font-semibold text-gray-900">New Quote</h1>
+          <h1 className="text-base font-semibold text-gray-900 flex-1">New Quote</h1>
+          {/* Submit button in header — visible only on mobile */}
+          <button
+            type="submit"
+            form="portal-new-quote"
+            disabled={isLoading}
+            className="sm:hidden flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors"
+          >
+            {isLoading ? <Loader2 size={15} className="animate-spin" /> : null}
+            Create Quote
+          </button>
         </div>
       </header>
 
@@ -113,8 +123,9 @@ function NewPortalQuoteContent() {
         <QuoteForm
           onSubmit={handleSubmit}
           isLoading={isLoading}
-          /* suppress customer selector entirely */
           hideCustomerField
+          formId="portal-new-quote"
+          hideBottomBarOnMobile
         />
       </div>
     </div>

@@ -381,7 +381,10 @@ class InvoiceDetailSerializer(serializers.ModelSerializer):
         if obj.pdf_file:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.pdf_file.url)
+                url = request.build_absolute_uri(obj.pdf_file.url)
+                if obj.pdf_generated_at:
+                    url = f"{url}?v={int(obj.pdf_generated_at.timestamp())}"
+                return url
         return None
 
     def get_receipt_url(self, obj):
@@ -538,7 +541,10 @@ class PublicInvoiceSerializer(serializers.ModelSerializer):
         if obj.pdf_file:
             request = self.context.get('request')
             if request:
-                return request.build_absolute_uri(obj.pdf_file.url)
+                url = request.build_absolute_uri(obj.pdf_file.url)
+                if obj.pdf_generated_at:
+                    url = f"{url}?v={int(obj.pdf_generated_at.timestamp())}"
+                return url
         return None
 
 

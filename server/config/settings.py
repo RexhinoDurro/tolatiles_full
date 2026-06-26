@@ -208,6 +208,7 @@ CORS_ALLOWED_ORIGINS = [
     'https://tolatiles.com',
     'https://www.tolatiles.com',
     'https://quotes.tolatiles.com',
+    'https://quote.tolatiles.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

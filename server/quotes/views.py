@@ -709,6 +709,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         installment.save(update_fields=['status', 'paid_date'])
         invoice.sync_installment_status()
         invoice.save()
+        self._generate_pdf_after_save(invoice, request)
         return Response(InvoiceInstallmentSerializer(installment, context={'request': request}).data)
 
     @action(detail=True, methods=['post'],

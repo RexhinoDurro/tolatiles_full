@@ -160,8 +160,8 @@ function PortalQuotesContent() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{q.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{q.portal_contact_name || q.customer_name} · {q.reference}</p>
+                      <p className="text-sm font-medium text-gray-900 truncate">{q.portal_contact_name || q.customer_name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{q.title} · {q.reference}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${STATUS_STYLES[q.status] ?? 'bg-gray-100 text-gray-600'}`}>

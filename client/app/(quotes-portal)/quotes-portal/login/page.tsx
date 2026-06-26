@@ -15,7 +15,7 @@ export default function PortalLoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/quotes-portal/schedule');
+      router.push('/quotes-portal/quotes');
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -25,7 +25,7 @@ export default function PortalLoginPage() {
     setSubmitting(true);
     try {
       await login(username, password);
-      router.push('/quotes-portal/schedule');
+      router.push('/quotes-portal/quotes');
     } catch {
       // error is set by the hook
     } finally {

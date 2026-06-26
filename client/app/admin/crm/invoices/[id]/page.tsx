@@ -5,13 +5,13 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft, Loader2, Download, Send, CheckCircle, Trash2,
-  Calendar, User, Clock, Edit, ExternalLink, Copy, Eye,
+  Calendar, User, Clock, Edit, ExternalLink, Copy, Eye, BadgeCheck,
 } from 'lucide-react';
 import CrmLayout from '@/components/admin/crm/CrmLayout';
 import InvoiceStatusBadge from '@/components/admin/invoices/InvoiceStatusBadge';
 import InvoiceForm from '@/components/admin/invoices/InvoiceForm';
 import { api } from '@/lib/api';
-import type { Invoice, InvoiceCreate, InvoiceStatus } from '@/types/api';
+import type { Invoice, InvoiceCreate, InvoiceStatus, InvoiceInstallment } from '@/types/api';
 
 export default function CrmInvoiceDetailPage() {
   const params = useParams();
@@ -25,6 +25,7 @@ export default function CrmInvoiceDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [installmentActionLoading, setInstallmentActionLoading] = useState<number | null>(null);
 
   const fetchInvoice = useCallback(async () => {
     setIsLoading(true);
@@ -101,6 +102,20 @@ export default function CrmInvoiceDetailPage() {
       setError('Failed to mark as paid');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleMarkInstallmentPaid = async (installmentId: number) => {
+    setInstallmentActionLoading(installmentId);
+    try {
+      await api.markInstallmentPaid(invoiceId, installmentId);
+      // Regenerate PDF so balance due reflects the new payment
+      await api.generateInvoicePdf(invoiceId).catch(() => {});
+      fetchInvoice();
+    } catch {
+      setError('Failed to mark installment as paid');
+    } finally {
+      setInstallmentActionLoading(null);
     }
   };
 
@@ -205,12 +220,6 @@ export default function CrmInvoiceDetailPage() {
               {actionLoading === 'email' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Send Email
             </button>
-            {invoice.status !== 'paid' && (
-              <button onClick={handleMarkPaid} disabled={actionLoading === 'paid'} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50">
-                {actionLoading === 'paid' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                Mark as Paid
-              </button>
-            )}
             <div className="ml-auto">
               <button onClick={handleDelete} disabled={actionLoading === 'delete'} className="flex items-center gap-2 px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 disabled:opacity-50">
                 {actionLoading === 'delete' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -258,14 +267,37 @@ export default function CrmInvoiceDetailPage() {
               <div className="px-6 py-4 border-b"><h3 className="font-semibold text-gray-900">Line Items</h3></div>
               {invoice.installments.map((inst, instIdx) => (
                 <div key={inst.id} className={instIdx > 0 ? 'border-t' : ''}>
-                  {invoice.installments.length > 1 && (
-                    <div className="px-6 py-3 bg-gray-50 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-700">{inst.title}</span>
-                      {inst.due_date && (
+                  <div className={`px-6 py-3 bg-gray-50 flex items-center justify-between ${invoice.installments.length === 1 ? 'border-b' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      {invoice.installments.length > 1 && (
+                        <span className="text-sm font-semibold text-gray-700">{inst.title}</span>
+                      )}
+                      {inst.due_date && invoice.installments.length > 1 && (
                         <span className="text-xs text-gray-500">Due: {formatDate(inst.due_date)}</span>
                       )}
                     </div>
-                  )}
+                    <div className="flex items-center gap-3">
+                      {inst.due_date && invoice.installments.length === 1 && (
+                        <span className="text-xs text-gray-500">Due: {formatDate(inst.due_date)}</span>
+                      )}
+                      {inst.status === 'paid' ? (
+                        <span className="flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                          <BadgeCheck className="w-3.5 h-3.5" /> Paid
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleMarkInstallmentPaid(inst.id)}
+                          disabled={installmentActionLoading === inst.id}
+                          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        >
+                          {installmentActionLoading === inst.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <CheckCircle className="w-3.5 h-3.5" />}
+                          Mark as Paid
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b">
                       <tr>
@@ -331,11 +363,6 @@ export default function CrmInvoiceDetailPage() {
                 {invoice.status === 'draft' && (
                   <button onClick={() => handleUpdateStatus('sent')} disabled={actionLoading === 'status'} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200">
                     <Send className="w-4 h-4" /> Mark as Sent
-                  </button>
-                )}
-                {invoice.status !== 'paid' && (
-                  <button onClick={handleMarkPaid} disabled={actionLoading === 'paid'} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200">
-                    <CheckCircle className="w-4 h-4" /> Mark as Paid
                   </button>
                 )}
               </div>
