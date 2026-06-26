@@ -1102,8 +1102,11 @@ export type SlotType = 'hero' | 'mid_slider' | 'bottom_grid';
 
 export interface ProjectMedia {
   id: number;
-  file: string;
-  media_type: 'image' | 'video';
+  file: string | null;
+  youtube_url: string;
+  youtube_embed_url: string | null;
+  youtube_thumbnail: string | null;
+  media_type: 'image' | 'video' | 'youtube';
   order: number;
   alt_text: string;
   created_at: string;
@@ -1140,7 +1143,7 @@ export interface ProjectListItem {
   job_types: ServiceTypeSlug[];
   phase_count: number;
   cover_image: string | null;
-  cover_media_type: 'image' | 'video';
+  cover_media_type: 'image' | 'video' | 'youtube';
   created_at: string;
   updated_at: string;
 }
@@ -1185,4 +1188,34 @@ export interface HomepageSlotUpdate {
 export interface ServicePinItem {
   project_id: number;
   order: number;
+}
+
+// Site FAQ Types (standalone FAQ management, not blog inline FAQs)
+export type FAQCategorySlug = 'general' | 'services' | 'pricing' | 'materials' | 'maintenance';
+
+export interface SiteFAQ {
+  id: number;
+  question: string;
+  answer: string;
+  category: FAQCategorySlug;
+  order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SiteFAQCreate {
+  question: string;
+  answer: string;
+  category: FAQCategorySlug;
+  order?: number;
+  is_active?: boolean;
+}
+
+export interface SiteFAQUpdate {
+  question?: string;
+  answer?: string;
+  category?: FAQCategorySlug;
+  order?: number;
+  is_active?: boolean;
 }

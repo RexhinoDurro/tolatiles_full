@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, LogOut, ExternalLink, Settings, X, BarChart3, PenSquare, Briefcase, FolderKanban } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, LogOut, ExternalLink, Settings, X, BarChart3, PenSquare, Briefcase, FolderKanban, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AdminSidebarProps {
@@ -35,6 +35,11 @@ const navItems = [
     name: 'Projects',
     href: '/admin/projects',
     icon: FolderKanban,
+  },
+  {
+    name: 'FAQs',
+    href: '/admin/faqs',
+    icon: HelpCircle,
   },
   {
     name: 'Stats',

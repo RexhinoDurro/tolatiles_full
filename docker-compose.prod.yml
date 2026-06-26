@@ -1,0 +1,76 @@
+# Production stack — run on VPS with:
+#   infisical run --env=prod -- docker-compose -f docker-compose.prod.yml up -d --build
+#
+# Nginx on the host proxies to:
+#   - backend  → 127.0.0.1:8000
+#   - frontend → 127.0.0.1:3000
+#
+# The existing Nginx config in DEPLOYMENT.md requires no changes.
+
+name: tolatiles-prod
+
+x-backend-env: &backend-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+  DJANGO_DEBUG: "False"
+  DATABASE_URL: ${DATABASE_URL}
+  CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+  CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+  REDIS_HOST: ${REDIS_HOST:-localhost}
+  FRONTEND_URL: ${FRONTEND_URL:-https://tolatiles.com}
+  WORKMAIL_PASS: ${WORKMAIL_PASS}
+  GEMINI_API_KEY: ${GEMINI_API_KEY}
+  GEMINI_IMAGE_API_KEY: ${GEMINI_IMAGE_API_KEY}
+  VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+  VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+  VAPID_CLAIMS_EMAIL: ${VAPID_CLAIMS_EMAIL:-menitola@tolatiles.com}
+  CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
+  GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+  GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+  GOOGLE_ADS_DEVELOPER_TOKEN: ${GOOGLE_ADS_DEVELOPER_TOKEN}
+  GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${GOOGLE_ADS_LOGIN_CUSTOMER_ID}
+  GOOGLE_ADS_CUSTOMER_ID: ${GOOGLE_ADS_CUSTOMER_ID}
+  GOOGLE_ADS_CLIENT_ID: ${GOOGLE_ADS_CLIENT_ID}
+  GOOGLE_ADS_CLIENT_SECRET: ${GOOGLE_ADS_CLIENT_SECRET}
+
+services:
+  backend:
+    build:
+      context: ./server
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    volumes:
+      - media_files:/app/media
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  celery:
+    build:
+      context: ./server
+    command: celery -A config worker --loglevel=info
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    volumes:
+      - media_files:/app/media
+
+  celery-beat:
+    build:
+      context: ./server
+    command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+
+  frontend:
+    build:
+      context: ./client
+      target: runner
+      # NEXT_PUBLIC_* vars are already correct in .env.production (committed).
+      # Only set build args here if you need to override them.
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  media_files:

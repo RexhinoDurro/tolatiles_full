@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2, Youtube } from 'lucide-react';
 import type { ProjectMedia } from '@/types/api';
 
 interface MediaItemProps {
@@ -26,7 +26,14 @@ export default function MediaItem({ media, onDelete }: MediaItemProps) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const isYouTube = media.media_type === 'youtube';
   const isVideo = media.media_type === 'video';
+
+  const thumbSrc = isYouTube
+    ? media.youtube_thumbnail
+    : isVideo
+    ? null
+    : media.file;
 
   return (
     <div
@@ -34,7 +41,23 @@ export default function MediaItem({ media, onDelete }: MediaItemProps) {
       style={style}
       className="relative group rounded-lg overflow-hidden aspect-square bg-gray-100 border border-gray-200"
     >
-      {isVideo ? (
+      {isYouTube && media.youtube_thumbnail ? (
+        <>
+          <img
+            src={media.youtube_thumbnail}
+            alt={media.alt_text || 'YouTube video'}
+            className="w-full h-full object-cover"
+          />
+          {/* YouTube play overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-4 h-4 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        </>
+      ) : isVideo && media.file ? (
         <video
           src={media.file}
           autoPlay
@@ -43,12 +66,14 @@ export default function MediaItem({ media, onDelete }: MediaItemProps) {
           playsInline
           className="w-full h-full object-cover"
         />
-      ) : (
+      ) : media.file ? (
         <img
           src={media.file}
           alt={media.alt_text || ''}
           className="w-full h-full object-cover"
         />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No preview</div>
       )}
 
       {/* Drag handle */}
@@ -68,12 +93,17 @@ export default function MediaItem({ media, onDelete }: MediaItemProps) {
         <Trash2 className="w-3.5 h-3.5" />
       </button>
 
-      {/* Video badge */}
-      {isVideo && (
+      {/* Type badge */}
+      {isYouTube ? (
+        <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-red-600 text-white text-xs rounded flex items-center gap-0.5">
+          <Youtube className="w-2.5 h-2.5" />
+          YT
+        </span>
+      ) : isVideo ? (
         <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 text-white text-xs rounded">
           Video
         </span>
-      )}
+      ) : null}
     </div>
   );
 }

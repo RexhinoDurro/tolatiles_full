@@ -62,13 +62,13 @@ export const metadata: Metadata = {
 
 const localBusinessSchema = {
   '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
+  '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'],
   '@id': 'https://tolatiles.com/#business',
   name: 'Tola Tiles',
   description: 'Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida, Tile Contractors, Flooring Installers, Tile Installers',
   url: 'https://tolatiles.com',
   telephone: '+1-904-866-1738',
-  email: 'Menitola@live.com',
+  email: 'menitola@tolatiles.com',
   foundingDate: '2008',
   priceRange: '$8-25 per sq ft',
   paymentAccepted: 'Cash, Check, Credit Card',
@@ -79,7 +79,7 @@ const localBusinessSchema = {
     streetAddress: '445 Hutchinson Ln',
     addressLocality: 'Saint Augustine',
     addressRegion: 'FL',
-    postalCode: '32095',
+    postalCode: '32084',
     addressCountry: 'US',
   },
   geo: {
@@ -118,7 +118,7 @@ const organizationSchema = {
     '@type': 'ContactPoint',
     telephone: '+1-904-866-1738',
     contactType: 'Customer Service',
-    email: 'Menitola@live.com',
+    email: 'menitola@tolatiles.com',
     availableLanguage: 'English',
   },
   address: {
@@ -126,7 +126,7 @@ const organizationSchema = {
     streetAddress: '445 Hutchinson Ln',
     addressLocality: 'Saint Augustine',
     addressRegion: 'FL',
-    postalCode: '32095',
+    postalCode: '32084',
     addressCountry: 'US',
   },
   founder: {
@@ -161,27 +161,27 @@ const siteNavigationSchema = {
     {
       '@type': 'SiteNavigationElement',
       name: 'Services',
-      url: 'https://tolatiles.com/florida/services',
+      url: 'https://tolatiles.com/services',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'Gallery',
-      url: 'https://tolatiles.com/florida/gallery',
+      url: 'https://tolatiles.com/gallery',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'About',
-      url: 'https://tolatiles.com/florida/about',
+      url: 'https://tolatiles.com/about',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'Blog',
-      url: 'https://tolatiles.com/florida/blog',
+      url: 'https://tolatiles.com/blog',
     },
     {
       '@type': 'SiteNavigationElement',
       name: 'Contact',
-      url: 'https://tolatiles.com/florida/contact',
+      url: 'https://tolatiles.com/contact',
     },
   ],
 };

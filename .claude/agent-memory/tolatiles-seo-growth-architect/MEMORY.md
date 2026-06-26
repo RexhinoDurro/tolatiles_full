@@ -1,0 +1,3 @@
+- [Location Pages Architecture](project-location-pages.md) — Jacksonville/St. Augustine page structure, what was added 2026-06-26, navigation links
+- [SEO Plan Status](project-seo-plan-status.md) — plan.md phase-by-phase status: done vs outstanding items
+- [Service Page Differentiation](project-service-page-differentiation.md) — color themes, new content sections, FAQ schema, H1 strategy per service (2026-06-26)

@@ -151,10 +151,12 @@ export default function DisplayStyleModal({
                         beforeMediaId === m.id ? 'border-blue-600' : 'border-transparent'
                       }`}
                     >
-                      {m.media_type === 'video' ? (
-                        <video src={m.file} muted className="w-full h-full object-cover" />
+                      {m.media_type === 'youtube' ? (
+                        <img src={m.youtube_thumbnail ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
+                      ) : m.media_type === 'video' ? (
+                        <video src={m.file ?? undefined} muted className="w-full h-full object-cover" />
                       ) : (
-                        <img src={m.file} alt={m.alt_text} className="w-full h-full object-cover" />
+                        <img src={m.file ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
                       )}
                     </button>
                   ))}
@@ -182,10 +184,12 @@ export default function DisplayStyleModal({
                         afterMediaId === m.id ? 'border-blue-600' : 'border-transparent'
                       }`}
                     >
-                      {m.media_type === 'video' ? (
-                        <video src={m.file} muted className="w-full h-full object-cover" />
+                      {m.media_type === 'youtube' ? (
+                        <img src={m.youtube_thumbnail ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
+                      ) : m.media_type === 'video' ? (
+                        <video src={m.file ?? undefined} muted className="w-full h-full object-cover" />
                       ) : (
-                        <img src={m.file} alt={m.alt_text} className="w-full h-full object-cover" />
+                        <img src={m.file ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
                       )}
                     </button>
                   ))}

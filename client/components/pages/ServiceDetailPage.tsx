@@ -3,23 +3,24 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Hammer, ChefHat, Bath, Home, Palette, Wrench, Clock, CheckCircle, ArrowRight, ChevronRight, Phone, Mail, Loader2, MapPin, Star } from 'lucide-react';
+import {
+  Hammer, ChefHat, Bath, Home, Palette, Wrench,
+  Clock, CheckCircle, ArrowRight, ChevronRight, ChevronDown,
+  Phone, Mail, Loader2, MapPin, Star, Layers,
+} from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
 import type { Service } from '@/data/services';
+import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 
+// ─── Icon map ────────────────────────────────────────────────────────────────
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  Hammer,
-  ChefHat,
-  Bath,
-  Home,
-  Palette,
-  Wrench,
+  Hammer, ChefHat, Bath, Home, Palette, Wrench,
 };
 
-// Map for gallery URL path
+// ─── Gallery path map ─────────────────────────────────────────────────────────
 const serviceToGalleryPath: Record<string, string> = {
   'kitchen-backsplash': 'backsplashes',
   bathroom: 'showers',
@@ -29,7 +30,7 @@ const serviceToGalleryPath: Record<string, string> = {
   shower: 'showers',
 };
 
-// Map service IDs to project service slugs
+// ─── Project slug map ─────────────────────────────────────────────────────────
 const serviceIdToProjectSlug: Record<string, string> = {
   'kitchen-backsplash': 'kitchen-backsplash',
   bathroom: 'bathroom-tile',
@@ -39,37 +40,134 @@ const serviceIdToProjectSlug: Record<string, string> = {
   shower: 'shower-tile',
 };
 
-// Map service IDs to location-specific slugs
-const getLocationSlug = (serviceId: string, loc: 'jacksonville' | 'st-augustine'): string => {
-  const slugMap: Record<string, Record<string, string>> = {
-    'kitchen-backsplash': {
-      jacksonville: 'kitchen-backsplash-jacksonville',
-      'st-augustine': 'kitchen-backsplash-st-augustine',
-    },
-    bathroom: {
-      jacksonville: 'bathroom-tile-jacksonville',
-      'st-augustine': 'bathroom-tile-st-augustine',
-    },
-    flooring: {
-      jacksonville: 'floor-tile-jacksonville',
-      'st-augustine': 'floor-tile-st-augustine',
-    },
-    patio: {
-      jacksonville: 'patio-tile-jacksonville',
-      'st-augustine': 'patio-tile-st-augustine',
-    },
-    fireplace: {
-      jacksonville: 'fireplace-tile-jacksonville',
-      'st-augustine': 'fireplace-tile-st-augustine',
-    },
-    shower: {
-      jacksonville: 'shower-tile-jacksonville',
-      'st-augustine': 'shower-tile-st-augustine',
-    },
-  };
-  return slugMap[serviceId]?.[loc] || serviceId;
+// ─── Visual theme system ──────────────────────────────────────────────────────
+// All class strings are static literals so Tailwind's scanner includes them.
+interface ServiceTheme {
+  heroBg: string;
+  accentBg: string;
+  accentBgHover: string;
+  accentText: string;
+  accentBorder: string;
+  accentLight: string;
+  accentLightHover: string;
+  accentLightMed: string;
+  accentLightMedHover: string;
+  accentLightBorder: string;
+  featureHover: string;
+  ctaBg: string;
+  ctaSubtitle: string;
+}
+
+const serviceThemes: Record<string, ServiceTheme> = {
+  'kitchen-backsplash': {
+    heroBg: 'bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100',
+    accentBg: 'bg-amber-600',
+    accentBgHover: 'hover:bg-amber-700',
+    accentText: 'text-amber-600',
+    accentBorder: 'border-amber-600',
+    accentLight: 'bg-amber-50',
+    accentLightHover: 'hover:bg-amber-100',
+    accentLightMed: 'bg-amber-100',
+    accentLightMedHover: 'group-hover:bg-amber-200',
+    accentLightBorder: 'border-amber-200',
+    featureHover: 'hover:bg-amber-50',
+    ctaBg: 'bg-gradient-to-r from-amber-600 to-orange-600',
+    ctaSubtitle: 'text-amber-100',
+  },
+  bathroom: {
+    heroBg: 'bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-100',
+    accentBg: 'bg-teal-600',
+    accentBgHover: 'hover:bg-teal-700',
+    accentText: 'text-teal-600',
+    accentBorder: 'border-teal-600',
+    accentLight: 'bg-teal-50',
+    accentLightHover: 'hover:bg-teal-100',
+    accentLightMed: 'bg-teal-100',
+    accentLightMedHover: 'group-hover:bg-teal-200',
+    accentLightBorder: 'border-teal-200',
+    featureHover: 'hover:bg-teal-50',
+    ctaBg: 'bg-gradient-to-r from-teal-600 to-cyan-700',
+    ctaSubtitle: 'text-teal-100',
+  },
+  flooring: {
+    heroBg: 'bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100',
+    accentBg: 'bg-stone-700',
+    accentBgHover: 'hover:bg-stone-800',
+    accentText: 'text-stone-700',
+    accentBorder: 'border-stone-700',
+    accentLight: 'bg-stone-50',
+    accentLightHover: 'hover:bg-stone-100',
+    accentLightMed: 'bg-stone-100',
+    accentLightMedHover: 'group-hover:bg-stone-200',
+    accentLightBorder: 'border-stone-200',
+    featureHover: 'hover:bg-stone-50',
+    ctaBg: 'bg-gradient-to-r from-stone-700 to-slate-700',
+    ctaSubtitle: 'text-stone-200',
+  },
+  patio: {
+    heroBg: 'bg-gradient-to-br from-green-50 via-emerald-50 to-green-100',
+    accentBg: 'bg-green-600',
+    accentBgHover: 'hover:bg-green-700',
+    accentText: 'text-green-600',
+    accentBorder: 'border-green-600',
+    accentLight: 'bg-green-50',
+    accentLightHover: 'hover:bg-green-100',
+    accentLightMed: 'bg-green-100',
+    accentLightMedHover: 'group-hover:bg-green-200',
+    accentLightBorder: 'border-green-200',
+    featureHover: 'hover:bg-green-50',
+    ctaBg: 'bg-gradient-to-r from-green-600 to-emerald-700',
+    ctaSubtitle: 'text-green-100',
+  },
+  fireplace: {
+    heroBg: 'bg-gradient-to-br from-red-50 via-rose-50 to-orange-50',
+    accentBg: 'bg-red-600',
+    accentBgHover: 'hover:bg-red-700',
+    accentText: 'text-red-600',
+    accentBorder: 'border-red-600',
+    accentLight: 'bg-red-50',
+    accentLightHover: 'hover:bg-red-100',
+    accentLightMed: 'bg-red-100',
+    accentLightMedHover: 'group-hover:bg-red-200',
+    accentLightBorder: 'border-red-200',
+    featureHover: 'hover:bg-red-50',
+    ctaBg: 'bg-gradient-to-r from-red-600 to-rose-700',
+    ctaSubtitle: 'text-red-100',
+  },
+  shower: {
+    heroBg: 'bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50',
+    accentBg: 'bg-sky-600',
+    accentBgHover: 'hover:bg-sky-700',
+    accentText: 'text-sky-600',
+    accentBorder: 'border-sky-600',
+    accentLight: 'bg-sky-50',
+    accentLightHover: 'hover:bg-sky-100',
+    accentLightMed: 'bg-sky-100',
+    accentLightMedHover: 'group-hover:bg-sky-200',
+    accentLightBorder: 'border-sky-200',
+    featureHover: 'hover:bg-sky-50',
+    ctaBg: 'bg-gradient-to-r from-sky-600 to-blue-700',
+    ctaSubtitle: 'text-sky-100',
+  },
 };
 
+const defaultTheme: ServiceTheme = {
+  heroBg: 'bg-gradient-to-r from-blue-50 to-blue-100',
+  accentBg: 'bg-blue-600',
+  accentBgHover: 'hover:bg-blue-700',
+  accentText: 'text-blue-600',
+  accentBorder: 'border-blue-600',
+  accentLight: 'bg-blue-50',
+  accentLightHover: 'hover:bg-blue-100',
+  accentLightMed: 'bg-blue-100',
+  accentLightMedHover: 'group-hover:bg-blue-200',
+  accentLightBorder: 'border-blue-200',
+  featureHover: 'hover:bg-blue-50',
+  ctaBg: 'bg-gradient-to-r from-blue-600 to-blue-700',
+  ctaSubtitle: 'text-blue-100',
+};
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface DisplayImage {
   id: number;
   src: string;
@@ -84,16 +182,32 @@ interface ServiceDetailPageProps {
   location?: string;
 }
 
-const ServiceDetailPage = ({ service, relatedServices, serviceIdToSlug, location = 'florida' }: ServiceDetailPageProps) => {
+// ─── Main component ───────────────────────────────────────────────────────────
+const ServiceDetailPage = ({
+  service,
+  relatedServices,
+  serviceIdToSlug,
+  location = 'florida',
+}: ServiceDetailPageProps) => {
   const [galleryImages, setGalleryImages] = useState<DisplayImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
-  // Get Florida location-specific content
+  const locPrefix = location === 'florida' ? '' : `/${location}`;
+
+  // Theme and details lookup
+  const theme = serviceThemes[service.id] ?? defaultTheme;
+  const details = serviceDetailsMap[service.id];
+
   const locationContent = service.locations.florida;
-
   const IconComponent = iconMap[service.icon];
   const galleryKey = serviceToGalleryPath[service.id] || 'backsplashes';
   const apiCategory = serviceToCategoryMap[service.id] || 'backsplash';
+
+  // H1: use keyword base from details, or fall back to service title
+  const h1Text = details
+    ? `${details.keywordBase} in Northeast Florida`
+    : `${service.title} in Northeast Florida`;
 
   // Fetch gallery images from API with fallback
   useEffect(() => {
@@ -101,92 +215,75 @@ const ServiceDetailPage = ({ service, relatedServices, serviceIdToSlug, location
       setIsLoading(true);
       try {
         const images = await api.getGalleryImages(apiCategory);
-        const formattedImages = images.slice(0, 6).map((img) => ({
-          id: img.id,
-          src: img.image_url || img.image,
-          title: img.title,
-          description: img.description,
-        }));
-        setGalleryImages(formattedImages);
-      } catch (err) {
-        console.warn('API fetch failed, using static data:', err);
-        // Fall back to static data
-        const staticKey = service.id === 'kitchen-backsplash' ? 'backsplashes' :
-                          service.id === 'bathroom' ? 'showers' :
-                          service.id === 'patio' ? 'patios' :
-                          service.id === 'fireplace' ? 'fireplaces' :
-                          service.id === 'shower' ? 'showers' :
-                          'flooring';
-        const staticImages = (sampleImages[staticKey as keyof typeof sampleImages] || []).slice(0, 6);
-        setGalleryImages(staticImages);
+        setGalleryImages(
+          images.slice(0, 6).map((img) => ({
+            id: img.id,
+            src: img.image_url || img.image,
+            title: img.title,
+            description: img.description,
+          }))
+        );
+      } catch {
+        const staticKey =
+          service.id === 'kitchen-backsplash' ? 'backsplashes' :
+          service.id === 'bathroom' ? 'showers' :
+          service.id === 'patio' ? 'patios' :
+          service.id === 'fireplace' ? 'fireplaces' :
+          service.id === 'shower' ? 'showers' : 'flooring';
+        setGalleryImages(
+          (sampleImages[staticKey as keyof typeof sampleImages] || []).slice(0, 6)
+        );
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchGalleryImages();
   }, [service.id, apiCategory]);
 
   const createQuoteEmailLink = () => {
     const subject = encodeURIComponent(`Quote Request - ${service.title} in Northeast Florida`);
-    const body = encodeURIComponent(`
-Hello Tola Tiles,
-
-I would like to request a quote for ${service.title} in Northeast Florida.
-
-Project Details:
-- Service: ${service.title}
-- Location: Northeast Florida
-- Timeline:
-- Budget Range:
-- Additional Notes:
-
-Please contact me to discuss this project further.
-
-Thank you,
-    `.trim());
-
+    const body = encodeURIComponent(
+      `Hello Tola Tiles,\n\nI would like to request a quote for ${service.title} in Northeast Florida.\n\nProject Details:\n- Service: ${service.title}\n- Location: Northeast Florida\n- Timeline:\n- Budget Range:\n- Additional Notes:\n\nThank you,`.trim()
+    );
     return `mailto:menitola@tolatiles.com?subject=${subject}&body=${body}`;
   };
 
+  const processSteps = details?.processSteps ?? [
+    { step: '01', title: 'Consultation', description: 'Free in-home assessment and design planning' },
+    { step: '02', title: 'Preparation', description: 'Surface preparation and material delivery' },
+    { step: '03', title: 'Installation', description: 'Expert installation by certified craftsmen' },
+    { step: '04', title: 'Completion', description: 'Quality inspection and customer walkthrough' },
+  ];
+
   return (
     <div className="pt-20">
-      {/* Breadcrumb */}
+
+      {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <nav className="bg-gray-50 py-4" aria-label="Breadcrumb">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ol className="flex items-center space-x-2 text-sm">
             <li>
-              <Link href="/" className="text-gray-500 hover:text-blue-600">
-                Home
-              </Link>
+              <Link href="/" className="text-gray-500 hover:text-gray-800 transition-colors">Home</Link>
             </li>
+            <li><ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" /></li>
             <li>
-              <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              <Link href="/services" className="text-gray-500 hover:text-gray-800 transition-colors">Services</Link>
             </li>
+            <li><ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" /></li>
             <li>
-              <Link href="/services" className="text-gray-500 hover:text-blue-600">
-                Services
-              </Link>
-            </li>
-            <li>
-              <ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" />
-            </li>
-            <li>
-              <span className="text-gray-900 font-medium" aria-current="page">
-                {service.title}
-              </span>
+              <span className="text-gray-900 font-medium" aria-current="page">{service.title}</span>
             </li>
           </ol>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-16">
+      {/* ── Hero ───────────────────────────────────────────────────────────── */}
+      <section className={`${theme.heroBg} py-16`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="flex items-center gap-4 mb-6">
-                <div className="bg-blue-600 p-3 rounded-xl">
+                <div className={`${theme.accentBg} p-3 rounded-xl`}>
                   {IconComponent && <IconComponent className="h-8 w-8 text-white" aria-hidden="true" />}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -195,25 +292,28 @@ Thank you,
                 </div>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{service.title} in Northeast Florida</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                {h1Text}
+              </h1>
 
-              {/* Use Florida location-specific description */}
-              <p className="text-xl text-gray-700 mb-8 leading-relaxed">{locationContent.localDescription}</p>
+              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+                {locationContent.localDescription}
+              </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/contact"
-                  className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 flex items-center justify-center gap-2"
+                  className={`${theme.accentBg} ${theme.accentBgHover} text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2`}
                 >
                   Get Free Quote
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <a
                   href="tel:+1-904-866-1738"
-                  className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
+                  className={`border-2 ${theme.accentBorder} ${theme.accentText} px-8 py-4 rounded-lg font-semibold ${theme.accentBgHover} hover:text-white transition-all duration-300 flex items-center justify-center gap-2`}
                 >
                   <Phone className="h-5 w-5" />
-                  Call Now
+                  (904) 866-1738
                 </a>
               </div>
             </div>
@@ -221,15 +321,18 @@ Thank you,
             <div className="relative">
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
                   {galleryImages.slice(0, 4).map((image, index) => (
-                    <div key={image.id} className={`rounded-xl overflow-hidden shadow-lg ${index === 0 ? 'col-span-2' : ''}`}>
+                    <div
+                      key={image.id}
+                      className={`rounded-xl overflow-hidden shadow-lg ${index === 0 ? 'col-span-2' : ''}`}
+                    >
                       <Image
                         src={image.src}
-                        alt={`${service.title} example - ${image.title}`}
+                        alt={`${service.title} project in Northeast Florida — ${image.title}`}
                         width={index === 0 ? 600 : 280}
                         height={index === 0 ? 300 : 200}
                         className={`w-full object-cover ${index === 0 ? 'h-64' : 'h-48'}`}
@@ -243,18 +346,25 @@ Thank you,
         </div>
       </section>
 
-      {/* Why Choose Us Section - Location Specific */}
+      {/* ── Why Choose Us ──────────────────────────────────────────────────── */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us in Northeast Florida</h2>
-            <p className="text-xl text-gray-600">Local expertise for exceptional results</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {details?.whyHeading ?? `Why Choose Tola Tiles in Northeast Florida`}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {details?.whySubtitle ?? 'Local expertise for exceptional results'}
+            </p>
           </header>
 
           <div className="grid md:grid-cols-3 gap-8">
             {locationContent.sellingPoints.map((point, index) => (
-              <div key={index} className="bg-blue-50 rounded-xl p-6 text-center hover:bg-blue-100 transition-colors duration-300">
-                <div className="bg-blue-600 p-3 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4">
+              <div
+                key={index}
+                className={`${theme.accentLight} rounded-xl p-6 text-center ${theme.accentLightHover} transition-colors duration-300`}
+              >
+                <div className={`${theme.accentBg} p-3 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4`}>
                   <Star className="h-6 w-6 text-white" aria-hidden="true" />
                 </div>
                 <p className="text-gray-800 font-medium text-lg">{point}</p>
@@ -264,34 +374,42 @@ Thank you,
         </div>
       </section>
 
-      {/* Features Section - Combined Base + Location Features */}
+      {/* ── What's Included (Features) ─────────────────────────────────────── */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">What&apos;s Included</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              What&apos;s Included with Every {service.title} Project
+            </h2>
             <p className="text-xl text-gray-600">Comprehensive service for exceptional results</p>
           </header>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Location-specific features first */}
             {locationContent.localFeatures.map((feature, index) => (
-              <div key={`local-${index}`} className="bg-blue-50 rounded-xl p-6 hover:bg-blue-100 transition-colors duration-300 border-2 border-blue-200">
+              <div
+                key={`local-${index}`}
+                className={`${theme.accentLight} rounded-xl p-6 ${theme.accentLightHover} transition-colors duration-300 border-2 ${theme.accentLightBorder}`}
+              >
                 <div className="flex items-start gap-4">
-                  <div className="bg-blue-600 p-2 rounded-lg">
+                  <div className={`${theme.accentBg} p-2 rounded-lg flex-shrink-0`}>
                     <MapPin className="h-5 w-5 text-white" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-gray-700 font-medium">{feature}</p>
-                    <span className="text-xs text-blue-600 font-semibold">Florida Specialty</span>
+                    <span className={`text-xs ${theme.accentText} font-semibold`}>Florida Specialty</span>
                   </div>
                 </div>
               </div>
             ))}
             {/* Base features */}
             {service.features.map((feature, index) => (
-              <div key={`base-${index}`} className="bg-white rounded-xl p-6 hover:bg-blue-50 transition-colors duration-300">
+              <div
+                key={`base-${index}`}
+                className={`bg-white rounded-xl p-6 ${theme.featureHover} transition-colors duration-300`}
+              >
                 <div className="flex items-start gap-4">
-                  <div className="bg-green-100 p-2 rounded-lg">
+                  <div className="bg-green-100 p-2 rounded-lg flex-shrink-0">
                     <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
                   </div>
                   <p className="text-gray-700 font-medium">{feature}</p>
@@ -302,17 +420,62 @@ Thank you,
         </div>
       </section>
 
-      {/* Service Areas Section */}
-      <section className="py-16 bg-white">
+      {/* ── Materials & Styles ─────────────────────────────────────────────── */}
+      {details?.materials && details.materials.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <header className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Tile Materials &amp; Styles for {service.title}
+              </h2>
+              <p className="text-xl text-gray-600">
+                We help you choose the right material for your space, budget, and Northeast Florida climate
+              </p>
+            </header>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {details.materials.map((material, index) => (
+                <div
+                  key={index}
+                  className={`rounded-xl border border-gray-200 p-6 ${theme.featureHover} transition-colors duration-300`}
+                >
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className={`${theme.accentBg} p-2 rounded-lg flex-shrink-0`}>
+                      <Layers className="h-4 w-4 text-white" aria-hidden="true" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">{material.name}</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm leading-relaxed">{material.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-center text-gray-500 mt-8 text-sm">
+              Not sure which material is right for you?{' '}
+              <Link href="/contact" className={`${theme.accentText} font-medium hover:underline`}>
+                Schedule a free material consultation →
+              </Link>
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ── Service Areas ──────────────────────────────────────────────────── */}
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Service Areas in Northeast Florida</h2>
-            <p className="text-xl text-gray-600">Proudly serving these communities</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {service.title} Service Areas in Northeast Florida
+            </h2>
+            <p className="text-xl text-gray-600">Proudly serving these communities across Duval and St. Johns counties</p>
           </header>
 
           <div className="flex flex-wrap justify-center gap-4">
             {locationContent.areasServed.map((area, index) => (
-              <div key={index} className="bg-gray-100 px-6 py-3 rounded-full text-gray-700 font-medium hover:bg-blue-100 hover:text-blue-700 transition-colors duration-300 flex items-center gap-2">
+              <div
+                key={index}
+                className={`bg-white px-6 py-3 rounded-full text-gray-700 font-medium border border-gray-200 ${theme.accentLightHover} transition-colors duration-300 flex items-center gap-2`}
+              >
                 <MapPin className="h-4 w-4" aria-hidden="true" />
                 {area}
               </div>
@@ -321,17 +484,21 @@ Thank you,
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section className="py-16 bg-gray-50">
+      {/* ── Project Gallery ────────────────────────────────────────────────── */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Project Gallery</h2>
-            <p className="text-xl text-gray-600">See examples of our {service.title.toLowerCase()} work</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {service.title} Project Gallery
+            </h2>
+            <p className="text-xl text-gray-600">
+              Real projects completed across Northeast Florida
+            </p>
           </header>
 
           {isLoading ? (
             <div className="flex justify-center items-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
             </div>
           ) : (
             <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -340,7 +507,7 @@ Thank you,
                   <div className="relative overflow-hidden rounded-xl shadow-lg">
                     <Image
                       src={image.src}
-                      alt={`${image.title} - ${image.description}`}
+                      alt={`${image.title} — ${service.title} by Tola Tiles in Northeast Florida`}
                       width={400}
                       height={256}
                       className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
@@ -359,33 +526,34 @@ Thank you,
 
           <div className="text-center">
             <Link
-              href={`/${location}/gallery/${galleryKey}`}
-              className="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+              href={`${locPrefix}/gallery/${galleryKey}`}
+              className={`inline-flex items-center gap-2 ${theme.accentText} font-semibold hover:underline transition-colors`}
             >
-              View Full Gallery
+              View Full {service.title} Gallery
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-16 bg-white">
+      {/* ── Installation Process ───────────────────────────────────────────── */}
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Installation Process</h2>
-            <p className="text-xl text-gray-600">How we ensure exceptional results</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Our {service.title} Installation Process
+            </h2>
+            <p className="text-xl text-gray-600">
+              A proven four-step approach that delivers lasting results every time
+            </p>
           </header>
 
           <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { step: '01', title: 'Consultation', description: 'Free in-home assessment and design planning' },
-              { step: '02', title: 'Preparation', description: 'Surface preparation and material delivery' },
-              { step: '03', title: 'Installation', description: 'Expert installation by certified craftsmen' },
-              { step: '04', title: 'Completion', description: 'Quality inspection and customer walkthrough' },
-            ].map((process, index) => (
+            {processSteps.map((process, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-blue-100 text-blue-600 rounded-full w-16 h-16 flex items-center justify-center text-xl font-bold mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+                <div
+                  className={`${theme.accentLightMed} ${theme.accentText} rounded-full w-16 h-16 flex items-center justify-center text-xl font-bold mx-auto mb-4 ${theme.accentLightMedHover} transition-colors`}
+                >
                   {process.step}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{process.title}</h3>
@@ -396,32 +564,85 @@ Thank you,
         </div>
       </section>
 
-      {/* Cross-Location Links */}
+      {/* ── FAQ Accordion ─────────────────────────────────────────────────── */}
+      {details?.faqs && details.faqs.length > 0 && (
+        <section className="py-16 bg-white" aria-labelledby="faq-heading">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <header className="text-center mb-12">
+              <h2 id="faq-heading" className="text-3xl font-bold text-gray-900 mb-4">
+                Frequently Asked Questions About {service.title}
+              </h2>
+              <p className="text-xl text-gray-600">
+                Answers to the questions we hear most from Northeast Florida homeowners
+              </p>
+            </header>
+
+            <div className="space-y-3">
+              {details.faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                    className={`w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-gray-900 ${theme.featureHover} transition-colors duration-200`}
+                    aria-expanded={openFaqIndex === index}
+                  >
+                    <span className="pr-4">{faq.question}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 flex-shrink-0 ${theme.accentText} transition-transform duration-300 ${openFaqIndex === index ? 'rotate-180' : ''}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {openFaqIndex === index && (
+                    <div className={`px-6 pb-5 ${theme.accentLight} border-t border-gray-100`}>
+                      <p className="text-gray-700 leading-relaxed pt-4">{faq.answer}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="text-center text-gray-500 mt-8 text-sm">
+              Have a question we didn&apos;t answer?{' '}
+              <Link href="/contact" className={`${theme.accentText} font-medium hover:underline`}>
+                Contact us directly →
+              </Link>
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ── Cross-Location Links ────────────────────────────────────────────── */}
       <section className="py-12 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-gray-600 mb-4">Looking for location-specific service pages?</p>
+            <p className="text-gray-600 mb-2 font-medium">Looking for location-specific service pages?</p>
+            <p className="text-gray-500 text-sm mb-6">
+              We serve all of Northeast Florida — find dedicated pages for Jacksonville and St. Augustine.
+            </p>
             <div className="flex justify-center gap-4 flex-wrap">
               <Link
                 href={`/jacksonville/services/${serviceIdToSlug[service.id]}`}
-                className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
+                className={`inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ${theme.accentText} font-medium`}
               >
                 <MapPin className="h-4 w-4" />
                 Jacksonville
               </Link>
               <Link
                 href={`/st-augustine/services/${serviceIdToSlug[service.id]}`}
-                className="inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-blue-600 font-medium"
+                className={`inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ${theme.accentText} font-medium`}
               >
                 <MapPin className="h-4 w-4" />
-                St Augustine
+                St. Augustine
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Project Portfolio Section */}
+      {/* ── Project Portfolio ──────────────────────────────────────────────── */}
       {serviceIdToProjectSlug[service.id] && (
         <ServiceProjectsSection
           location={location as any}
@@ -430,12 +651,14 @@ Thank you,
         />
       )}
 
-      {/* Related Services */}
+      {/* ── Related Services ───────────────────────────────────────────────── */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Related Services</h2>
-            <p className="text-xl text-gray-600">Explore our other tile installation services</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Other Tile Installation Services</h2>
+            <p className="text-xl text-gray-600">
+              Explore our full range of professional tile services in Northeast Florida
+            </p>
           </header>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -444,17 +667,17 @@ Thank you,
               return (
                 <Link
                   key={index}
-                  href={`/${location}/services/${serviceIdToSlug[relatedService.id]}`}
+                  href={`${locPrefix}/services/${serviceIdToSlug[relatedService.id]}`}
                   className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
                 >
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
-                      {RelatedIcon && <RelatedIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />}
+                    <div className={`${theme.accentLightMed} p-3 rounded-xl ${theme.accentLightMedHover} transition-colors`}>
+                      {RelatedIcon && <RelatedIcon className={`h-6 w-6 ${theme.accentText}`} aria-hidden="true" />}
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900">{relatedService.title}</h3>
                   </div>
                   <p className="text-gray-600 mb-4">{relatedService.description}</p>
-                  <span className="text-blue-600 font-medium flex items-center gap-2 group-hover:gap-3 transition-all">
+                  <span className={`${theme.accentText} font-medium flex items-center gap-2 group-hover:gap-3 transition-all`}>
                     Learn More
                     <ArrowRight className="h-4 w-4" />
                   </span>
@@ -465,21 +688,26 @@ Thank you,
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-blue-700">
+      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      <section className={`py-16 ${theme.ctaBg}`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Ready to Transform Your Space?</h2>
-          <p className="text-xl text-blue-100 mb-8">Get a free consultation and quote for your {service.title.toLowerCase()} project in Northeast Florida.</p>
+          <h2 className="text-3xl font-bold text-white mb-6">
+            Ready to Start Your {service.title} Project?
+          </h2>
+          <p className={`text-xl ${theme.ctaSubtitle} mb-8`}>
+            Get a free consultation and detailed quote for your project in Northeast Florida.
+            Licensed, insured, and backed by our 2-year installation warranty.
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/${location}/contact`}
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
+              href={`${locPrefix}/contact`}
+              className="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
             >
               Schedule Free Consultation
             </Link>
             <a
               href={createQuoteEmailLink()}
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 flex items-center justify-center gap-2"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Mail className="h-5 w-5" />
               Email Quote Request

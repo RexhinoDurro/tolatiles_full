@@ -100,11 +100,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         file = request.FILES.get('file')
-        if not file:
-            return Response({'detail': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        youtube_url = request.data.get('youtube_url', '').strip()
+        if not file and not youtube_url:
+            return Response({'detail': 'No file or YouTube URL provided.'}, status=status.HTTP_400_BAD_REQUEST)
         alt_text = request.data.get('alt_text', '')
         order = phase.media.count()
-        media = ProjectMedia(phase=phase, file=file, alt_text=alt_text, order=order)
+        if youtube_url:
+            media = ProjectMedia(phase=phase, youtube_url=youtube_url, alt_text=alt_text, order=order)
+        else:
+            media = ProjectMedia(phase=phase, file=file, alt_text=alt_text, order=order)
         media.save()
         serializer = ProjectMediaSerializer(media, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -117,7 +121,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
             media = phase.media.get(pk=media_id)
         except (Phase.DoesNotExist, ProjectMedia.DoesNotExist):
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-        media.file.delete(save=False)
+        if media.file:
+            media.file.delete(save=False)
         media.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

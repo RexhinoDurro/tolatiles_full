@@ -67,10 +67,12 @@ export default function LivePreviewCard({ project }: LivePreviewCardProps) {
                 <div className="grid grid-cols-3 gap-1">
                   {phase.media.slice(0, 6).map((m) => (
                     <div key={m.id} className="aspect-square rounded overflow-hidden bg-gray-100">
-                      {m.media_type === 'video' ? (
-                        <video src={m.file} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                      {m.media_type === 'youtube' ? (
+                        <img src={m.youtube_thumbnail ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
+                      ) : m.media_type === 'video' ? (
+                        <video src={m.file ?? undefined} autoPlay muted loop playsInline className="w-full h-full object-cover" />
                       ) : (
-                        <img src={m.file} alt={m.alt_text} className="w-full h-full object-cover" />
+                        <img src={m.file ?? undefined} alt={m.alt_text} className="w-full h-full object-cover" />
                       )}
                     </div>
                   ))}

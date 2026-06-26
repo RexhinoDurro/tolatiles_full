@@ -127,14 +127,59 @@ const nextConfig = {
       // Legacy redirect
       {
         source: '/Tola',
-        destination: '/florida',
+        destination: '/',
         permanent: true,
       },
 
-      // Root to Florida
+      // /florida/* → root (consolidate equity to root)
       {
-        source: '/',
-        destination: '/florida',
+        source: '/florida',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/florida/services',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/florida/services/:slug',
+        destination: '/services/:slug',
+        permanent: true,
+      },
+      {
+        source: '/florida/gallery',
+        destination: '/gallery',
+        permanent: true,
+      },
+      {
+        source: '/florida/gallery/:path*',
+        destination: '/gallery/:path*',
+        permanent: true,
+      },
+      {
+        source: '/florida/about',
+        destination: '/about',
+        permanent: true,
+      },
+      {
+        source: '/florida/contact',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/florida/faqs',
+        destination: '/faqs',
+        permanent: true,
+      },
+      {
+        source: '/florida/blog',
+        destination: '/blog',
+        permanent: true,
+      },
+      {
+        source: '/florida/blog/:path*',
+        destination: '/blog/:path*',
         permanent: true,
       },
 
@@ -147,55 +192,6 @@ const nextConfig = {
       {
         source: '/services/:slug-st-augustine',
         destination: '/st-augustine/services/:slug',
-        permanent: true,
-      },
-
-      // Florida services (no location suffix) to /florida/services
-      {
-        source: '/services/:slug',
-        destination: '/florida/services/:slug',
-        permanent: true,
-      },
-      {
-        source: '/services',
-        destination: '/florida/services',
-        permanent: true,
-      },
-
-      // Global pages to /florida
-      {
-        source: '/gallery/:path*',
-        destination: '/florida/gallery/:path*',
-        permanent: true,
-      },
-      {
-        source: '/gallery',
-        destination: '/florida/gallery',
-        permanent: true,
-      },
-      {
-        source: '/about',
-        destination: '/florida/about',
-        permanent: true,
-      },
-      {
-        source: '/blog/:path*',
-        destination: '/florida/blog/:path*',
-        permanent: true,
-      },
-      {
-        source: '/blog',
-        destination: '/florida/blog',
-        permanent: true,
-      },
-      {
-        source: '/faqs',
-        destination: '/florida/faqs',
-        permanent: true,
-      },
-      {
-        source: '/contact',
-        destination: '/florida/contact',
         permanent: true,
       },
     ];

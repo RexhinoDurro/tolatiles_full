@@ -2,8 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronDown, Search, HelpCircle, Hammer, DollarSign, Palette, Shield, Phone, Mail, MessageCircle } from 'lucide-react';
-import { faqs, faqCategories } from '@/data/faqs';
+import {
+  ChevronDown, Search, HelpCircle, Hammer, DollarSign, Palette, Shield,
+  Phone, Mail, MessageCircle, ArrowRight,
+} from 'lucide-react';
+import { faqCategories } from '@/data/faqs';
+import type { SiteFAQ } from '@/types/api';
 
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
   HelpCircle,
@@ -21,55 +25,63 @@ interface FAQsLocationContent {
 
 const locationContent: Record<string, FAQsLocationContent> = {
   jacksonville: {
-    heroH1: 'Tile Installation FAQs - Jacksonville FL',
+    heroH1: 'Tile Installation FAQs — Jacksonville FL',
     heroSubtitle:
-      "Find answers to common questions about tile installation in Jacksonville and Duval County. From project timelines to material selection for the River City's climate — we've got you covered.",
+      "Answers to common questions about tile installation in Jacksonville and Duval County. From project timelines to material selection — answered by local experts.",
     ctaDescription:
       'Our Jacksonville team is ready to answer any questions about your tile installation project. Get personalized advice for your Duval County home or business.',
   },
   'st-augustine': {
-    heroH1: 'Tile Installation FAQs - St Augustine FL',
+    heroH1: 'Tile Installation FAQs — St Augustine FL',
     heroSubtitle:
-      "Find answers to common questions about tile installation in St. Augustine and St. Johns County. Whether you're renovating a historic home or building new in Nocatee, we have the expertise you need.",
+      "Answers to common questions about tile installation in St. Augustine and St. Johns County. Whether you're renovating a historic home or building new in Nocatee, we have the expertise you need.",
     ctaDescription:
-      'Our St. Augustine team is ready to answer any questions about your tile installation project. Get expert advice on materials and techniques suited to our coastal climate.',
+      'Our St. Augustine team is ready to answer any questions about your tile installation project. Get expert advice on materials suited to our coastal climate.',
   },
   florida: {
-    heroH1: 'Tile Installation FAQs - Northeast Florida',
+    heroH1: 'Tile Installation FAQs — Northeast Florida',
     heroSubtitle:
-      "Find answers to common questions about our tile installation services, processes, and expertise across Northeast Florida. Can't find what you're looking for? We're here to help!",
+      "Answers to common questions about our tile installation services across Northeast Florida. Can't find what you're looking for? We're here to help!",
     ctaDescription:
-      'Our experienced team is ready to answer any questions about your tile installation project. Get personalized advice and detailed information about our services anywhere in Northeast Florida.',
+      'Our experienced team is ready to answer any questions about your tile installation project. Get personalized advice anywhere in Northeast Florida.',
   },
 };
 
+const serviceLinks = [
+  { label: 'Kitchen Backsplash FAQs', slug: 'kitchen-backsplash', category: 'services' },
+  { label: 'Bathroom Tile FAQs', slug: 'bathroom-tile', category: 'services' },
+  { label: 'Floor Tile FAQs', slug: 'floor-tile', category: 'services' },
+  { label: 'Shower Tile FAQs', slug: 'shower-tile', category: 'services' },
+  { label: 'Patio Tile FAQs', slug: 'patio-tile', category: 'services' },
+  { label: 'Fireplace Tile FAQs', slug: 'fireplace-tile', category: 'services' },
+];
+
 interface FAQsPageProps {
   location?: string;
+  initialFAQs: SiteFAQ[];
 }
 
-const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
+const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
   const content = locationContent[location] || locationContent.florida;
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Filter FAQs based on category and search term
-  const filteredFAQs = useMemo(() => {
-    let filtered = faqs;
+  const locPrefix = location === 'florida' ? '' : `/${location}`;
 
-    // Filter by category
+  const filteredFAQs = useMemo(() => {
+    let filtered = initialFAQs;
     if (selectedCategory !== 'all') {
       filtered = filtered.filter((faq) => faq.category === selectedCategory);
     }
-
-    // Filter by search term
     if (searchTerm.trim()) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter((faq) => faq.question.toLowerCase().includes(search) || faq.answer.toLowerCase().includes(search));
+      filtered = filtered.filter(
+        (faq) => faq.question.toLowerCase().includes(search) || faq.answer.toLowerCase().includes(search)
+      );
     }
-
     return filtered;
-  }, [selectedCategory, searchTerm]);
+  }, [initialFAQs, selectedCategory, searchTerm]);
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
@@ -80,18 +92,21 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <nav className="flex justify-center mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
+            <ol className="flex items-center gap-2">
+              <li><Link href={locPrefix || '/'} className="hover:text-blue-600">Home</Link></li>
+              <li>/</li>
+              <li className="text-gray-900 font-medium">FAQs</li>
+            </ol>
+          </nav>
           <header>
-            <h1 className="text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
-            <p className="text-xl text-gray-600 mb-8 animate-slideInUp">
-              {content.heroSubtitle}
-            </p>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
+            <p className="text-xl text-gray-600 mb-8 animate-slideInUp">{content.heroSubtitle}</p>
           </header>
 
           {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto animate-slideInUp">
-            <label htmlFor="faq-search" className="sr-only">
-              Search FAQs
-            </label>
+            <label htmlFor="faq-search" className="sr-only">Search FAQs</label>
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" aria-hidden="true" />
             <input
               id="faq-search"
@@ -119,14 +134,13 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
               <HelpCircle className="h-4 w-4" aria-hidden="true" />
               All Questions
               <span className={`text-xs px-2 py-1 rounded-full ${selectedCategory === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
-                {faqs.length}
+                {initialFAQs.length}
               </span>
             </button>
 
             {faqCategories.map((category) => {
               const IconComponent = iconMap[category.icon as keyof typeof iconMap];
-              const count = faqs.filter((faq) => faq.category === category.id).length;
-
+              const count = initialFAQs.filter((faq) => faq.category === category.id).length;
               return (
                 <button
                   key={category.id}
@@ -140,9 +154,7 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
                 >
                   {IconComponent && <IconComponent className="h-4 w-4" aria-hidden="true" />}
                   {category.name}
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}
-                  >
+                  <span className={`text-xs px-2 py-1 rounded-full ${selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
                     {count}
                   </span>
                 </button>
@@ -154,7 +166,7 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
           {(selectedCategory !== 'all' || searchTerm) && (
             <div className="text-center mb-8">
               <p className="text-gray-600">
-                Showing {filteredFAQs.length} of {faqs.length} questions
+                Showing {filteredFAQs.length} of {initialFAQs.length} questions
                 {searchTerm && ` for "${searchTerm}"`}
               </p>
             </div>
@@ -165,31 +177,36 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
             <div className="space-y-4 mb-16">
               {filteredFAQs.map((faq, index) => (
                 <article
-                  key={`${faq.category}-${index}`}
+                  key={faq.id}
                   className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden animate-slideInUp"
                   style={{ animationDelay: `${index * 50}ms` }}
+                  itemScope
+                  itemType="https://schema.org/Question"
                 >
-                  <h3>
+                  <h2>
                     <button
                       onClick={() => toggleFAQ(index)}
                       className="w-full px-8 py-6 text-left flex justify-between items-center hover:bg-gray-50 transition-colors duration-200"
                       aria-expanded={openFAQ === index}
-                      aria-controls={`faq-answer-${index}`}
+                      aria-controls={`faq-answer-${faq.id}`}
                     >
-                      <span className="font-semibold text-gray-900 text-lg pr-4 leading-relaxed">{faq.question}</span>
+                      <span className="font-semibold text-gray-900 text-lg pr-4 leading-relaxed" itemProp="name">{faq.question}</span>
                       <ChevronDown
                         className={`h-6 w-6 text-blue-600 transition-transform duration-300 flex-shrink-0 ${openFAQ === index ? 'transform rotate-180' : ''}`}
                         aria-hidden="true"
                       />
                     </button>
-                  </h3>
+                  </h2>
                   <div
-                    id={`faq-answer-${index}`}
+                    id={`faq-answer-${faq.id}`}
                     className={`transition-all duration-300 ease-in-out ${openFAQ === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}
                     aria-hidden={openFAQ !== index}
+                    itemScope
+                    itemType="https://schema.org/Answer"
+                    itemProp="acceptedAnswer"
                   >
                     <div className="px-8 pb-6 border-t border-gray-100">
-                      <p className="text-gray-700 leading-relaxed pt-4">{faq.answer}</p>
+                      <p className="text-gray-700 leading-relaxed pt-4" itemProp="text">{faq.answer}</p>
                     </div>
                   </div>
                 </article>
@@ -203,10 +220,7 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
                 {searchTerm ? `No FAQs match "${searchTerm}". Try different keywords or browse by category.` : 'No questions in this category yet.'}
               </p>
               <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('all');
-                }}
+                onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 View all questions
@@ -214,14 +228,32 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
             </div>
           )}
 
+          {/* Service-Specific FAQ Links */}
+          <section className="mb-16 bg-gray-50 rounded-2xl p-8" aria-labelledby="service-faq-heading">
+            <h2 id="service-faq-heading" className="text-2xl font-bold text-gray-900 mb-2 text-center">
+              Browse by Service
+            </h2>
+            <p className="text-gray-600 text-center mb-8">
+              Looking for questions about a specific tile service? Visit our service pages for detailed information.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {serviceLinks.map((svc) => (
+                <Link
+                  key={svc.slug}
+                  href={`${locPrefix}/services/${svc.slug}`}
+                  className="flex items-center justify-between bg-white rounded-xl px-5 py-4 shadow-sm hover:shadow-md hover:text-blue-600 transition-all duration-200 group font-medium text-gray-700"
+                >
+                  <span>{svc.label}</span>
+                  <ArrowRight className="h-4 w-4 text-blue-400 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+          </section>
+
           {/* Contact CTA */}
           <section className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-12 text-center text-white" aria-labelledby="contact-cta-heading">
-            <h2 id="contact-cta-heading" className="text-3xl font-bold mb-4">
-              Still Have Questions?
-            </h2>
-            <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">
-              {content.ctaDescription}
-            </p>
+            <h2 id="contact-cta-heading" className="text-3xl font-bold mb-4">Still Have Questions?</h2>
+            <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">{content.ctaDescription}</p>
 
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition-all duration-300">
@@ -237,11 +269,7 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
                 <Mail className="h-8 w-8 mx-auto mb-3 text-blue-200" aria-hidden="true" />
                 <h3 className="font-semibold mb-2">Email Us</h3>
                 <p className="text-blue-100 text-sm mb-3">Get detailed answers via email</p>
-                <a
-                  href="mailto:menitola@tolatiles.com"
-                  className="text-white hover:text-blue-200 font-medium"
-                  aria-label="Email Tola Tiles at menitola@tolatiles.com"
-                >
+                <a href="mailto:menitola@tolatiles.com" className="text-white hover:text-blue-200 font-medium">
                   menitola@tolatiles.com
                 </a>
               </div>
@@ -250,7 +278,10 @@ const FAQsPage = ({ location = 'florida' }: FAQsPageProps) => {
                 <MessageCircle className="h-8 w-8 mx-auto mb-3 text-blue-200" aria-hidden="true" />
                 <h3 className="font-semibold mb-2">Free Consultation</h3>
                 <p className="text-blue-100 text-sm mb-3">Schedule an in-home visit</p>
-                <Link href={`/${location}/contact`} className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block">
+                <Link
+                  href={`${locPrefix}/contact`}
+                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+                >
                   Book Now
                 </Link>
               </div>

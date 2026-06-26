@@ -16,6 +16,7 @@ interface PhaseEditorProps {
   onUpdate: (phaseId: number, updates: Partial<Phase>) => void;
   onDelete: (phaseId: number) => void;
   onMediaUpload: (phaseId: number, file: File) => Promise<void>;
+  onMediaYouTubeAdd: (phaseId: number, url: string) => Promise<void>;
   onMediaDelete: (phaseId: number, mediaId: number) => void;
   onMediaReorder: (phaseId: number, items: { id: number; order: number }[]) => void;
   onMediaChange: (phaseId: number, media: ProjectMedia[]) => void;
@@ -27,6 +28,7 @@ export default function PhaseEditor({
   onUpdate,
   onDelete,
   onMediaUpload,
+  onMediaYouTubeAdd,
   onMediaDelete,
   onMediaReorder,
   onMediaChange,
@@ -108,6 +110,7 @@ export default function PhaseEditor({
               phaseId={phase.id}
               onChange={(media) => onMediaChange(phase.id, media)}
               onUpload={(file) => onMediaUpload(phase.id, file)}
+              onYouTubeAdd={(url) => onMediaYouTubeAdd(phase.id, url)}
               onDelete={(mediaId) => onMediaDelete(phase.id, mediaId)}
               onReorder={(items) => onMediaReorder(phase.id, items)}
             />

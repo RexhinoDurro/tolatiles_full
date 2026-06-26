@@ -10,18 +10,26 @@ class ProjectServiceTypeSerializer(serializers.ModelSerializer):
 
 class ProjectMediaSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
+    youtube_embed_url = serializers.SerializerMethodField()
+    youtube_thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = ProjectMedia
-        fields = ['id', 'file', 'media_type', 'order', 'alt_text', 'created_at']
+        fields = ['id', 'file', 'youtube_url', 'youtube_embed_url', 'youtube_thumbnail', 'media_type', 'order', 'alt_text', 'created_at']
 
     def get_file(self, obj):
+        if not obj.file:
+            return None
         request = self.context.get('request')
-        if obj.file and request:
+        if request:
             return request.build_absolute_uri(obj.file.url)
-        elif obj.file:
-            return obj.file.url
-        return None
+        return obj.file.url
+
+    def get_youtube_embed_url(self, obj):
+        return obj.youtube_embed_url
+
+    def get_youtube_thumbnail(self, obj):
+        return obj.youtube_thumbnail
 
 
 class PhaseSerializer(serializers.ModelSerializer):
@@ -55,9 +63,13 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return None
 
     def get_cover_image(self, obj):
-        request = self.context.get('request')
         media = self._get_cover_media(obj)
-        if media and media.file:
+        if not media:
+            return None
+        if media.media_type == 'youtube':
+            return media.youtube_thumbnail
+        if media.file:
+            request = self.context.get('request')
             return request.build_absolute_uri(media.file.url) if request else media.file.url
         return None
 

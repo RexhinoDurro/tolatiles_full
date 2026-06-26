@@ -1,65 +1,85 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import FAQsPage from '@/components/pages/FAQsPage';
-import { faqs } from '@/data/faqs';
+import { faqs as staticFaqs } from '@/data/faqs';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
 export function generateStaticParams() {
-  return VALID_LOCATIONS.map((location) => ({
-    location,
-  }));
+  return VALID_LOCATIONS.map((location) => ({ location }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ location: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
+  if (!isValidLocation(resolvedParams.location)) return { title: 'Not Found' };
 
-  if (!isValidLocation(resolvedParams.location)) {
-    return { title: 'Not Found' };
-  }
-
-  const locationName = locationNames[resolvedParams.location];
+  const locationName = locationNames[resolvedParams.location as LocationType];
 
   return {
-    title: `Frequently Asked Questions - Tile Installation FAQs ${locationName} FL | Tola Tiles`,
-    description: `Find answers to common questions about tile installation in ${locationName} FL. Get expert advice on pricing, materials, maintenance, and our tile services.`,
-    keywords: `tile installation FAQ ${locationName.toLowerCase()} FL, tile questions ${locationName.toLowerCase()}, tile installation cost, tile maintenance, tile materials, tile contractor questions Florida`,
+    title: `Tile Installation FAQs ${locationName} FL | Tola Tiles`,
+    description: `Answers to common tile installation questions in ${locationName} FL — pricing, materials, timelines, and maintenance from local tile experts with 15+ years of experience.`,
+    keywords: `tile installation FAQ ${locationName.toLowerCase()} FL, tile contractor questions ${locationName.toLowerCase()}, tile installation cost Florida, how long does tile installation take, grout sealing ${locationName.toLowerCase()}`,
     alternates: {
       canonical: `https://tolatiles.com/${resolvedParams.location}/faqs`,
+    },
+    openGraph: {
+      title: `Tile Installation FAQs | Tola Tiles ${locationName}`,
+      description: `Expert answers to tile installation questions for ${locationName} homeowners — pricing, materials, maintenance, and more.`,
+      url: `https://tolatiles.com/${resolvedParams.location}/faqs`,
+      type: 'website',
     },
   };
 }
 
-function generateFAQSchema() {
+async function getFAQs() {
+  try {
+    const res = await fetch(`${API_BASE}/faqs/`, { next: { revalidate: 300 } });
+    if (!res.ok) throw new Error('API error');
+    return await res.json();
+  } catch {
+    return staticFaqs.map((faq, i) => ({ ...faq, id: i + 1, order: i, is_active: true }));
+  }
+}
+
+function generateFAQSchema(faqList: Array<{ question: string; answer: string }>, location: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
+    mainEntity: faqList.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
+      acceptedAnswer: { '@type': 'Answer', text: faq.answer },
     })),
+  };
+}
+
+function generateBreadcrumbSchema(location: string, locationName: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tolatiles.com' },
+      { '@type': 'ListItem', position: 2, name: `Tola Tiles ${locationName}`, item: `https://tolatiles.com/${location}` },
+      { '@type': 'ListItem', position: 3, name: 'FAQs', item: `https://tolatiles.com/${location}/faqs` },
+    ],
   };
 }
 
 export default async function FAQs({ params }: { params: Promise<{ location: string }> }) {
   const resolvedParams = await params;
+  if (!isValidLocation(resolvedParams.location)) notFound();
 
-  if (!isValidLocation(resolvedParams.location)) {
-    notFound();
-  }
-
-  const faqSchema = generateFAQSchema();
+  const locationName = locationNames[resolvedParams.location as LocationType];
+  const faqList = await getFAQs();
+  const faqSchema = generateFAQSchema(faqList, resolvedParams.location);
+  const breadcrumbSchema = generateBreadcrumbSchema(resolvedParams.location, locationName);
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <FAQsPage location={resolvedParams.location} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <FAQsPage location={resolvedParams.location} initialFAQs={faqList} />
     </>
   );
 }

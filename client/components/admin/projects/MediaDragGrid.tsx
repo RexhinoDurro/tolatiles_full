@@ -16,6 +16,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import type { ProjectMedia } from '@/types/api';
 import MediaItem from './MediaItem';
 import MediaUploader from './MediaUploader';
+import YouTubeUploader from './YouTubeUploader';
 
 interface MediaDragGridProps {
   media: ProjectMedia[];
@@ -23,6 +24,7 @@ interface MediaDragGridProps {
   phaseId: number;
   onChange: (media: ProjectMedia[]) => void;
   onUpload: (file: File) => Promise<void>;
+  onYouTubeAdd: (url: string) => Promise<void>;
   onDelete: (mediaId: number) => void;
   onReorder: (items: { id: number; order: number }[]) => void;
 }
@@ -31,6 +33,7 @@ export default function MediaDragGrid({
   media,
   onChange,
   onUpload,
+  onYouTubeAdd,
   onDelete,
   onReorder,
 }: MediaDragGridProps) {
@@ -55,6 +58,7 @@ export default function MediaDragGrid({
             <MediaItem key={m.id} media={m} onDelete={onDelete} />
           ))}
           <MediaUploader onUpload={onUpload} />
+          <YouTubeUploader onAdd={onYouTubeAdd} />
         </div>
       </SortableContext>
     </DndContext>

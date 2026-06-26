@@ -86,6 +86,9 @@ import type {
   ProjectLocation,
   ServiceTypeSlug,
   ProjectStatus,
+  SiteFAQ,
+  SiteFAQCreate,
+  SiteFAQUpdate,
 } from '@/types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -1504,6 +1507,13 @@ class ApiClient {
     return this.fetch<ProjectMedia[]>(`/projects/${projectId}/phases/${phaseId}/media/`);
   }
 
+  async addYouTubeMedia(projectId: number, phaseId: number, youtubeUrl: string, altText?: string): Promise<ProjectMedia> {
+    return this.fetch<ProjectMedia>(`/projects/${projectId}/phases/${phaseId}/media/`, {
+      method: 'POST',
+      body: JSON.stringify({ youtube_url: youtubeUrl, alt_text: altText ?? '' }),
+    });
+  }
+
   async uploadMedia(projectId: number, phaseId: number, file: File, altText?: string): Promise<ProjectMedia> {
     const formData = new FormData();
     formData.append('file', file);
@@ -1553,6 +1563,34 @@ class ApiClient {
 
   async getPublicServiceProjects(location: ProjectLocation, serviceSlug: string): Promise<ProjectListItem[]> {
     return this.fetch<ProjectListItem[]>(`/projects/public/service/${location}/${serviceSlug}/`);
+  }
+
+  // ============ FAQs ============
+
+  async getFAQs(): Promise<SiteFAQ[]> {
+    return this.fetch<SiteFAQ[]>('/faqs/');
+  }
+
+  async getAllFAQsAdmin(): Promise<SiteFAQ[]> {
+    return this.fetch<SiteFAQ[]>('/faqs/');
+  }
+
+  async createFAQ(data: SiteFAQCreate): Promise<SiteFAQ> {
+    return this.fetch<SiteFAQ>('/faqs/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateFAQ(id: number, data: SiteFAQUpdate): Promise<SiteFAQ> {
+    return this.fetch<SiteFAQ>(`/faqs/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteFAQ(id: number): Promise<void> {
+    return this.fetch<void>(`/faqs/${id}/`, { method: 'DELETE' });
   }
 }
 

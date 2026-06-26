@@ -17,7 +17,7 @@ export default function ProjectCard({ project, location, serviceSlug }: ProjectC
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
       {/* Cover media */}
-      <div className="overflow-hidden bg-gray-100 w-full">
+      <div className="overflow-hidden bg-gray-100 w-full relative">
         {project.cover_image ? (
           project.cover_media_type === 'video' ? (
             <VideoWithSound src={project.cover_image} className="w-full h-auto block" />
@@ -30,6 +30,16 @@ export default function ProjectCard({ project, location, serviceSlug }: ProjectC
           )
         ) : (
           <div className="aspect-video flex items-center justify-center text-gray-400 text-sm">No photo</div>
+        )}
+        {/* YouTube play button overlay for YouTube cover */}
+        {project.cover_media_type === 'youtube' && project.cover_image && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-5 h-5 text-white ml-1" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
         )}
       </div>
 

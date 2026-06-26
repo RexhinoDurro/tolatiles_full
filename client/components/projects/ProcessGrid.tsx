@@ -12,19 +12,31 @@ export default function ProcessGrid({ project }: ProcessGridProps) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {project.phases.map((phase) => {
         const coverMedia = phase.media[0];
+        const coverSrc = coverMedia?.media_type === 'youtube'
+          ? coverMedia.youtube_thumbnail
+          : coverMedia?.file ?? null;
+
         return (
           <div key={phase.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
-            {/* Cover media */}
-            {coverMedia ? (
-              <div className="aspect-video overflow-hidden">
+            {coverMedia && coverSrc ? (
+              <div className="aspect-video overflow-hidden relative">
                 {coverMedia.media_type === 'video' ? (
-                  <VideoWithSound src={coverMedia.file} className="w-full h-full object-cover" />
+                  <VideoWithSound src={coverSrc} className="w-full h-full object-cover" />
                 ) : (
                   <img
-                    src={coverMedia.file}
+                    src={coverSrc}
                     alt={coverMedia.alt_text || phase.title}
                     className="w-full h-full object-cover"
                   />
+                )}
+                {coverMedia.media_type === 'youtube' && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-10 bg-red-600/90 rounded-full flex items-center justify-center shadow">
+                      <svg className="w-4 h-4 text-white ml-0.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
                 )}
               </div>
             ) : (

@@ -95,6 +95,17 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
     }));
   }, [savedId]);
 
+  const handleYouTubeAdd = useCallback(async (phaseId: number, url: string) => {
+    if (!savedId) return;
+    const media = await api.addYouTubeMedia(savedId, phaseId, url);
+    setLocalProject((prev) => ({
+      ...prev,
+      phases: (prev.phases ?? []).map((p) =>
+        p.id === phaseId ? { ...p, media: [...p.media, media] } : p
+      ),
+    }));
+  }, [savedId]);
+
   const handleMediaDelete = useCallback(async (phaseId: number, mediaId: number) => {
     if (!savedId) return;
     await api.deleteMedia(savedId, phaseId, mediaId);
@@ -179,6 +190,7 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
               onPhaseDelete={deletePhase}
               onPhaseReorder={handlePhaseReorder}
               onMediaUpload={handleMediaUpload}
+              onMediaYouTubeAdd={handleYouTubeAdd}
               onMediaDelete={handleMediaDelete}
               onMediaReorder={handleMediaReorder}
               onMediaChange={handleMediaChange}

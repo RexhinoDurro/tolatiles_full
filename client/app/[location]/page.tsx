@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import HomePage from '@/components/pages/HomePage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 
@@ -31,10 +31,10 @@ const locationSchemas: Record<LocationType, object> = {
   florida: {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://tolatiles.com/florida#business',
-    name: 'Tola Tiles - Tile Installation Florida',
+    '@id': 'https://tolatiles.com/#business',
+    name: 'Tola Tiles - Tile Installation Jacksonville & St. Augustine FL',
     description: 'Professional tile installation services in Northeast Florida. Expert tile installers specializing in kitchen backsplashes, bathroom tiles, floor tiling, patios, and fireplace surrounds.',
-    url: 'https://tolatiles.com/florida',
+    url: 'https://tolatiles.com',
     telephone: '+1-904-866-1738',
     priceRange: '$8-25 per sq ft',
     address: {
@@ -204,7 +204,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   }
 
   const meta = locationMetadata[resolvedParams.location];
-  const canonicalPath = resolvedParams.location === 'florida' ? '/florida' : `/${resolvedParams.location}`;
+  const canonicalPath = resolvedParams.location === 'florida' ? '/' : `/${resolvedParams.location}`;
 
   return {
     title: meta.title,
@@ -230,6 +230,10 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
 
 export default async function LocationHomePage({ params }: { params: Promise<{ location: string }> }) {
   const resolvedParams = await params;
+
+  if (resolvedParams.location === 'florida') {
+    redirect('/');
+  }
 
   if (!isValidLocation(resolvedParams.location)) {
     notFound();

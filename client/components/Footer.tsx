@@ -21,8 +21,7 @@ const Footer = () => {
     return 'florida';
   }, [pathname]);
 
-  // Get base path for current location
-  const basePath = `/${currentLocation}`;
+  const basePath = currentLocation === 'florida' ? '' : `/${currentLocation}`;
 
   // Get service links using new location-prefixed URLs
   const serviceLinks = useMemo(() => {
@@ -169,7 +168,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link href={`${basePath}/faqs`} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    Frequently Asked Questions
+                    Tile Installation FAQs
                   </Link>
                 </li>
                 <li>
@@ -194,7 +193,7 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/florida" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
+                  <Link href="/" className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
                     All Florida Services
                   </Link>
                 </li>

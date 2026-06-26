@@ -1,4 +1,5 @@
 import os
+import re
 from django.db import models
 
 
@@ -85,10 +86,17 @@ class ProjectMedia(models.Model):
     MEDIA_TYPE_CHOICES = [
         ('image', 'Image'),
         ('video', 'Video'),
+        ('youtube', 'YouTube Video'),
+    ]
+
+    YOUTUBE_PATTERNS = [
+        r'(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com/embed/([a-zA-Z0-9_-]{11})',
     ]
 
     phase = models.ForeignKey(Phase, related_name='media', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='projects/media/')
+    file = models.FileField(upload_to='projects/media/', null=True, blank=True)
+    youtube_url = models.URLField(max_length=500, blank=True, default='')
     media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES, default='image')
     order = models.PositiveIntegerField(default=0)
     alt_text = models.CharField(max_length=500, blank=True)
@@ -101,10 +109,35 @@ class ProjectMedia(models.Model):
         return f"{self.phase} - {self.media_type} #{self.order}"
 
     def save(self, *args, **kwargs):
-        if self.file:
+        if self.youtube_url:
+            self.media_type = 'youtube'
+        elif self.file:
             ext = os.path.splitext(str(self.file.name))[1].lower()
             self.media_type = 'video' if ext in VIDEO_EXTENSIONS else 'image'
         super().save(*args, **kwargs)
+
+    def _extract_youtube_id(self):
+        if not self.youtube_url:
+            return None
+        for pattern in self.YOUTUBE_PATTERNS:
+            match = re.search(pattern, self.youtube_url)
+            if match:
+                return match.group(1)
+        return None
+
+    @property
+    def youtube_video_id(self):
+        return self._extract_youtube_id()
+
+    @property
+    def youtube_embed_url(self):
+        vid = self._extract_youtube_id()
+        return f'https://www.youtube.com/embed/{vid}' if vid else None
+
+    @property
+    def youtube_thumbnail(self):
+        vid = self._extract_youtube_id()
+        return f'https://img.youtube.com/vi/{vid}/maxresdefault.jpg' if vid else None
 
 
 class HomepageSlot(models.Model):

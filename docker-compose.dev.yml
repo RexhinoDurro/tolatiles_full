@@ -1,0 +1,37 @@
+# Dev databases only — run locally with:
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# Django: DATABASE_URL=postgres://tolatiles:<password>@localhost:5432/tolatiles
+# Redis:  CELERY_BROKER_URL=redis://localhost:6379/0
+
+services:
+  db:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: tolatiles
+      POSTGRES_USER: tolatiles
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tolatiles"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data_dev:

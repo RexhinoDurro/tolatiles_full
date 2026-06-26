@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'notifications',
     'blog',
     'projects',
+    'faqs',
 ]
 
 MIDDLEWARE = [

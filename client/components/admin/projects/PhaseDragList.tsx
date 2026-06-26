@@ -24,6 +24,7 @@ interface PhaseDragListProps {
   onPhaseDelete: (phaseId: number) => void;
   onPhaseReorder: (items: { id: number; order: number }[]) => void;
   onMediaUpload: (phaseId: number, file: File) => Promise<void>;
+  onMediaYouTubeAdd: (phaseId: number, url: string) => Promise<void>;
   onMediaDelete: (phaseId: number, mediaId: number) => void;
   onMediaReorder: (phaseId: number, items: { id: number; order: number }[]) => void;
   onMediaChange: (phaseId: number, media: ProjectMedia[]) => void;
@@ -37,6 +38,7 @@ export default function PhaseDragList({
   onPhaseDelete,
   onPhaseReorder,
   onMediaUpload,
+  onMediaYouTubeAdd,
   onMediaDelete,
   onMediaReorder,
   onMediaChange,
@@ -66,6 +68,7 @@ export default function PhaseDragList({
               onUpdate={onPhaseUpdate}
               onDelete={onPhaseDelete}
               onMediaUpload={onMediaUpload}
+              onMediaYouTubeAdd={onMediaYouTubeAdd}
               onMediaDelete={onMediaDelete}
               onMediaReorder={onMediaReorder}
               onMediaChange={onMediaChange}

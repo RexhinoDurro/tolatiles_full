@@ -83,4 +83,7 @@ urlpatterns = [
 
     # Projects API
     path('projects/', include('projects.urls')),
+
+    # FAQs API
+    path('faqs/', include('faqs.urls')),
 ]

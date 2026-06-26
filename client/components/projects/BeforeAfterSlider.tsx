@@ -9,7 +9,11 @@ interface BeforeAfterSliderProps {
 }
 
 function MediaElement({ media, className, style }: { media: ProjectMedia; className?: string; style?: React.CSSProperties }) {
-  if (media.media_type === 'video') {
+  if (media.media_type === 'youtube') {
+    const src = media.youtube_thumbnail ?? undefined;
+    return <img src={src} alt={media.alt_text || ''} className={className} style={style} />;
+  }
+  if (media.media_type === 'video' && media.file) {
     return (
       <video
         src={media.file}
@@ -22,7 +26,7 @@ function MediaElement({ media, className, style }: { media: ProjectMedia; classN
       />
     );
   }
-  return <img src={media.file} alt={media.alt_text || ''} className={className} style={style} />;
+  return <img src={media.file ?? undefined} alt={media.alt_text || ''} className={className} style={style} />;
 }
 
 export default function BeforeAfterSlider({ before, after }: BeforeAfterSliderProps) {

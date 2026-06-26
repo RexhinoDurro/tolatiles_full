@@ -22,20 +22,18 @@ const Navbar = () => {
     return 'florida';
   }, [pathname]);
 
-  // Get home link based on location (all locations now have explicit paths)
-  const homeLink = `/${currentLocation}`;
+  const homeLink = currentLocation === 'florida' ? '/' : `/${currentLocation}`;
 
-  // Get service categories based on location (now using location-prefixed URLs)
   const serviceCategories = useMemo(() => {
-    const loc = currentLocation;
+    const prefix = currentLocation === 'florida' ? '' : `/${currentLocation}`;
     return [
-      { id: 'all', label: 'All Services', href: `/${loc}/services` },
-      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `/${loc}/services/kitchen-backsplash` },
-      { id: 'bathroom', label: 'Bathroom Tile', href: `/${loc}/services/bathroom-tile` },
-      { id: 'flooring', label: 'Floor Tiling', href: `/${loc}/services/floor-tile` },
-      { id: 'patio', label: 'Patio & Outdoor', href: `/${loc}/services/patio-tile` },
-      { id: 'fireplace', label: 'Fireplace Tile', href: `/${loc}/services/fireplace-tile` },
-      { id: 'shower', label: 'Shower Installation', href: `/${loc}/services/shower-tile` },
+      { id: 'all', label: 'All Services', href: `${prefix}/services` },
+      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `${prefix}/services/kitchen-backsplash` },
+      { id: 'bathroom', label: 'Bathroom Tile', href: `${prefix}/services/bathroom-tile` },
+      { id: 'flooring', label: 'Floor Tiling', href: `${prefix}/services/floor-tile` },
+      { id: 'patio', label: 'Patio & Outdoor', href: `${prefix}/services/patio-tile` },
+      { id: 'fireplace', label: 'Fireplace Tile', href: `${prefix}/services/fireplace-tile` },
+      { id: 'shower', label: 'Shower Installation', href: `${prefix}/services/shower-tile` },
     ];
   }, [currentLocation]);
 
@@ -63,22 +61,21 @@ const Navbar = () => {
     setIsServicesDropdownOpen(false);
   }, [pathname]);
 
+  const navPrefix = currentLocation === 'florida' ? '' : `/${currentLocation}`;
+
   const navigationItems = [
-    { id: 'home', label: 'Home', href: `/${currentLocation}` },
-    { id: 'services', label: 'Services', href: `/${currentLocation}/services`, hasDropdown: true },
-    { id: 'gallery', label: 'Gallery', href: `/${currentLocation}/gallery` },
-    { id: 'about', label: 'About', href: `/${currentLocation}/about` },
-    { id: 'blog', label: 'Blog', href: `/${currentLocation}/blog` },
-    { id: 'faqs', label: 'FAQs', href: `/${currentLocation}/faqs` },
-    { id: 'contact', label: 'Contact Us', href: `/${currentLocation}/contact` },
+    { id: 'home', label: 'Home', href: homeLink },
+    { id: 'services', label: 'Services', href: `${navPrefix}/services`, hasDropdown: true },
+    { id: 'gallery', label: 'Gallery', href: `${navPrefix}/gallery` },
+    { id: 'about', label: 'About', href: `${navPrefix}/about` },
+    { id: 'blog', label: 'Blog', href: `${navPrefix}/blog` },
+    { id: 'contact', label: 'Contact Us', href: `${navPrefix}/contact` },
   ];
 
   const isActiveRoute = (href: string) => {
-    // For home links, exact match
-    if (href === `/${currentLocation}`) {
+    if (href === homeLink) {
       return pathname === href;
     }
-    // For other pages, check if pathname starts with the href
     return pathname.startsWith(href);
   };
 
@@ -162,7 +159,7 @@ const Navbar = () => {
 
             <div className="md:hidden flex items-center gap-2">
               <Link
-                href={`/${currentLocation}/contact`}
+                href={`${navPrefix}/contact`}
                 className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full hover:bg-blue-700 transition-colors"
               >
                 Contact
