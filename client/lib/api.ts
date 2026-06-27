@@ -1568,11 +1568,13 @@ class ApiClient {
   // ============ FAQs ============
 
   async getFAQs(): Promise<SiteFAQ[]> {
-    return this.fetch<SiteFAQ[]>('/faqs/');
+    const response = await this.fetch<PaginatedResponse<SiteFAQ> | SiteFAQ[]>('/faqs/');
+    return Array.isArray(response) ? response : response.results;
   }
 
   async getAllFAQsAdmin(): Promise<SiteFAQ[]> {
-    return this.fetch<SiteFAQ[]>('/faqs/');
+    const response = await this.fetch<PaginatedResponse<SiteFAQ> | SiteFAQ[]>('/faqs/');
+    return Array.isArray(response) ? response : response.results;
   }
 
   async createFAQ(data: SiteFAQCreate): Promise<SiteFAQ> {

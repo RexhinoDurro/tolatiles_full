@@ -25,7 +25,8 @@ async function getFAQs() {
   try {
     const res = await fetch(`${API_BASE}/faqs/`, { next: { revalidate: 300 } });
     if (!res.ok) throw new Error('API error');
-    return await res.json();
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results ?? []);
   } catch {
     return staticFaqs.map((faq, i) => ({ ...faq, id: i + 1, order: i, is_active: true }));
   }
