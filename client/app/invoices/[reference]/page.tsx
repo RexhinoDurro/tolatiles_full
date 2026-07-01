@@ -142,7 +142,7 @@ export default function PublicInvoicePage() {
                     onClick={() => {
                       const pdfUrl = invoice.pdf_file!.startsWith('http')
                         ? invoice.pdf_file!
-                        : `http://localhost:8000${invoice.pdf_file}`;
+                        : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${invoice.pdf_file}`;
                       window.location.href = pdfUrl;
                     }}
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/15 hover:bg-white/25 rounded-xl transition-all text-white border border-white/20 backdrop-blur-sm"

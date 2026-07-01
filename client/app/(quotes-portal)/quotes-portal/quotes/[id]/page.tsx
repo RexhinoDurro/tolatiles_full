@@ -168,7 +168,7 @@ function PortalQuoteDetailContent({ id }: { id: string }) {
 
   // ── view mode ─────────────────────────────────────────────────────────
   const pdfUrl = quote.pdf_url
-    ? (quote.pdf_url.startsWith('http') ? quote.pdf_url : `http://localhost:8000${quote.pdf_url}`)
+    ? (quote.pdf_url.startsWith('http') ? quote.pdf_url : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${quote.pdf_url}`)
     : null;
 
   const shareableLink = quote.public_url

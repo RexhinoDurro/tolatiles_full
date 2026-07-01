@@ -193,7 +193,7 @@ export default function CrmQuoteDetailPage() {
             </button>
             {quote.pdf_url ? (
               <button
-                onClick={() => { window.location.href = quote.pdf_url!.startsWith('http') ? quote.pdf_url! : `http://localhost:8000${quote.pdf_url}`; }}
+                onClick={() => { window.location.href = quote.pdf_url!.startsWith('http') ? quote.pdf_url! : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${quote.pdf_url}`; }}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Eye className="w-4 h-4" /> View PDF

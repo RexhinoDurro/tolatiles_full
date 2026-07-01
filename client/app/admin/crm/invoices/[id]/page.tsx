@@ -205,7 +205,7 @@ export default function CrmInvoiceDetailPage() {
             </button>
             {invoice.pdf_file ? (
               <button
-                onClick={() => { const url = invoice.pdf_file!.startsWith('http') ? invoice.pdf_file! : `http://localhost:8000${invoice.pdf_file}`; window.location.href = url; }}
+                onClick={() => { const url = invoice.pdf_file!.startsWith('http') ? invoice.pdf_file! : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${invoice.pdf_file}`; window.location.href = url; }}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 <Eye className="w-4 h-4" /> View PDF

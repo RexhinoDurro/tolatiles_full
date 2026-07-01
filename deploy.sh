@@ -35,7 +35,7 @@ echo "→ Pulling latest code..."
 git pull origin main
 
 echo "→ Building and starting containers..."
-sudo -E docker compose up --build -d
+sudo -E docker compose -f docker-compose.prod.yml up --build -d
 
 echo "→ Done. Running containers:"
-sudo docker compose ps
+sudo docker compose -f docker-compose.prod.yml ps

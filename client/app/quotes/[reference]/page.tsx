@@ -141,7 +141,7 @@ export default function PublicQuotePage() {
                       console.log('pdf_url from API:', quote.pdf_url);
                       const pdfUrl = quote.pdf_url!.startsWith('http')
                         ? quote.pdf_url!
-                        : `http://localhost:8000${quote.pdf_url}`;
+                        : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${quote.pdf_url}`;
                       console.log('Redirecting to:', pdfUrl);
                       window.location.href = pdfUrl;
                     }}
