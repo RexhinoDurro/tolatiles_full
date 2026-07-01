@@ -421,17 +421,17 @@ const HeroSection = ({ content }: { content: LocationContent }) => {
                   </div>
                 </div>
                 {reviewsData && (
-                  <div className="overflow-hidden mt-8">
-                    <a href={GOOGLE_BUSINESS_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full transform transition-all duration-1000 delay-1200 hover:bg-white/20 ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
-                      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-5 w-auto" />
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-white font-semibold">{reviewsData.rating.toFixed(1)}</span>
-                        <div className="flex">
+                  <div className="mt-8">
+                    <a href={GOOGLE_BUSINESS_URL} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full transform transition-all duration-1000 delay-1200 hover:bg-white/20 max-w-full ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
+                      <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google" className="h-4 w-auto flex-shrink-0" />
+                      <div className="flex items-center gap-1 min-w-0">
+                        <span className="text-white font-semibold flex-shrink-0">{reviewsData.rating.toFixed(1)}</span>
+                        <div className="flex flex-shrink-0">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`h-4 w-4 ${i < Math.round(reviewsData.rating) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} />
+                            <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(reviewsData.rating) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} />
                           ))}
                         </div>
-                        <span className="text-white/80 text-sm">({reviewsData.userRatingCount} reviews)</span>
+                        <span className="text-white/80 text-xs hidden sm:inline flex-shrink-0">({reviewsData.userRatingCount} reviews)</span>
                       </div>
                     </a>
                   </div>
@@ -972,7 +972,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   };
 
   return (
