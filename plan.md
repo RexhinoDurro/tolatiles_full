@@ -137,3 +137,38 @@ Priority Order
 9. Sitemap + robots.txt + FAQPage schema
 
 ✻ Crunched for 7m 4s
+
+
+
+
+
+
+
+
+
+---
+Phase 1 — Route Architecture (done)
+- app/page.tsx — renders <HomePage location="florida" /> at root with keyword-optinstaller Jacksonville & St. Augustine, FL — Expert Installation"
+---
+Phase 1 — Route Architecture (done)
+- app/page.tsx — renders <HomePage location="florida" /> at root with keyword-optimized meta; H1 is now "Tile Installer Jacksonville & St. Augustine, FL — Expert Installation"
+- next.config.js — removed / → /florida; added 10 permanent redirects from /florida/* → root equivalents
+- [location]/page.tsx — adds redirect('/') guard when location is 'florida'; canon
+- app/layout.tsx — siteNavigation URLs fixed to root paths; email fixed to menitola@tolatiles.com; postal code fixed to 32084; @type updated to ["LocalBusiness", "HomeAndConstructionBusiness"]
+
+Phase 2 — Homepage Components (done)
+- floridaContent.basePath changed from '/florida' to '' so all internal links go t
+- ServiceAreasSection CTA text changed from "View Jacksonville Services" to "Explore Tile Installation in Jacksonville, FL"
+
+Phase 3 — Root Service Pages (done)
+- Created app/services/page.tsx and app/services/[slug]/page.tsx
+- Fixed ServiceDetailPage.tsx to use root paths (/services/, /gallery/, /contact) for florida
+- Fixed ServiceDetailPageLocation.tsx cross-link from /florida/services/ to /services/
+
+Phase 6 — Technical SEO (done)
+- sitemap.ts — root / and root service/gallery/blog/static pages added; florida ciay
+- robots.txt — added Disallow: /florida/ to save crawl budget
+- Navbar.tsx — homeLink and all nav paths use root prefix for florida
+- Footer.tsx — basePath fixed for florida; "All Florida Services" links to /
+
+✻ Baked for 1m 44s

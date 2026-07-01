@@ -23,7 +23,6 @@ __pycache__/
 # Django
 server/db.sqlite3
 server/staticfiles/
-server/media/
 server/*.sock
 server/*.sock.lock
 
