@@ -1,6 +1,7 @@
 'use client';
 
-import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu, ReactNodeViewRenderer } from '@tiptap/react';
+import { mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -37,6 +38,7 @@ import {
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import AIImageGenerator from './AIImageGenerator';
+import ResizableImageNodeView from './ResizableImageNodeView';
 
 interface TipTapEditorProps {
   content: string;
@@ -44,27 +46,56 @@ interface TipTapEditorProps {
   placeholder?: string;
 }
 
-// Extended Image extension with width and alignment
+// Extended Image extension with width, alignment, drag-to-move and resize.
+// Attribute parsing keeps width/align in sync with saved HTML; the actual
+// visual output (public site) is produced by renderHTML as inline styles,
+// while editing is handled by the React node view (drag + resize handles).
 const ResizableImage = Image.extend({
+  draggable: true,
+
   addAttributes() {
     return {
       ...this.parent?.(),
       width: {
         default: null,
-        parseHTML: element => element.getAttribute('width') || element.style.width?.replace('px', '') || null,
-        renderHTML: attributes => {
-          if (!attributes.width) return {};
-          return { width: attributes.width, style: `width: ${attributes.width}` };
-        },
+        parseHTML: element =>
+          element.style.width || element.getAttribute('width') || null,
+        // Rendered via node renderHTML below (avoids duplicate style attrs).
+        renderHTML: () => ({}),
       },
       align: {
         default: 'center',
         parseHTML: element => element.getAttribute('data-align') || 'center',
-        renderHTML: attributes => {
-          return { 'data-align': attributes.align };
-        },
+        renderHTML: () => ({}),
       },
     };
+  },
+
+  renderHTML({ HTMLAttributes, node }) {
+    const width: string | null = node.attrs.width;
+    const align: string = node.attrs.align || 'center';
+
+    const styles = ['display:block'];
+    if (width) {
+      const value = /^\d+$/.test(width) ? `${width}px` : width;
+      styles.push(`width:${value}`, 'height:auto');
+    }
+    // Alignment for block images uses auto margins.
+    if (align === 'center') styles.push('margin-left:auto', 'margin-right:auto');
+    else if (align === 'right') styles.push('margin-left:auto', 'margin-right:0');
+    else styles.push('margin-left:0', 'margin-right:auto');
+
+    return [
+      'img',
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+        'data-align': align,
+        style: styles.join(';'),
+      }),
+    ];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageNodeView);
   },
 });
 
@@ -136,27 +167,26 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     if (!editor) return;
 
     const handleSelectionUpdate = () => {
-      const { state } = editor;
-      const { selection } = state;
-      const node = selection.$anchor.parent;
-
-      // Check if we're in an image node
-      if (selection.$anchor.nodeBefore?.type.name === 'image') {
-        const imgNode = selection.$anchor.nodeBefore;
+      // An image is "active" when its node is selected (clicked) in the editor.
+      if (editor.isActive('image')) {
+        const attrs = editor.getAttributes('image');
         setSelectedImage({
-          src: imgNode.attrs.src,
-          alt: imgNode.attrs.alt || '',
-          width: imgNode.attrs.width || 'auto',
-          align: imgNode.attrs.align || 'center',
+          src: attrs.src,
+          alt: attrs.alt || '',
+          width: attrs.width || 'auto',
+          align: attrs.align || 'center',
         });
       } else {
         setSelectedImage(null);
       }
     };
 
+    // Reflect both cursor moves and attribute changes (e.g. live resizing).
     editor.on('selectionUpdate', handleSelectionUpdate);
+    editor.on('transaction', handleSelectionUpdate);
     return () => {
       editor.off('selectionUpdate', handleSelectionUpdate);
+      editor.off('transaction', handleSelectionUpdate);
     };
   }, [editor]);
 
@@ -464,8 +494,17 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
           <div className="flex items-center gap-2">
             <label className="text-xs text-gray-500">Width:</label>
             <select
-              value={selectedImage.width === 'auto' ? '' : selectedImage.width}
-              onChange={(e) => updateImageAttribute('width', e.target.value || 'auto')}
+              value={
+                selectedImage.width === 'auto' || !selectedImage.width
+                  ? ''
+                  : ['25%', '50%', '75%', '100%', '300px', '500px'].includes(selectedImage.width)
+                    ? selectedImage.width
+                    : '__custom'
+              }
+              onChange={(e) =>
+                e.target.value !== '__custom' &&
+                updateImageAttribute('width', e.target.value || 'auto')
+              }
               className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
             >
               <option value="">Auto</option>
@@ -475,6 +514,11 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
               <option value="100%">100%</option>
               <option value="300px">300px</option>
               <option value="500px">500px</option>
+              {selectedImage.width &&
+                selectedImage.width !== 'auto' &&
+                !['25%', '50%', '75%', '100%', '300px', '500px'].includes(selectedImage.width) && (
+                  <option value="__custom">{selectedImage.width} (dragged)</option>
+                )}
             </select>
           </div>
 
@@ -535,6 +579,13 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
         <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100 }}
+          shouldShow={({ editor, state }) => {
+            // Text-only bubble menu: hide for empty selections and for image
+            // (or other node) selections, which have their own controls bar.
+            if (state.selection.empty) return false;
+            if (editor.isActive('image')) return false;
+            return true;
+          }}
           className="bg-white rounded-lg shadow-lg border border-gray-200 flex items-center p-1"
         >
           <ToolbarButton

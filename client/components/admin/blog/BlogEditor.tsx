@@ -518,18 +518,23 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
 
             {/* Location */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="font-medium text-gray-900 mb-4">Target Location</h3>
+              <h3 className="font-medium text-gray-900 mb-4">Local Focus</h3>
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value as BlogLocation)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="florida">Florida</option>
-                <option value="jacksonville">Jacksonville</option>
-                <option value="st-augustine">St. Augustine</option>
+                <option value="florida">Northeast Florida (General)</option>
+                <optgroup label="Duval County">
+                  <option value="jacksonville">Jacksonville</option>
+                </optgroup>
+                <optgroup label="St. Johns County">
+                  <option value="st-augustine">St. Augustine</option>
+                </optgroup>
               </select>
               <p className="text-xs text-gray-500 mt-2">
-                Determines which location this post appears under (e.g., /{location}/blog/...)
+                Tags which area this post targets for local SEO. This is a content tag only —
+                every post publishes at /blog/... regardless of the location selected here.
               </p>
             </div>
 

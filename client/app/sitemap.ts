@@ -154,42 +154,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     locationStaticPages.push(
       { url: `${BASE_URL}/${loc}/about`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.8 },
       { url: `${BASE_URL}/${loc}/contact`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.9 },
-      { url: `${BASE_URL}/${loc}/faqs`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.8 },
-      { url: `${BASE_URL}/${loc}/blog`, lastModified: currentDate, changeFrequency: 'daily' as const, priority: 0.9 }
+      { url: `${BASE_URL}/${loc}/faqs`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.8 }
     );
   }
 
-  // Blog post pages (florida posts at root, city posts under location)
-  const blogPostPages: MetadataRoute.Sitemap = blogPosts.map((post) => {
-    const loc = post.location || 'florida';
-    const url = loc === 'florida'
-      ? `${BASE_URL}/blog/${post.slug}`
-      : `${BASE_URL}/${loc}/blog/${post.slug}`;
-    return {
-      url,
-      lastModified: post.last_updated?.split('T')[0] || post.publish_date?.split('T')[0] || currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    };
-  });
+  // Blog post pages — single canonical URL per post regardless of the
+  // post's `location` tag (blog has no per-city URLs; see next.config.js
+  // redirects for /jacksonville/blog and /st-augustine/blog).
+  const blogPostPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: post.last_updated?.split('T')[0] || post.publish_date?.split('T')[0] || currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
 
-  // Blog category pages — root + city pages
+  // Blog category pages — root only, no per-city variants.
   const blogCategoryPages: MetadataRoute.Sitemap = blogCategories.map((category) => ({
     url: `${BASE_URL}/blog/category/${category.slug}`,
     lastModified: currentDate,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
-  for (const loc of locations) {
-    for (const category of blogCategories) {
-      blogCategoryPages.push({
-        url: `${BASE_URL}/${loc}/blog/category/${category.slug}`,
-        lastModified: currentDate,
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      });
-    }
-  }
 
   // Global static pages (not location-specific)
   const globalStaticPages: MetadataRoute.Sitemap = [

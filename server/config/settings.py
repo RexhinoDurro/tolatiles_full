@@ -168,6 +168,12 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Ensure uploaded files/dirs are world-readable so nginx (www-data) can serve
+# them. Without this, Django's default umask produces 0640/0750 owned by the
+# container user, and nginx returns 403 for /media/ assets (e.g. blog images).
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

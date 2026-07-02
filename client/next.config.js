@@ -194,6 +194,29 @@ const nextConfig = {
         destination: '/st-augustine/services/:slug',
         permanent: true,
       },
+
+      // Blog no longer has per-city URLs (avoids duplicate-content across
+      // /blog, /jacksonville/blog, /st-augustine/blog) — consolidate to root.
+      {
+        source: '/jacksonville/blog',
+        destination: '/blog',
+        permanent: true,
+      },
+      {
+        source: '/jacksonville/blog/:path*',
+        destination: '/blog/:path*',
+        permanent: true,
+      },
+      {
+        source: '/st-augustine/blog',
+        destination: '/blog',
+        permanent: true,
+      },
+      {
+        source: '/st-augustine/blog/:path*',
+        destination: '/blog/:path*',
+        permanent: true,
+      },
     ];
   },
 };
