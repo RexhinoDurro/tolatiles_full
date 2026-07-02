@@ -34,11 +34,21 @@ class ContactLead(models.Model):
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(blank=True, help_text='Optional — landing page lead forms may omit this')
     phone = models.CharField(max_length=20, blank=True)
     project_type = models.CharField(max_length=50, choices=PROJECT_TYPE_CHOICES)
-    message = models.TextField()
+    message = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    lead_source = models.CharField(
+        max_length=100, blank=True,
+        help_text='Free-text source tag, e.g. "Landing Page: Bathroom Remodel". Set server-side.'
+    )
+    landing_page = models.ForeignKey(
+        'landingpages.LandingPage',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='leads',
+        help_text='Set automatically when the lead was submitted from a landing page'
+    )
     contact_result_reason = models.CharField(
         max_length=20,
         choices=CONTACT_RESULT_REASON_CHOICES,

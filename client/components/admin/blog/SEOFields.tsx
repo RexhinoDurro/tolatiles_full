@@ -15,6 +15,10 @@ interface SEOFieldsProps {
   onCanonicalUrlChange: (value: string) => void;
   onIsIndexedChange: (value: boolean) => void;
   title?: string; // Fallback title
+  /** URL prefix shown in the search preview, e.g. "tolatiles.com/blog/". Defaults to the blog path. */
+  previewUrlPrefix?: string;
+  /** Hide the URL Slug field entirely — used where another field (e.g. a subdomain input) already covers this role. */
+  showSlugField?: boolean;
 }
 
 export default function SEOFields({
@@ -29,6 +33,8 @@ export default function SEOFields({
   onCanonicalUrlChange,
   onIsIndexedChange,
   title,
+  previewUrlPrefix = 'tolatiles.com/blog/',
+  showSlugField = true,
 }: SEOFieldsProps) {
   const [slugEdited, setSlugEdited] = useState(false);
 
@@ -79,7 +85,7 @@ export default function SEOFields({
             {displayTitle.length > 60 && '...'}
           </div>
           <div className="text-green-700 text-sm mt-1">
-            tolatiles.com/blog/{slug || 'your-post-url'}
+            {previewUrlPrefix}{showSlugField ? slug || 'your-post-url' : ''}
           </div>
           <div className="text-gray-600 text-sm mt-1 line-clamp-2">
             {displayDesc.substring(0, 160)}
@@ -135,26 +141,28 @@ export default function SEOFields({
       </div>
 
       {/* URL Slug */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          URL Slug
-        </label>
-        <div className="flex items-center">
-          <span className="px-4 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-500 text-sm">
-            /blog/
-          </span>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => handleSlugChange(e.target.value)}
-            placeholder="your-post-url"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+      {showSlugField && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            URL Slug
+          </label>
+          <div className="flex items-center">
+            <span className="px-4 py-2 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-500 text-sm">
+              /blog/
+            </span>
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="your-post-url"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            URL-friendly identifier. Use lowercase letters, numbers, and hyphens only.
+          </p>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          URL-friendly identifier. Use lowercase letters, numbers, and hyphens only.
-        </p>
-      </div>
+      )}
 
       {/* Canonical URL */}
       <div>

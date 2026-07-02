@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Phone, Mail, Calendar, FileText, Loader2, Save, MapPin, UserCheck } from 'lucide-react';
+import { X, Phone, Mail, Calendar, FileText, Loader2, Save, MapPin, UserCheck, Rocket } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import LeadStatusBadge from './LeadStatusBadge';
 import PhoneCopy from './PhoneCopy';
@@ -196,6 +196,17 @@ export default function LeadDetailModal({ lead, isOpen, onClose, onUpdate, onCon
                   </p>
                 </div>
               </div>
+              {(lead.landing_page_name || lead.lead_source) && (
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg md:col-span-2">
+                  <Rocket className="w-5 h-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Source</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {lead.landing_page_name || lead.lead_source}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Address */}

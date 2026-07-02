@@ -108,6 +108,11 @@ export default function WebsiteLeadsTable({ leads, onView, onDelete }: WebsiteLe
                 </button>
               </th>
               <th className="px-6 py-3 text-left">
+                <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Source
+                </span>
+              </th>
+              <th className="px-6 py-3 text-left">
                 <button
                   onClick={() => handleSort('status')}
                   className="flex items-center gap-1 text-xs font-semibold text-gray-600 uppercase tracking-wider hover:text-gray-900"
@@ -150,6 +155,15 @@ export default function WebsiteLeadsTable({ leads, onView, onDelete }: WebsiteLe
                   <div className="text-gray-600">
                     {projectTypeLabels[lead.project_type] || lead.project_type}
                   </div>
+                </td>
+                <td className="px-6 py-4">
+                  {lead.landing_page_name ? (
+                    <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                      {lead.landing_page_name}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-400">{lead.lead_source || 'Website'}</span>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <LeadStatusBadge status={lead.status} size="sm" />
@@ -201,6 +215,11 @@ export default function WebsiteLeadsTable({ leads, onView, onDelete }: WebsiteLe
                 <p className="text-sm text-gray-500 mt-1">
                   {projectTypeLabels[lead.project_type] || lead.project_type}
                 </p>
+                {lead.landing_page_name && (
+                  <span className="inline-flex mt-1 px-2 py-0.5 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                    {lead.landing_page_name}
+                  </span>
+                )}
                 <p className="text-xs text-gray-400 mt-1">
                   {new Date(lead.created_at).toLocaleDateString()}
                 </p>

@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { headers } from 'next/headers';
 import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import Analytics from '@/components/Analytics';
+import { isLandingPageSubdomain } from '@/lib/subdomain';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -186,11 +188,14 @@ const siteNavigationSchema = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headersList = await headers();
+  const isLandingSite = isLandingPageSubdomain(headersList.get('host') || '');
+
   return (
     <html lang="en">
       <head>
@@ -210,11 +215,13 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <Analytics
-          gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}
-          gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}
-        />
-        <LayoutWrapper>{children}</LayoutWrapper>
+        {!isLandingSite && (
+          <Analytics
+            gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}
+            gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}
+          />
+        )}
+        <LayoutWrapper forceNoChrome={isLandingSite}>{children}</LayoutWrapper>
       </body>
     </html>
   );

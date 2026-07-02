@@ -680,3 +680,172 @@ After adding the block:
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
 ```
+
+---
+
+## Landing Pages on Wildcard Subdomains (*.tolatiles.com)
+
+The admin dashboard (`/admin/landing-pages`) can create marketing landing pages — each one
+served on its own subdomain, e.g. `bathroom.tolatiles.com`, `promotion.tolatiles.com`. This is
+built so that **creating a new landing page never requires a deploy or a server change** — the
+app already handles any subdomain dynamically (`client/middleware.ts` rewrites, Django serves
+by subdomain slug, CORS/host checks use a wildcard pattern). The one-time setup below is what
+makes that true. Do it once; every landing page created afterward needs nothing further here.
+
+> Note on naming: the existing Quotes Portal subdomain is inconsistently referred to as
+> `quote.tolatiles.com` in `nginx/nginx.conf` and `quotes.tolatiles.com` in this doc/Django
+> settings. Both spellings are now accepted everywhere (`ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`,
+> and `client/middleware.ts` all list/handle both) so this doesn't block anything below, but if
+> you're touching that area anyway, picking one and cleaning up the other is a good small
+> follow-up.
+
+### What's already handled in code (no server action needed)
+
+- `server/config/settings.py` — `ALLOWED_HOSTS` includes a leading-dot `.tolatiles.com` entry
+  (matches any subdomain), and `CORS_ALLOWED_ORIGIN_REGEXES` allows any `https://*.tolatiles.com`
+  origin to call the API. This is required because the frontend always calls the API at the fixed
+  `https://tolatiles.com/api` origin (see `NEXT_PUBLIC_API_URL` in `.env.production`) — a page
+  served from `bathroom.tolatiles.com` calling `tolatiles.com/api` is a cross-origin request from
+  the browser's point of view, so this needs to be a wildcard regex, not per-subdomain entries.
+- `client/middleware.ts` — parses the `Host` header and rewrites any subdomain that isn't `www`,
+  `quote`/`quotes`, or the bare apex domain to `/landing-site/[subdomain]`, which fetches and
+  renders that page's content from the API. No code change needed per new landing page.
+- The Django `landingpages` app and `/admin/landing-pages` UI are what create/edit the actual
+  page rows — this is the only thing you touch to add a new landing page after setup below.
+
+### One-time production setup
+
+**1. Confirm the current SSL certificate's actual coverage — don't assume.**
+
+```bash
+sudo certbot certificates
+```
+
+Check the SAN (Subject Alternative Names) list on the `tolatiles.com` cert. You need it to cover
+`*.tolatiles.com` (a true wildcard). If it currently only lists specific names like
+`tolatiles.com, www.tolatiles.com, quotes.tolatiles.com`, it does **not** cover arbitrary new
+subdomains and must be reissued as a wildcard (step 3) before any landing page subdomain will
+get valid HTTPS.
+
+**2. DNS: add a wildcard record.**
+
+In Route 53 (or wherever `tolatiles.com`'s DNS is managed), add:
+
+```
+*.tolatiles.com    A (or CNAME)    <same target as the apex/tolatiles.com record>
+```
+
+Match whatever record type the apex domain already uses. This single record covers every future
+landing page subdomain — no DNS changes needed per new page.
+
+**3. SSL: reissue as a true wildcard cert via DNS-01 challenge.**
+
+Certbot's default HTTP-01 challenge (`certbot --nginx`) **cannot** issue wildcard certs — only
+DNS-01 can. Since DNS is on Route 53, use the Route 53 DNS plugin:
+
+```bash
+# Install the Route 53 DNS plugin for certbot
+sudo apt install python3-certbot-dns-route53
+# (or: pip install certbot-dns-route53, depending on how certbot itself is installed)
+```
+
+Set up an IAM user/role with a policy scoped to just the `tolatiles.com` hosted zone
+(`route53:ChangeResourceRecordSets`, `route53:ListHostedZones`, `route53:GetChange`) and make
+those credentials available to certbot (env vars or `~/.aws/credentials`).
+
+```bash
+sudo certbot certonly --dns-route53 \
+  --cert-name tolatiles.com \
+  -d tolatiles.com -d '*.tolatiles.com'
+```
+
+Using `--cert-name tolatiles.com` reuses the existing cert's name/path
+(`/etc/letsencrypt/live/tolatiles.com/`) so nginx's existing `ssl_certificate` paths keep working
+without any changes. Verify renewal still works under the new DNS-01 config:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+(Renewal runs automatically via the existing certbot timer/cron — it reuses the DNS-01 config
+stored in `/etc/letsencrypt/renewal/tolatiles.com.conf`, no extra scheduling needed.)
+
+**4. Nginx: add one wildcard server block.**
+
+Add this to `/etc/nginx/sites-available/tolatiles`, alongside the existing blocks (order doesn't
+matter — nginx always matches the most specific `server_name` first, so the existing exact-match
+`quote.tolatiles.com` block keeps its own distinct behavior even with this wildcard block also
+present):
+
+```nginx
+# ── Landing pages: any other subdomain ───────────────────────────────────────
+server {
+    listen 80;
+    server_name *.tolatiles.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name *.tolatiles.com;
+
+    ssl_certificate /etc/letsencrypt/live/tolatiles.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/tolatiles.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 20M;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**5. Deploy the application code** (the `landingpages` Django app, updated `ALLOWED_HOSTS`/CORS,
+`client/middleware.ts`, and the admin UI) through your normal deploy process, including running
+migrations:
+
+```bash
+python manage.py migrate
+```
+
+### Verifying it worked
+
+1. Create a test landing page in `/admin/landing-pages` (any unused subdomain, e.g. `test`), add
+   a Hero section, set status to Published, and Save.
+2. Visit `https://test.tolatiles.com/` — it should load over valid HTTPS with no certificate
+   warnings, showing your content with no site nav.
+3. Create a *second* test page on a different subdomain and confirm it also works immediately,
+   with no further nginx/DNS/deploy steps — that's the actual proof that the wildcard setup
+   worked and future pages are truly zero-ops.
+4. Submit the lead form on the test page and confirm it appears in `/admin/crm/leads` tagged
+   with the landing page's name as the source.
+5. Delete the test page(s) when done.
+
+### Ongoing: creating a new landing page
+
+Nothing from this section needs to be repeated. Go to `/admin/landing-pages` → New, pick a
+subdomain, build the sections, set tracking IDs, and publish.

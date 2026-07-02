@@ -6,15 +6,20 @@ import Footer from './Footer';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
+  /** Set from a server-side host check (see app/layout.tsx) — usePathname() does not
+   * reliably reflect the middleware rewrite target for landing-page subdomains, so that
+   * case can't be detected from pathname alone. */
+  forceNoChrome?: boolean;
 }
 
-export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+export default function LayoutWrapper({ children, forceNoChrome }: LayoutWrapperProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith('/admin');
   const isQuotesPortalRoute = pathname?.startsWith('/quotes-portal');
+  const isLandingSiteRoute = pathname?.startsWith('/landing-site');
 
-  if (isAdminRoute || isQuotesPortalRoute) {
-    // Admin pages render without Navbar/Footer
+  if (forceNoChrome || isAdminRoute || isQuotesPortalRoute || isLandingSiteRoute) {
+    // Admin pages and admin-managed landing pages render without Navbar/Footer
     return <>{children}</>;
   }
 

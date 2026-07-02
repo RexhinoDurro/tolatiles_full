@@ -27,6 +27,7 @@ from quotes.views import (
 )
 from api.views import GoogleReviewsView
 from integrations.urls import api_urlpatterns as integration_api_urls
+from landingpages.views import LandingPageViewSet, LandingPageSectionViewSet
 
 
 # Create router and register viewsets
@@ -45,6 +46,8 @@ router.register('appointments', AppointmentViewSet, basename='appointment')
 router.register('job-types', CustomJobTypeViewSet, basename='job-type')
 router.register('lead-sources', CustomLeadSourceViewSet, basename='lead-source')
 router.register('portal/quotes', QuotesPortalViewSet, basename='portal-quote')
+router.register('landing-pages', LandingPageViewSet, basename='landing-page')
+router.register('landing-page-sections', LandingPageSectionViewSet, basename='landing-page-section')
 
 
 urlpatterns = [

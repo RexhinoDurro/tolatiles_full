@@ -12,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.core.mail import send_mail
 from django.core.cache import cache
 from django.conf import settings
+from django.db.models import Count
 
 from .models import ContactLead, LocalAdsLead
 from .serializers import (
@@ -54,6 +55,11 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0].strip()
         return request.META.get('REMOTE_ADDR', '')
+
+    def _is_allowed_tolatiles_origin(self, value: str) -> bool:
+        """True if value is https://tolatiles.com, https://www.tolatiles.com, or any https://*.tolatiles.com subdomain."""
+        import re
+        return bool(re.match(r'^https://([\w-]+\.)?tolatiles\.com(/|$)', value))
 
     def _verify_turnstile(self, token: str, ip: str) -> bool:
         """Verify a Cloudflare Turnstile token via the siteverify API."""
@@ -101,13 +107,14 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Origin/Referer validation (skip in DEBUG mode)
+        # Any *.tolatiles.com origin is allowed so landing-page subdomains (bathroom.tolatiles.com,
+        # promotion.tolatiles.com, etc.) can submit leads, not just the main site.
         if not settings.DEBUG:
-            allowed_origins = ['https://tolatiles.com', 'https://www.tolatiles.com']
             origin = request.META.get('HTTP_ORIGIN', '')
             referer = request.META.get('HTTP_REFERER', '')
-            if origin and not any(origin.startswith(o) for o in allowed_origins):
+            if origin and not self._is_allowed_tolatiles_origin(origin):
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
-            if not origin and referer and not any(referer.startswith(o) for o in allowed_origins):
+            if not origin and referer and not self._is_allowed_tolatiles_origin(referer):
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Cloudflare Turnstile verification (skip in DEBUG mode)
@@ -130,11 +137,12 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
         customer_email = lead.email
         customer_name = lead.full_name
 
-        # Send thank you email to customer
-        try:
-            send_mail(
-                subject='Thank You for Contacting Tola Tiles',
-                message=f'''Dear {customer_name},
+        # Send thank you email to customer (landing-page leads may not collect an email)
+        if customer_email:
+            try:
+                send_mail(
+                    subject='Thank You for Contacting Tola Tiles',
+                    message=f'''Dear {customer_name},
 
 Thank you for contacting us! We have received your inquiry and appreciate your interest in Tola Tiles.
 
@@ -143,12 +151,12 @@ Our team will review your message and get back to you as soon as possible.
 Best regards,
 Meni Tola
 Tola Tiles''',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[customer_email],
-                fail_silently=False,
-            )
-        except Exception as e:
-            logger.error(f"Failed to send thank you email to {customer_email}: {e}")
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[customer_email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                logger.error(f"Failed to send thank you email to {customer_email}: {e}")
 
         # Send notification email to admin
         try:
@@ -157,9 +165,10 @@ Tola Tiles''',
                 message=f'''A new lead came through the contact form.
 
 Name: {customer_name}
-Email: {customer_email}
+Email: {customer_email or '(not provided)'}
 Phone: {lead.phone}
 Project Type: {lead.get_project_type_display()}
+Source: {lead.lead_source or 'Website'}
 
 Message:
 {lead.message}
@@ -188,9 +197,17 @@ View all leads in the admin dashboard.''',
                 status=status_choice[0]
             ).count()
 
+        landing_page_counts = (
+            ContactLead.objects.exclude(landing_page__isnull=True)
+            .values('landing_page__name')
+            .annotate(count=Count('id'))
+        )
+        by_landing_page = {row['landing_page__name']: row['count'] for row in landing_page_counts}
+
         return Response({
             'total': total,
             'by_status': by_status,
+            'by_landing_page': by_landing_page,
         })
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])

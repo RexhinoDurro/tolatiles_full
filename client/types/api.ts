@@ -52,6 +52,9 @@ export interface ContactLead {
   contact_result_reason: ContactResultReason | '';
   address: string;
   notes: string;
+  lead_source: string;
+  landing_page: number | null;
+  landing_page_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -62,18 +65,85 @@ export type ContactResultReason = 'no_answer' | 'phone_off' | 'wrong_number' | '
 export interface ContactFormData {
   first_name: string;
   last_name: string;
-  email: string;
+  email?: string;
   phone?: string;
   project_type: string;
-  message: string;
+  message?: string;
   honeypot?: string;
   form_fill_time?: number;
   cf_turnstile_response?: string;
+  landing_page_id?: number;
 }
 
 export interface LeadStats {
   total: number;
   by_status: Record<LeadStatus, number>;
+  by_landing_page: Record<string, number>;
+}
+
+// Landing Page Types (admin-managed marketing pages on their own subdomain)
+export type LandingPageStatus = 'draft' | 'published';
+export type LandingPageSectionType = 'hero' | 'headline' | 'cta' | 'lead_form' | 'reviews' | 'gallery';
+
+export interface LandingPageSection {
+  id: number;
+  landing_page: number;
+  section_type: LandingPageSectionType;
+  order: number;
+  is_enabled: boolean;
+  config: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LandingPageListItem {
+  id: number;
+  name: string;
+  subdomain: string;
+  status: LandingPageStatus;
+  updated_at: string;
+  created_at: string;
+  lead_count: number;
+}
+
+export interface LandingPage {
+  id: number;
+  name: string;
+  subdomain: string;
+  status: LandingPageStatus;
+  published_at: string | null;
+  page_title: string;
+  meta_title: string;
+  meta_description: string;
+  canonical_url: string;
+  is_indexed: boolean;
+  og_image: string | null;
+  meta_pixel_id: string;
+  gtm_container_id: string;
+  ga_measurement_id: string;
+  custom_head_scripts: string;
+  custom_body_scripts: string;
+  phone_number: string;
+  effective_meta_title: string;
+  effective_meta_description: string;
+  sections: LandingPageSection[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type LandingPageCreate = Partial<Omit<LandingPage, 'id' | 'sections' | 'created_at' | 'updated_at' | 'published_at' | 'effective_meta_title' | 'effective_meta_description'>> & {
+  name: string;
+  subdomain: string;
+  page_title: string;
+};
+
+export interface LandingPagePublic extends Omit<LandingPage, 'meta_title' | 'meta_description' | 'sections' | 'published_at' | 'status'> {
+  sections: (LandingPageSection & { config: Record<string, any> & { images?: GalleryImage[] } })[];
+}
+
+export interface SubdomainCheckResponse {
+  available: boolean;
+  reason: string | null;
 }
 
 // Website Lead Admin Create (for manually adding leads)

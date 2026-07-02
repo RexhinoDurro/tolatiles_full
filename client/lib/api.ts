@@ -89,6 +89,12 @@ import type {
   SiteFAQ,
   SiteFAQCreate,
   SiteFAQUpdate,
+  LandingPage,
+  LandingPageListItem,
+  LandingPageCreate,
+  LandingPageSection,
+  LandingPageSectionType,
+  SubdomainCheckResponse,
 } from '@/types/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -497,6 +503,72 @@ class ApiClient {
     return this.fetch<ContactLead>('/leads/admin_create/', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  }
+
+  // ============ Landing Pages ============
+
+  async getLandingPages(): Promise<LandingPageListItem[]> {
+    const response = await this.fetch<PaginatedResponse<LandingPageListItem> | LandingPageListItem[]>('/landing-pages/');
+    return Array.isArray(response) ? response : response.results;
+  }
+
+  async getLandingPage(id: number): Promise<LandingPage> {
+    return this.fetch<LandingPage>(`/landing-pages/${id}/`);
+  }
+
+  async createLandingPage(data: LandingPageCreate): Promise<LandingPage> {
+    return this.fetch<LandingPage>('/landing-pages/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateLandingPage(id: number, data: Partial<LandingPageCreate>): Promise<LandingPage> {
+    return this.fetch<LandingPage>(`/landing-pages/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLandingPage(id: number): Promise<void> {
+    await this.fetch<void>(`/landing-pages/${id}/`, { method: 'DELETE' });
+  }
+
+  async checkLandingPageSubdomain(subdomain: string, excludeId?: number): Promise<SubdomainCheckResponse> {
+    const params = new URLSearchParams({ subdomain });
+    if (excludeId) params.set('exclude_id', String(excludeId));
+    return this.fetch<SubdomainCheckResponse>(`/landing-pages/check_subdomain/?${params.toString()}`);
+  }
+
+  async createLandingPageSection(data: {
+    landing_page: number;
+    section_type: LandingPageSectionType;
+    order?: number;
+    is_enabled?: boolean;
+    config?: Record<string, any>;
+  }): Promise<LandingPageSection> {
+    return this.fetch<LandingPageSection>('/landing-page-sections/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateLandingPageSection(id: number, data: Partial<LandingPageSection>): Promise<LandingPageSection> {
+    return this.fetch<LandingPageSection>(`/landing-page-sections/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteLandingPageSection(id: number): Promise<void> {
+    await this.fetch<void>(`/landing-page-sections/${id}/`, { method: 'DELETE' });
+  }
+
+  async reorderLandingPageSections(landingPageId: number, order: number[]): Promise<void> {
+    await this.fetch<void>('/landing-page-sections/reorder/', {
+      method: 'PATCH',
+      body: JSON.stringify({ landing_page: landingPageId, order }),
     });
   }
 

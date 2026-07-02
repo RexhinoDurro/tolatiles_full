@@ -53,7 +53,10 @@
       "Bash(git push https://RexhinoDurro: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@github.com/RexhinoDurro/tolatiles_full.git main)",
       "Bash(ls:*)",
       "Bash(systemctl:*)",
-      "Bash(pgrep:*)"
+      "Bash(pgrep:*)",
+      "mcp__rag__search_codebase",
+      "mcp__obsidian__search_simple",
+      "mcp__obsidian__vault_read"
     ]
   }
 }

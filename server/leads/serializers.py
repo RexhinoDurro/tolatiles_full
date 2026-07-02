@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from landingpages.models import LandingPage
 from .models import ContactLead, LocalAdsLead
 
 
@@ -6,6 +7,7 @@ class ContactLeadSerializer(serializers.ModelSerializer):
     """Full serializer for contact leads (admin view)."""
 
     full_name = serializers.ReadOnlyField()
+    landing_page_name = serializers.CharField(source='landing_page.name', read_only=True, default=None)
 
     class Meta:
         model = ContactLead
@@ -22,14 +24,25 @@ class ContactLeadSerializer(serializers.ModelSerializer):
             'contact_result_reason',
             'address',
             'notes',
+            'lead_source',
+            'landing_page',
+            'landing_page_name',
             'created_at',
             'updated_at',
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'lead_source', 'landing_page']
 
 
 class ContactLeadCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating contact leads (public form submission)."""
+
+    landing_page_id = serializers.PrimaryKeyRelatedField(
+        queryset=LandingPage.objects.filter(status='published'),
+        source='landing_page',
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
 
     class Meta:
         model = ContactLead
@@ -40,11 +53,12 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
             'phone',
             'project_type',
             'message',
+            'landing_page_id',
         ]
 
     def validate_email(self, value):
-        """Validate email format."""
-        return value.lower().strip()
+        """Validate email format. Optional — landing page forms may omit it."""
+        return value.lower().strip() if value else value
 
     def validate_first_name(self, value):
         """Clean first name."""
@@ -64,6 +78,12 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Invalid submission.')
 
         return attrs
+
+    def create(self, validated_data):
+        landing_page = validated_data.get('landing_page')
+        if landing_page:
+            validated_data['lead_source'] = f'Landing Page: {landing_page.name}'
+        return super().create(validated_data)
 
 
 class ContactLeadUpdateSerializer(serializers.ModelSerializer):

@@ -25,7 +25,11 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-(s@2kjw9c72^yz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com', 'quotes.tolatiles.com']
+ALLOWED_HOSTS = [
+    'localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com',
+    'quotes.tolatiles.com', 'quote.tolatiles.com',
+    '.tolatiles.com',  # leading-dot wildcard: covers admin-created landing page subdomains too
+]
 
 # Trust X-Forwarded-Proto header from nginx proxy for HTTPS detection
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -58,6 +62,7 @@ INSTALLED_APPS = [
     'blog',
     'projects',
     'faqs',
+    'landingpages',
 ]
 
 MIDDLEWARE = [
@@ -216,6 +221,15 @@ CORS_ALLOWED_ORIGINS = [
     'https://www.tolatiles.com',
     'https://quotes.tolatiles.com',
     'https://quote.tolatiles.com',
+]
+
+# Landing pages are created ad hoc from the admin (new subdomain = new DB row, no deploy),
+# so their origins can't be enumerated in the static list above. The frontend always calls
+# the API at the fixed https://tolatiles.com/api origin (see NEXT_PUBLIC_API_URL), so a
+# browser request from e.g. bathroom.tolatiles.com to tolatiles.com/api is cross-origin and
+# needs this regex to get an Access-Control-Allow-Origin header — independent of ALLOWED_HOSTS.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://([\w-]+\.)?tolatiles\.com$',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

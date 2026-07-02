@@ -4,12 +4,13 @@ from .models import ContactLead, LocalAdsLead
 
 @admin.register(ContactLead)
 class ContactLeadAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'email', 'project_type', 'status', 'created_at']
-    list_filter = ['status', 'project_type', 'created_at']
+    list_display = ['full_name', 'email', 'project_type', 'lead_source', 'status', 'created_at']
+    list_filter = ['status', 'project_type', 'lead_source', 'landing_page', 'created_at']
     search_fields = ['first_name', 'last_name', 'email', 'message']
     list_editable = ['status']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+    raw_id_fields = ['landing_page']
 
     fieldsets = (
         ('Contact Information', {
@@ -17,6 +18,9 @@ class ContactLeadAdmin(admin.ModelAdmin):
         }),
         ('Project Details', {
             'fields': ('project_type', 'message')
+        }),
+        ('Attribution', {
+            'fields': ('lead_source', 'landing_page')
         }),
         ('Status', {
             'fields': ('status', 'notes')
