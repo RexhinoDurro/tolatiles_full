@@ -120,6 +120,7 @@ class LandingPageSection(models.Model):
         ('lead_form', 'Lead Form'),
         ('reviews', 'Reviews'),
         ('gallery', 'Gallery'),
+        ('custom_code', 'Custom Code'),
     ]
 
     landing_page = models.ForeignKey(
@@ -132,7 +133,10 @@ class LandingPageSection(models.Model):
     is_enabled = models.BooleanField(default=True)
     config = models.JSONField(
         default=dict, blank=True,
-        help_text='Shape depends on section_type, e.g. hero: {headline, subheadline, media_type, image, video_url}'
+        help_text=(
+            'Shape depends on section_type, e.g. hero: {headline, subheadline, media_type, '
+            'image, video_url}; custom_code: {html} — raw HTML/CSS/JS, admin-trust-level input'
+        )
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

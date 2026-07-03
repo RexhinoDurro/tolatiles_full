@@ -5,6 +5,7 @@ import CTASection from './sections/CTASection';
 import LeadFormSection from './sections/LeadFormSection';
 import ReviewsSection from './sections/ReviewsSection';
 import GallerySection from './sections/GallerySection';
+import CustomCodeSection from './sections/CustomCodeSection';
 
 interface SectionRendererProps {
   sections: LandingPageSection[];
@@ -37,6 +38,8 @@ export default function SectionRenderer({ sections, phoneNumber, landingPageId }
             return <ReviewsSection key={section.id} config={section.config} />;
           case 'gallery':
             return <GallerySection key={section.id} config={section.config} />;
+          case 'custom_code':
+            return <CustomCodeSection key={section.id} config={section.config} />;
           default:
             return null;
         }

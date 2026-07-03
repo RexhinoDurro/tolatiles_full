@@ -10,6 +10,7 @@ import CTASectionForm from './sections/CTASectionForm';
 import LeadFormSectionForm from './sections/LeadFormSectionForm';
 import ReviewsSectionForm from './sections/ReviewsSectionForm';
 import GallerySectionForm from './sections/GallerySectionForm';
+import CustomCodeSectionForm from './sections/CustomCodeSectionForm';
 
 interface SectionsEditorProps {
   landingPageId: number;
@@ -24,9 +25,10 @@ const SECTION_TYPE_LABELS: Record<LandingPageSectionType, string> = {
   lead_form: 'Lead Form',
   reviews: 'Reviews',
   gallery: 'Gallery',
+  custom_code: 'Custom Code',
 };
 
-const SECTION_TYPES: LandingPageSectionType[] = ['hero', 'headline', 'cta', 'lead_form', 'reviews', 'gallery'];
+const SECTION_TYPES: LandingPageSectionType[] = ['hero', 'headline', 'cta', 'lead_form', 'reviews', 'gallery', 'custom_code'];
 
 export default function SectionsEditor({ landingPageId, sections, onSectionsChange }: SectionsEditorProps) {
   const [addingType, setAddingType] = useState<LandingPageSectionType>('hero');
@@ -100,6 +102,8 @@ export default function SectionsEditor({ landingPageId, sections, onSectionsChan
         return <ReviewsSectionForm config={section.config} onChange={onChange} />;
       case 'gallery':
         return <GallerySectionForm config={section.config} onChange={onChange} />;
+      case 'custom_code':
+        return <CustomCodeSectionForm config={section.config} onChange={onChange} />;
       default:
         return null;
     }

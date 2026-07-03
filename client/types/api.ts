@@ -83,7 +83,7 @@ export interface LeadStats {
 
 // Landing Page Types (admin-managed marketing pages on their own subdomain)
 export type LandingPageStatus = 'draft' | 'published';
-export type LandingPageSectionType = 'hero' | 'headline' | 'cta' | 'lead_form' | 'reviews' | 'gallery';
+export type LandingPageSectionType = 'hero' | 'headline' | 'cta' | 'lead_form' | 'reviews' | 'gallery' | 'custom_code';
 
 export interface LandingPageSection {
   id: number;
