@@ -21,10 +21,10 @@ export default function LandingPageNavbar({ phoneNumber }: LandingPageNavbarProp
         {phoneNumber && (
           <a
             href={`tel:${phoneNumber}`}
-            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition-colors whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 sm:gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-2 sm:px-4 sm:py-2 rounded-xl transition-colors whitespace-nowrap text-sm sm:text-base"
           >
-            <Phone className="w-5 h-5" />
-            <span className="hidden sm:inline">{displayPhoneNumber(phoneNumber)}</span>
+            <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span>{displayPhoneNumber(phoneNumber)}</span>
           </a>
         )}
       </div>

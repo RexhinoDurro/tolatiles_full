@@ -23,17 +23,12 @@ SECTIONS = [
         },
     },
     {
-        'section_type': 'headline',
+        'section_type': 'lead_form',
         'config': {
-            'text': 'Licensed & Insured Bathroom Tile Experts',
-            'subtext': 'Serving Jacksonville and the surrounding area with high-quality shower, floor, and full bathroom tile installations.',
-        },
-    },
-    {
-        'section_type': 'gallery',
-        'config': {
-            'heading': 'Recent Bathroom Projects',
-            'gallery_category': 'shower',
+            'heading': 'Get Your Free Bathroom Quote',
+            'button_label': 'Get My Free Quote',
+            'success_message': "Thank you! We'll call you shortly to schedule your free bathroom quote.",
+            'project_type': 'bathroom',
         },
     },
     {
@@ -75,18 +70,23 @@ SECTIONS = [
         },
     },
     {
-        'section_type': 'cta',
+        'section_type': 'headline',
         'config': {
-            'label': 'Ready to Remodel Your Bathroom?',
+            'text': 'Licensed & Insured Bathroom Tile Experts',
+            'subtext': 'Serving Jacksonville and the surrounding area with high-quality shower, floor, and full bathroom tile installations.',
         },
     },
     {
-        'section_type': 'lead_form',
+        'section_type': 'gallery',
         'config': {
-            'heading': 'Get Your Free Bathroom Quote',
-            'button_label': 'Get My Free Quote',
-            'success_message': "Thank you! We'll call you shortly to schedule your free bathroom quote.",
-            'project_type': 'bathroom',
+            'heading': 'Recent Bathroom Projects',
+            'gallery_category': 'shower',
+        },
+    },
+    {
+        'section_type': 'cta',
+        'config': {
+            'label': 'Ready to Remodel Your Bathroom?',
         },
     },
 ]
