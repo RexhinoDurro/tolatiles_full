@@ -125,6 +125,9 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
       const [firstName, ...rest] = name.trim().split(/\s+/);
       const lastName = rest.join(' ') || firstName;
       const fillTime = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+      // Shared between the pixel and the server-side Conversions API call so Meta
+      // dedupes them into a single Lead event instead of double-counting.
+      const eventId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
 
       await api.submitContactForm({
         first_name: firstName || 'Lead',
@@ -135,10 +138,11 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
         form_fill_time: fillTime,
         cf_turnstile_response: turnstileToken,
         landing_page_id: landingPageId,
+        event_id: eventId,
       });
 
       if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', 'Lead');
+        window.fbq('track', 'Lead', {}, { eventID: eventId });
       }
 
       setSubmitStatus('success');

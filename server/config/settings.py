@@ -323,6 +323,9 @@ GOOGLE_ADS_CUSTOMER_ID = os.environ.get('GOOGLE_ADS_CUSTOMER_ID', '')
 GOOGLE_ADS_CLIENT_ID = os.environ.get('GOOGLE_ADS_CLIENT_ID', '')
 GOOGLE_ADS_CLIENT_SECRET = os.environ.get('GOOGLE_ADS_CLIENT_SECRET', '')
 
+# Meta Conversions API (server-side event tracking for landing pages)
+META_CAPI_ACCESS_TOKEN = os.environ.get('CAPI_ACCESS_TOKEN', '')
+
 
 # Django Channels Configuration
 CHANNEL_LAYERS = {

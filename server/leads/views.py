@@ -14,6 +14,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.db.models import Count
 
+from .meta_capi import send_lead_event
 from .models import ContactLead, LocalAdsLead
 from .serializers import (
     ContactLeadSerializer,
@@ -136,6 +137,13 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
         lead = serializer.instance
         customer_email = lead.email
         customer_name = lead.full_name
+
+        # Server-side Meta Conversions API event, deduplicated against the
+        # browser pixel's fbq('track', 'Lead') via a shared event_id.
+        try:
+            send_lead_event(lead, request, client_ip, request.data.get('event_id', ''))
+        except Exception as e:
+            logger.error(f"Meta CAPI dispatch failed: {e}")
 
         # Send thank you email to customer (landing-page leads may not collect an email)
         if customer_email:

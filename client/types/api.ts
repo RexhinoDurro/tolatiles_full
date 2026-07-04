@@ -73,6 +73,7 @@ export interface ContactFormData {
   form_fill_time?: number;
   cf_turnstile_response?: string;
   landing_page_id?: number;
+  event_id?: string;
 }
 
 export interface LeadStats {
