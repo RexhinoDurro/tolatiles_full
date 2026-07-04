@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle, AlertCircle, PhoneCall } from 'lucide-react';
+import { CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
 
@@ -30,15 +30,9 @@ interface LeadCaptureFormProps {
   id?: string;
 }
 
-/**
- * Deliberately old-school "2010s web form" look: a bold bordered card, a glossy
- * gradient header bar, oversized labels/inputs, and a chunky 3D press-button —
- * chosen for maximum clarity for older, less tech-savvy visitors rather than a
- * modern flat aesthetic.
- */
 export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptureFormProps) {
   const heading = config.heading || 'Get Your Free Quote';
-  const buttonLabel = config.button_label || 'Get My Free Quote';
+  const buttonLabel = config.button_label || 'Schedule Now';
   const successMessage = config.success_message || "Thank you! We'll call you shortly.";
   const projectType = config.project_type || 'other';
 
@@ -162,109 +156,99 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
   };
 
   return (
-    <div id={id} className="w-full max-w-md mx-auto" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
-      <div
-        className="rounded-lg overflow-hidden border-4 border-blue-900"
-        style={{ boxShadow: '0 8px 0 rgba(0,0,0,0.2), 0 14px 28px rgba(0,0,0,0.35)' }}
-      >
-        <div className="bg-gradient-to-b from-blue-500 to-blue-800 px-5 py-4 text-center border-b-4 border-blue-900">
-          <p className="text-white font-extrabold text-xl sm:text-2xl uppercase tracking-wide">{heading}</p>
-        </div>
+    <div id={id} className="w-full max-w-md mx-auto">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-7 sm:px-8 sm:py-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">{heading}</h2>
 
-        <div className="bg-white px-5 py-6 sm:px-7 sm:py-7">
-          {submitStatus === 'success' ? (
-            <div className="p-4 bg-green-50 border-2 border-green-600 rounded-md flex items-start gap-3">
-              <CheckCircle className="h-7 w-7 text-green-600 mt-0.5 flex-shrink-0" />
-              <p className="text-green-800 text-lg font-semibold">{successMessage}</p>
+        {submitStatus === 'success' ? (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+            <CheckCircle className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
+            <p className="text-green-800 text-base font-medium">{successMessage}</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {submitStatus === 'error' && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <p className="text-red-700 text-sm">{errorMessage}</p>
+              </div>
+            )}
+
+            <div style={{ display: 'none' }} aria-hidden="true">
+              <label htmlFor="company_website">Company Website</label>
+              <input
+                type="text"
+                id="company_website"
+                name="company_website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {submitStatus === 'error' && (
-                <div className="p-4 bg-red-50 border-2 border-red-600 rounded-md flex items-start gap-3">
-                  <AlertCircle className="h-6 w-6 text-red-600 mt-0.5 flex-shrink-0" />
-                  <p className="text-red-800 text-base font-semibold">{errorMessage}</p>
-                </div>
-              )}
 
-              <div style={{ display: 'none' }} aria-hidden="true">
-                <label htmlFor="company_website">Company Website</label>
-                <input
-                  type="text"
-                  id="company_website"
-                  name="company_website"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-              </div>
+            <div>
+              <label htmlFor="lp-name" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Your Name
+              </label>
+              <input
+                type="text"
+                id="lp-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="John Smith"
+              />
+            </div>
 
-              <div>
-                <label htmlFor="lp-name" className="block text-lg font-bold text-gray-900 mb-2">
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  id="lp-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full px-4 py-4 text-xl border-2 border-gray-500 rounded-md focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-600"
-                  placeholder="John Smith"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="lp-phone" className="block text-lg font-bold text-gray-900 mb-2">
-                  Your Phone Number
-                </label>
-                <div className="relative flex">
-                  {phoneDigits && (
-                    <span className="inline-flex items-center px-3 border-2 border-r-0 border-gray-500 rounded-l-md bg-gray-100 text-blue-800 font-bold select-none text-xl">
-                      +1
-                    </span>
-                  )}
-                  <input
-                    type="tel"
-                    id="lp-phone"
-                    value={formatPhoneNumber(phoneDigits)}
-                    onChange={handlePhoneChange}
-                    required
-                    className={`w-full px-4 py-4 text-xl border-2 border-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-600 ${
-                      phoneDigits ? 'rounded-r-md' : 'rounded-md'
-                    }`}
-                    placeholder="(904) 123-4567"
-                  />
-                </div>
-              </div>
-
-              <div ref={turnstileContainerRef} aria-hidden="true" />
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-b from-green-400 to-green-600 disabled:from-green-300 disabled:to-green-400 text-white py-5 px-6 rounded-md border-2 border-green-800 font-extrabold text-xl uppercase tracking-wide flex items-center justify-center gap-3 transition-all"
-                style={{ boxShadow: isSubmitting ? 'none' : '0 5px 0 #14532d', transform: isSubmitting ? 'translateY(3px)' : undefined }}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <PhoneCall className="h-6 w-6" />
-                    {buttonLabel}
-                  </>
+            <div>
+              <label htmlFor="lp-phone" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Your Phone Number
+              </label>
+              <div className="relative flex">
+                {phoneDigits && (
+                  <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-600 font-medium select-none text-base">
+                    +1
+                  </span>
                 )}
-              </button>
+                <input
+                  type="tel"
+                  id="lp-phone"
+                  value={formatPhoneNumber(phoneDigits)}
+                  onChange={handlePhoneChange}
+                  required
+                  className={`w-full px-4 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    phoneDigits ? 'rounded-r-lg' : 'rounded-lg'
+                  }`}
+                  placeholder="(904) 123-4567"
+                />
+              </div>
+            </div>
 
-              <p className="text-center text-sm sm:text-base font-semibold text-gray-500">
-                100% Free &nbsp;•&nbsp; No Obligation &nbsp;•&nbsp; Fast Response
-              </p>
-            </form>
-          )}
-        </div>
+            <div ref={turnstileContainerRef} aria-hidden="true" />
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white py-3.5 px-6 rounded-lg font-semibold text-base sm:text-lg flex items-center justify-center gap-2 transition-colors"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="h-5 w-5" />
+                  {buttonLabel}
+                </>
+              )}
+            </button>
+
+            <p className="text-center text-sm text-gray-400">No obligation. Fast response.</p>
+          </form>
+        )}
       </div>
     </div>
   );
