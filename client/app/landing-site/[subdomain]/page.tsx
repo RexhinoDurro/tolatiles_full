@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import type { LandingPagePublic } from '@/types/api';
 import LandingPageTracking from '@/components/landing/LandingPageTracking';
 import LandingPageLeadBridge from '@/components/landing/LandingPageLeadBridge';
+import LandingPageNavbar from '@/components/landing/LandingPageNavbar';
 import SectionRenderer from '@/components/landing/SectionRenderer';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -92,6 +93,7 @@ export default async function LandingSitePage({
         bodyScripts={landingPage.custom_body_scripts}
       />
       {hasCustomCodeSection && <LandingPageLeadBridge landingPageId={landingPage.id} />}
+      <LandingPageNavbar phoneNumber={landingPage.phone_number} />
       <SectionRenderer
         sections={landingPage.sections}
         phoneNumber={landingPage.phone_number}
