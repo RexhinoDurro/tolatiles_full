@@ -157,7 +157,10 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
 
   return (
     <div id={id} className="w-full max-w-md mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-7 sm:px-8 sm:py-8">
+      <div
+        className="bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-7 sm:px-8 sm:py-8"
+        style={{ colorScheme: 'light' }}
+      >
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-center mb-6">{heading}</h2>
 
         {submitStatus === 'success' ? (
@@ -197,7 +200,7 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="John Smith"
               />
             </div>
@@ -218,7 +221,7 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
                   value={formatPhoneNumber(phoneDigits)}
                   onChange={handlePhoneChange}
                   required
-                  className={`w-full px-4 py-3 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                     phoneDigits ? 'rounded-r-lg' : 'rounded-lg'
                   }`}
                   placeholder="(904) 123-4567"

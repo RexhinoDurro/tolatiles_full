@@ -41,39 +41,7 @@ SECTIONS = [
     {
         'section_type': 'reviews',
         'config': {
-            'heading': 'What Our Customers Say',
-            'quotes': [
-                {
-                    'author': 'Garrett E.',
-                    'rating': 5,
-                    'text': (
-                        "I had a really great experience with Tola Tiles... I'm really happy with "
-                        "how everything turned out and would absolutely recommend Tola Tiles to "
-                        "anyone looking for quality work and a team you can trust. I will be using "
-                        "them going forward to redo all of my bathrooms."
-                    ),
-                },
-                {
-                    'author': 'Mark Stackhouse',
-                    'rating': 5,
-                    'text': (
-                        "I can't say enough GREAT things about this company!! They came to the job "
-                        "on time, explained the process... Meni took his time measuring and cutting "
-                        "as needed. The job turned out FANTASTIC!!!! I would recommend this company "
-                        "to anyone who needs or wants exceptional tile work done."
-                    ),
-                },
-                {
-                    'author': 'Andrew Grossman',
-                    'rating': 5,
-                    'text': (
-                        "100/10!!!! We could not be more pleased with the work Tola Tiles did. They "
-                        "were extremely professional and showed great care in installing our tile. "
-                        "To add to it, they were very reasonable in pricing. We will be using Tola "
-                        "for all future projects!"
-                    ),
-                },
-            ],
+            'location': 'jacksonville',
         },
     },
     {
