@@ -21,7 +21,14 @@ export default function SectionRenderer({ sections, phoneNumber, landingPageId }
       {ordered.map((section) => {
         switch (section.section_type) {
           case 'hero':
-            return <HeroSection key={section.id} config={section.config} phoneNumber={phoneNumber} />;
+            return (
+              <HeroSection
+                key={section.id}
+                config={section.config}
+                phoneNumber={phoneNumber}
+                landingPageId={landingPageId}
+              />
+            );
           case 'headline':
             return <HeadlineSection key={section.id} config={section.config} />;
           case 'cta':

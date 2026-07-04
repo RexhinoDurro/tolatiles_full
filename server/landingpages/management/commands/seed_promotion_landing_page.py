@@ -10,7 +10,15 @@ from landingpages.models import LandingPage, LandingPageSection
 
 SUBDOMAIN = 'promotion'
 PHONE_NUMBER = '+19048661738'
-HERO_IMAGE_URL = 'https://tolatiles.com/media/gallery/2026/02/20250619_090843.webp'
+
+# Rotating hero backdrop — real project photos, not stock. Auto-advances only
+# (no swipe/arrows), so the exact order just needs visual variety.
+HERO_IMAGES = [
+    'https://tolatiles.com/media/gallery/2026/02/20250619_090843.webp',  # glass shower, gold fixtures
+    'https://tolatiles.com/media/gallery/2026/02/20250619_090853.webp',  # matching soaking tub, same remodel
+    'https://tolatiles.com/media/gallery/2026/02/20260205_102458.webp',  # patterned accent tile shower
+    'https://tolatiles.com/media/gallery/2026/01/1000000917.webp',       # bold green tile shower w/ bench
+]
 
 SECTIONS = [
     {
@@ -19,16 +27,15 @@ SECTIONS = [
             'headline': 'Transform Your Bathroom',
             'subheadline': "Custom tile showers, floors & full remodels — built by Jacksonville's trusted tile experts.",
             'media_type': 'image',
-            'image': HERO_IMAGE_URL,
-        },
-    },
-    {
-        'section_type': 'lead_form',
-        'config': {
-            'heading': 'Get Your Free Bathroom Quote',
-            'button_label': 'Get My Free Quote',
-            'success_message': "Thank you! We'll call you shortly to schedule your free bathroom quote.",
-            'project_type': 'bathroom',
+            'images': HERO_IMAGES,
+            'show_google_rating': True,
+            'show_lead_form': True,
+            'lead_form': {
+                'heading': 'Get Your Free Bathroom Quote',
+                'button_label': 'Get My Free Quote',
+                'success_message': "Thank you! We'll call you shortly to schedule your free bathroom quote.",
+                'project_type': 'bathroom',
+            },
         },
     },
     {
