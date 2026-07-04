@@ -10,6 +10,7 @@ from landingpages.models import LandingPage, LandingPageSection
 
 SUBDOMAIN = 'promotion'
 PHONE_NUMBER = '+19048661738'
+META_PIXEL_ID = '1051367344510051'
 
 # Rotating hero backdrop — real project photos, not stock. Auto-advances only
 # (no swipe/arrows), so the exact order just needs visual variety.
@@ -85,6 +86,7 @@ class Command(BaseCommand):
                 ),
                 'is_indexed': False,
                 'phone_number': PHONE_NUMBER,
+                'meta_pixel_id': META_PIXEL_ID,
             },
         )
 
