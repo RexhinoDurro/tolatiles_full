@@ -57,6 +57,8 @@ def send_lead_event(lead, request, client_ip: str, event_id: str = '') -> None:
             'user_data': user_data,
         }],
     }
+    if settings.META_CAPI_TEST_EVENT_CODE:
+        payload['test_event_code'] = settings.META_CAPI_TEST_EVENT_CODE
 
     try:
         response = requests.post(
