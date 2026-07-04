@@ -326,7 +326,9 @@ GOOGLE_ADS_CLIENT_SECRET = os.environ.get('GOOGLE_ADS_CLIENT_SECRET', '')
 # Meta Conversions API (server-side event tracking for landing pages)
 META_CAPI_ACCESS_TOKEN = os.environ.get('CAPI_ACCESS_TOKEN', '')
 # Temporary while verifying in Meta's Test Events tool; remove this default once confirmed.
-META_CAPI_TEST_EVENT_CODE = os.environ.get('CAPI_TEST_EVENT_CODE', 'TEST9416')
+# `or` (not .get's default) because docker-compose's ${VAR} substitution sets an empty
+# string rather than leaving the key absent when the host has no such env var.
+META_CAPI_TEST_EVENT_CODE = os.environ.get('CAPI_TEST_EVENT_CODE') or 'TEST9416'
 
 
 # Django Channels Configuration
