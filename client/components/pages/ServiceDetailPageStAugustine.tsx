@@ -114,7 +114,7 @@ Thank you,
   };
 
   return (
-    <div className="pt-20">
+    <div className="pt-[var(--navbar-height)]">
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-4" aria-label="Breadcrumb">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

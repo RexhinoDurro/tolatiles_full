@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Fallback before Navbar's ResizeObserver measures the real height on mount.
+     Matches the unscrolled mobile navbar (two-row info bar + main bar). */
+  --navbar-height: 150px;
+}
+
 /* Custom animations */
 @keyframes fadeIn {
   from {

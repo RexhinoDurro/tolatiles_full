@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import { headers } from 'next/headers';
 import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
@@ -11,6 +11,13 @@ const inter = Inter({
   display: 'swap',
   preload: true,
   variable: '--font-inter',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['700', '800', '900'],
+  variable: '--font-outfit',
 });
 
 export const metadata: Metadata = {
@@ -214,7 +221,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema) }}
         />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${outfit.variable}`}>
         {!isLandingSite && (
           <Analytics
             gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}

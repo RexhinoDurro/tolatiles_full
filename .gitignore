@@ -36,3 +36,8 @@ htmlcov/
 
 # macOS
 .DS_Store
+
+# Root npm (not needed in the root)
+/node_modules/
+/package.json
+/package-lock.json

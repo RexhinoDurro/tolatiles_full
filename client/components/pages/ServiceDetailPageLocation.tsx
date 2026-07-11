@@ -256,7 +256,7 @@ const ServiceDetailPageLocation = ({
   ];
 
   return (
-    <div className="pt-20">
+    <div className="pt-[var(--navbar-height)]">
 
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <nav className="bg-gray-50 py-4" aria-label="Breadcrumb">

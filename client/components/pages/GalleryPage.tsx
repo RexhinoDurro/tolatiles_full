@@ -253,7 +253,7 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
   const categoryInfo = categoryDescriptions[selectedCategory] || categoryDescriptions.all;
 
   return (
-    <div className="pt-20">
+    <div className="pt-[var(--navbar-height)]">
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}

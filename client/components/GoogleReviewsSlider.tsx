@@ -23,6 +23,38 @@ export interface GoogleReviewsData {
   reviews: GoogleReview[];
 }
 
+const DEMO_REVIEWS_DATA: GoogleReviewsData = {
+  displayName: "Tola Tiles",
+  rating: 4.9,
+  userRatingCount: 127,
+  reviews: [
+    {
+      authorName: "Sarah Jenkins",
+      profilePhotoUrl: "",
+      rating: 5,
+      text: "Meni and his crew did an absolutely outstanding job on our kitchen backsplash. Their precision and attention to detail are unmatched. They cleaned up every day and completed the project on time. Highly recommended!",
+      relativeTimeDescription: "2 weeks ago",
+      publishTime: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      authorName: "David Miller",
+      profilePhotoUrl: "",
+      rating: 5,
+      text: "We hired Tola Tiles for a complete master bathroom tile renovation. The craftsmanship is top-tier. Meni helped us choose the right pattern layout and the finished product looks like a luxury spa. Extremely satisfied!",
+      relativeTimeDescription: "1 month ago",
+      publishTime: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      authorName: "Emily Rodriguez",
+      profilePhotoUrl: "",
+      rating: 5,
+      text: "Professional, honest, and hardworking. They tiled our outdoor patio and it looks beautiful. Very responsive communication throughout the entire project. Will definitely use them again for future tile work.",
+      relativeTimeDescription: "3 weeks ago",
+      publishTime: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+    }
+  ]
+};
+
 const ReviewCard = ({ review }: { review: GoogleReview }) => (
   <article className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 h-full mx-2 md:mx-3">
     <div className="text-blue-100 mb-4">
@@ -70,11 +102,25 @@ export default function GoogleReviewsSlider({ location = 'florida' }: GoogleRevi
 
   useEffect(() => {
     const fetchReviews = async () => {
+      let fetched = false;
       try {
         const response = await fetch(`${API_BASE}/google-reviews/`);
-        if (response.ok) setReviewsData(await response.json());
-      } catch {}
-      finally { setIsLoading(false); }
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.reviews && data.reviews.length > 0) {
+            setReviewsData(data);
+            fetched = true;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch reviews:', err);
+      } finally {
+        if (!fetched && process.env.NODE_ENV === 'development') {
+          console.log('Using demo reviews in development mode.');
+          setReviewsData(DEMO_REVIEWS_DATA);
+        }
+        setIsLoading(false);
+      }
     };
     fetchReviews();
   }, []);
@@ -96,7 +142,14 @@ export default function GoogleReviewsSlider({ location = 'florida' }: GoogleRevi
   const locationText = location === 'st-augustine' ? 'St Augustine' : location === 'jacksonville' ? 'Jacksonville' : 'Northeast Florida';
 
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden" aria-labelledby="reviews-heading">
+    <section className="relative pt-20 pb-12 md:pt-24 md:pb-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden" aria-labelledby="reviews-heading">
+      {/* Wavy top transition from Projects strip */}
+      <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-20">
+        <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px] rotate-180" preserveAspectRatio="none">
+          <path className="fill-gray-950" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,160C672,160,768,192,864,213.3C960,235,1056,245,1152,229.3C1248,213,1344,171,1392,149.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
           <a href={GOOGLE_BUSINESS_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 mb-4 hover:opacity-80 transition-opacity">
