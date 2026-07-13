@@ -29,7 +29,6 @@ const Navbar = () => {
   const serviceCategories = useMemo(() => {
     const prefix = currentLocation === 'florida' ? '' : `/${currentLocation}`;
     return [
-      { id: 'all', label: 'All Services', href: `${prefix}/services` },
       { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `${prefix}/services/kitchen-backsplash` },
       { id: 'bathroom', label: 'Bathroom Tile', href: `${prefix}/services/bathroom-tile` },
       { id: 'flooring', label: 'Floor Tiling', href: `${prefix}/services/floor-tile` },
@@ -86,6 +85,7 @@ const Navbar = () => {
     { id: 'home', label: 'Home', href: homeLink },
     { id: 'services', label: 'Services', href: `${navPrefix}/services`, hasDropdown: true },
     { id: 'gallery', label: 'Gallery', href: `${navPrefix}/gallery` },
+    { id: 'projects', label: 'Projects', href: '/projects' },
     { id: 'about', label: 'About', href: `${navPrefix}/about` },
     { id: 'blog', label: 'Blog', href: `${navPrefix}/blog` },
     { id: 'contact', label: 'Contact Us', href: `${navPrefix}/contact` },
@@ -175,7 +175,7 @@ const Navbar = () => {
         </div>
 
         {/* MOBILE TOP UTILITY BAR (Mobile/Tablet) */}
-        <div className={`md:hidden bg-white border-b border-gray-200/60 text-gray-600 text-[10px] sm:text-xs transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 border-transparent' : 'max-h-32 opacity-100'
+        <div className={`md:hidden bg-white border-gray-200/60 text-gray-600 text-[10px] sm:text-xs transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 border-b-0 m-0 p-0' : 'max-h-32 opacity-100 border-b'
           }`}>
           {/* Row 1: Phone & Location Selection */}
           <div className="px-4 py-2 flex justify-between items-center border-b border-gray-100/50">

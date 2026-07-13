@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tola-admin-v5';
+const CACHE_NAME = 'tola-admin-v6';
 const ADMIN_ASSETS = [
   '/admin/login',
   '/admin/dashboard',
@@ -36,8 +36,18 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  // Only handle admin routes
-  if (!event.request.url.includes('/admin')) {
+  const url = new URL(event.request.url);
+
+  // Only handle actual admin page navigations. Never intercept build assets
+  // (/_next/*) or API calls (/api/*) — caching those means a single transient
+  // dev-server or network hiccup can silently serve a stale JS bundle or stale
+  // API response indefinitely afterward, which is worse than no offline support.
+  if (
+    event.request.method !== 'GET' ||
+    !url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/_next/') ||
+    url.pathname.startsWith('/api/')
+  ) {
     return;
   }
 

@@ -4,11 +4,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import dynamic from 'next/dynamic';
 import type { Phase, ProjectMedia } from '@/types/api';
 import MediaDragGrid from './MediaDragGrid';
-
-const TipTapEditor = dynamic(() => import('@/components/admin/blog/TipTapEditor'), { ssr: false });
 
 interface PhaseEditorProps {
   phase: Phase;
@@ -89,16 +86,16 @@ export default function PhaseEditor({
 
       {!collapsed && (
         <div className="p-4 space-y-4">
-          {/* Description (TipTap) */}
+          {/* Description */}
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <TipTapEditor
-                content={phase.description}
-                onChange={(content) => onUpdate(phase.id, { description: content })}
-                placeholder="Describe this phase..."
-              />
-            </div>
+            <textarea
+              value={phase.description}
+              onChange={(e) => onUpdate(phase.id, { description: e.target.value })}
+              placeholder="Describe this phase..."
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+            />
           </div>
 
           {/* Media */}

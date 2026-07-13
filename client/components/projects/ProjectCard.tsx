@@ -7,15 +7,23 @@ import VideoWithSound from './VideoWithSound';
 
 interface ProjectCardProps {
   project: ProjectListItem;
-  location: string;
-  serviceSlug?: string;
 }
 
-export default function ProjectCard({ project, location, serviceSlug }: ProjectCardProps) {
+const WORK_STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  started: { label: 'Started', className: 'bg-sky-50 text-sky-700' },
+  in_progress: { label: 'In Progress', className: 'bg-amber-50 text-amber-700' },
+  completed: { label: 'Completed', className: 'bg-emerald-50 text-emerald-700' },
+};
+
+export default function ProjectCard({ project }: ProjectCardProps) {
   const serviceTypeMap = Object.fromEntries(SERVICE_TYPES.map((s) => [s.slug, s.name]));
+  const workStatus = WORK_STATUS_LABELS[project.work_status];
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+    <Link
+      href={`/projects/${project.id}`}
+      className="block bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
+    >
       {/* Cover media */}
       <div className="overflow-hidden bg-gray-100 w-full relative">
         {project.cover_image ? (
@@ -44,10 +52,15 @@ export default function ProjectCard({ project, location, serviceSlug }: ProjectC
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 leading-tight">{project.title}</h3>
+        <h3 className="font-semibold text-gray-900 mb-2 leading-tight group-hover:text-[#00a8e8] transition-colors">{project.title}</h3>
 
         <div className="flex items-center gap-2 mb-3">
           <span className="text-xs text-gray-500">{project.phase_count} phase{project.phase_count !== 1 ? 's' : ''}</span>
+          {workStatus && (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${workStatus.className}`}>
+              {workStatus.label}
+            </span>
+          )}
         </div>
 
         {project.job_types.length > 0 && (
@@ -60,6 +73,6 @@ export default function ProjectCard({ project, location, serviceSlug }: ProjectC
           </div>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

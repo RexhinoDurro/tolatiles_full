@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
-import type { ProjectListItem, ProjectLocation } from '@/types/api';
+import type { ProjectListItem } from '@/types/api';
 import { SERVICE_TYPES } from '@/types/api';
 import ProjectCard from './ProjectCard';
 
 interface ServiceProjectsSectionProps {
-  location: ProjectLocation;
+  location: string;
   serviceSlug: string;
   serviceName?: string;
 }
@@ -24,11 +24,11 @@ export default function ServiceProjectsSection({
 
   useEffect(() => {
     api
-      .getPublicServiceProjects(location, serviceSlug)
+      .getPublicServiceProjects(serviceSlug)
       .then((data) => setProjects(data.slice(0, 3)))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [location, serviceSlug]);
+  }, [serviceSlug]);
 
   if (!loading && projects.length === 0) return null;
 
@@ -64,7 +64,7 @@ export default function ServiceProjectsSection({
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {projects.map((project) => (
-                <ProjectCard key={project.id} project={project} location={location} serviceSlug={serviceSlug} />
+                <ProjectCard key={project.id} project={project} />
               ))}
             </div>
 

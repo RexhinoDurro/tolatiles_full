@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Phase, ProjectMedia, HomepageSlot, ServiceProjectPin, ProjectServiceType
+from .models import Project, Phase, ProjectMedia, ProjectServiceType
 
 
 class ProjectServiceTypeSerializer(serializers.ModelSerializer):
@@ -40,7 +40,19 @@ class PhaseSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'order', 'media', 'created_at']
 
 
-class ProjectListSerializer(serializers.ModelSerializer):
+class MainVideoSerializerMixin(serializers.Serializer):
+    main_video = serializers.SerializerMethodField()
+
+    def get_main_video(self, obj):
+        if not obj.main_video:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.main_video.url)
+        return obj.main_video.url
+
+
+class ProjectListSerializer(MainVideoSerializerMixin, serializers.ModelSerializer):
     job_types = serializers.SerializerMethodField()
     phase_count = serializers.SerializerMethodField()
     cover_image = serializers.SerializerMethodField()
@@ -48,7 +60,7 @@ class ProjectListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'status', 'location', 'is_featured', 'job_types', 'phase_count', 'cover_image', 'cover_media_type', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'status', 'work_status', 'is_featured', 'job_types', 'phase_count', 'main_video', 'main_video_type', 'cover_image', 'cover_media_type', 'created_at', 'updated_at']
 
     def get_job_types(self, obj):
         return list(obj.job_types.values_list('slug', flat=True))
@@ -63,6 +75,8 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return None
 
     def get_cover_image(self, obj):
+        if obj.main_video_type == 'youtube' and obj.main_video_thumbnail:
+            return obj.main_video_thumbnail
         media = self._get_cover_media(obj)
         if not media:
             return None
@@ -74,21 +88,31 @@ class ProjectListSerializer(serializers.ModelSerializer):
         return None
 
     def get_cover_media_type(self, obj):
+        if obj.main_video_type == 'youtube':
+            return 'youtube'
         media = self._get_cover_media(obj)
         return media.media_type if media else 'image'
 
 
-class ProjectDetailSerializer(serializers.ModelSerializer):
+class ProjectDetailSerializer(MainVideoSerializerMixin, serializers.ModelSerializer):
     phases = PhaseSerializer(many=True, read_only=True)
     job_types = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
         queryset=ProjectServiceType.objects.all(),
     )
+    main_video_url = serializers.ReadOnlyField()
+    main_video_type = serializers.ReadOnlyField()
+    main_video_embed_url = serializers.ReadOnlyField()
+    main_video_thumbnail = serializers.ReadOnlyField()
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'status', 'location', 'is_featured', 'job_types', 'phases', 'created_at', 'updated_at']
+        fields = [
+            'id', 'title', 'description', 'status', 'work_status', 'is_featured', 'job_types',
+            'main_video', 'main_video_url', 'main_video_type', 'main_video_embed_url', 'main_video_thumbnail',
+            'phases', 'created_at', 'updated_at'
+        ]
 
     def update(self, instance, validated_data):
         job_types = validated_data.pop('job_types', None)
@@ -102,33 +126,3 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         instance = super().create(validated_data)
         instance.job_types.set(job_types)
         return instance
-
-
-class HomepageSlotSerializer(serializers.ModelSerializer):
-    project = ProjectListSerializer(read_only=True)
-    project_id = serializers.PrimaryKeyRelatedField(
-        queryset=Project.objects.all(), source='project', write_only=True, allow_null=True, required=False
-    )
-    before_media = ProjectMediaSerializer(read_only=True)
-    before_media_id = serializers.PrimaryKeyRelatedField(
-        queryset=ProjectMedia.objects.all(), source='before_media', write_only=True, allow_null=True, required=False
-    )
-    after_media = ProjectMediaSerializer(read_only=True)
-    after_media_id = serializers.PrimaryKeyRelatedField(
-        queryset=ProjectMedia.objects.all(), source='after_media', write_only=True, allow_null=True, required=False
-    )
-
-    class Meta:
-        model = HomepageSlot
-        fields = [
-            'slot_type', 'project', 'project_id', 'display_style',
-            'before_media', 'before_media_id', 'after_media', 'after_media_id', 'updated_at'
-        ]
-
-
-class ServicePinSerializer(serializers.ModelSerializer):
-    project = ProjectListSerializer(read_only=True)
-
-    class Meta:
-        model = ServiceProjectPin
-        fields = ['project', 'order']

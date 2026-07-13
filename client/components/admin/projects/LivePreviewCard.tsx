@@ -8,12 +8,6 @@ interface LivePreviewCardProps {
   project: Partial<Project>;
 }
 
-const locationLabels: Record<string, string> = {
-  florida: 'Florida',
-  jacksonville: 'Jacksonville',
-  'st-augustine': 'St. Augustine',
-};
-
 export default function LivePreviewCard({ project }: LivePreviewCardProps) {
   const serviceTypeMap = Object.fromEntries(SERVICE_TYPES.map((s) => [s.slug, s.name]));
 
@@ -23,11 +17,6 @@ export default function LivePreviewCard({ project }: LivePreviewCardProps) {
       <div className="p-4 border-b border-gray-100">
         <div className="flex flex-wrap gap-1.5 mb-2">
           {project.status && <ProjectStatusBadge status={project.status} />}
-          {project.location && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-              {locationLabels[project.location] ?? project.location}
-            </span>
-          )}
           {project.is_featured && (
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
               Featured
@@ -80,10 +69,9 @@ export default function LivePreviewCard({ project }: LivePreviewCardProps) {
               )}
 
               {phase.description && (
-                <div
-                  className="text-xs text-gray-600 mt-2 line-clamp-3 prose prose-xs"
-                  dangerouslySetInnerHTML={{ __html: phase.description }}
-                />
+                <p className="text-xs text-gray-600 mt-2 line-clamp-3 whitespace-pre-line">
+                  {phase.description}
+                </p>
               )}
             </div>
           ))}

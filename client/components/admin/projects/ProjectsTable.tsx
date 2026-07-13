@@ -1,21 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import type { ProjectListItem } from '@/types/api';
-import ProjectStatusBadge from './ProjectStatusBadge';
+import ProjectStatusBadge, { WorkStatusBadge } from './ProjectStatusBadge';
 
 interface ProjectsTableProps {
   projects: ProjectListItem[];
+  onDelete?: (project: ProjectListItem) => void;
 }
 
-const locationLabels: Record<string, string> = {
-  florida: 'Florida',
-  jacksonville: 'Jacksonville',
-  'st-augustine': 'St. Augustine',
-};
-
-export default function ProjectsTable({ projects }: ProjectsTableProps) {
+export default function ProjectsTable({ projects, onDelete }: ProjectsTableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -23,7 +18,7 @@ export default function ProjectsTable({ projects }: ProjectsTableProps) {
           <tr>
             <th className="px-4 py-3 text-left font-semibold text-gray-700">Title</th>
             <th className="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
-            <th className="px-4 py-3 text-left font-semibold text-gray-700">Location</th>
+            <th className="px-4 py-3 text-left font-semibold text-gray-700">Work</th>
             <th className="px-4 py-3 text-left font-semibold text-gray-700">Phases</th>
             <th className="px-4 py-3 text-left font-semibold text-gray-700">Created</th>
             <th className="px-4 py-3" />
@@ -38,21 +33,33 @@ export default function ProjectsTable({ projects }: ProjectsTableProps) {
               <td className="px-4 py-3">
                 <ProjectStatusBadge status={project.status} />
               </td>
-              <td className="px-4 py-3 text-gray-600">
-                {locationLabels[project.location] ?? project.location}
+              <td className="px-4 py-3">
+                <WorkStatusBadge workStatus={project.work_status} />
               </td>
               <td className="px-4 py-3 text-gray-600">{project.phase_count}</td>
               <td className="px-4 py-3 text-gray-500">
                 {new Date(project.created_at).toLocaleDateString()}
               </td>
               <td className="px-4 py-3">
-                <Link
-                  href={`/admin/projects/${project.id}/edit`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  Edit
-                </Link>
+                <div className="flex items-center gap-1">
+                  <Link
+                    href={`/admin/projects/${project.id}/edit`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    Edit
+                  </Link>
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete(project)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

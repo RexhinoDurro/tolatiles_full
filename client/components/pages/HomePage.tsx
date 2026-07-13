@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Star,
   Play,
-  X,
   Phone,
   MapPin,
   Award,
@@ -25,7 +24,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import type { ProjectListItem, BlogPostListItem, ProjectLocation } from '@/types/api';
+import type { ProjectListItem, BlogPostListItem } from '@/types/api';
 import GoogleReviewsSlider, { type GoogleReviewsData } from '@/components/GoogleReviewsSlider';
 import WhatWeDoSection from '@/components/WhatWeDoSection';
 
@@ -128,7 +127,7 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
   return (
     <>
       <HeroSection />
-      <ProjectsStripSection location={location} />
+      <ProjectsStripSection />
       <GoogleReviewsSlider location={location} />
 
       {location !== 'florida' && <LocalServicesSection content={content} />}
@@ -157,24 +156,19 @@ const PLACEHOLDER_PROJECTS: ProjectListItem[] = [
   { id: -8, title: 'Stone Fireplace Makeover', cover_image: '/images/fireplace/6.webp', cover_media_type: 'image', job_types: ['fireplace-tile'], is_featured: false },
 ] as unknown as ProjectListItem[];
 
-const ProjectsStripSection = ({ location }: { location: ProjectLocation }) => {
+const ProjectsStripSection = () => {
   const [projects, setProjects] = useState<ProjectListItem[]>(PLACEHOLDER_PROJECTS);
-  const [selected, setSelected] = useState<ProjectListItem | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const slots = await api.getPublicHomepage(location);
-        const slotProjects = slots.map((s) => s.project).filter((p): p is ProjectListItem => !!p && !!p.cover_image);
-        const serviceProjects = await api.getPublicServiceProjects(location, 'kitchen-backsplash');
-        const all = [...slotProjects, ...serviceProjects.filter((p) => p.cover_image)];
-        const seen = new Set<number>();
-        const deduped = all.filter((p) => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
-        if (deduped.length > 0) setProjects(deduped);
+        const featured = await api.getPublicFeaturedProjects();
+        const withCovers = featured.filter((p) => p.cover_image);
+        if (withCovers.length > 0) setProjects(withCovers);
       } catch { }
     };
     load();
-  }, [location]);
+  }, []);
 
   // Duplicate for seamless loop
   const looped = [...projects, ...projects, ...projects];
@@ -200,23 +194,6 @@ const ProjectsStripSection = ({ location }: { location: ProjectLocation }) => {
         .projects-strip:hover { animation-play-state: paused; }
       `}</style>
 
-      {/* Modal */}
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" onClick={() => setSelected(null)}>
-          <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setSelected(null)} className="absolute -top-10 right-0 text-white/70 hover:text-white transition-colors" aria-label="Close">
-              <X className="h-8 w-8" />
-            </button>
-            {selected.cover_media_type === 'video' ? (
-              <video src={selected.cover_image!} controls autoPlay className="w-full rounded-xl max-h-[80vh] object-contain" />
-            ) : (
-              <Image src={selected.cover_image!} alt={selected.title} width={1200} height={800} className="w-full rounded-xl object-contain max-h-[80vh]" />
-            )}
-            <p className="text-white text-center mt-4 text-lg font-semibold">{selected.title}</p>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <h2 id="projects-strip-heading" className="text-3xl md:text-4xl font-bold text-white mb-2">
           Our Recent Work
@@ -227,9 +204,9 @@ const ProjectsStripSection = ({ location }: { location: ProjectLocation }) => {
       <div className="relative overflow-hidden">
         <div className="projects-strip flex gap-6" style={{ width: 'max-content' }}>
           {looped.map((project, i) => (
-            <button
+            <Link
               key={`${project.id}-${i}`}
-              onClick={() => setSelected(project)}
+              href={project.id > 0 ? `/projects/${project.id}` : '/projects'}
               className="group relative rounded-2xl overflow-hidden flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               style={{ width: cardW, height: 420 }}
               aria-label={`View project: ${project.title}`}
@@ -268,7 +245,7 @@ const ProjectsStripSection = ({ location }: { location: ProjectLocation }) => {
                   <p className="text-blue-300 text-sm mt-1 capitalize">{project.job_types[0].replace(/-/g, ' ')}</p>
                 )}
               </div>
-            </button>
+            </Link>
           ))}
         </div>
 
@@ -304,7 +281,7 @@ const HeroSection = () => (
       </div>
 
       {/* People Layer — pinned to bottom right, scales proportionally */}
-      <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-10">
+      <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-20">
         <Image
           src="/images/team_people.png"
           alt="Tola Tiles team — expert tile installers in Jacksonville FL"
@@ -316,10 +293,10 @@ const HeroSection = () => (
       </div>
 
       {/* Top-left gradient scrim — keeps text readable without covering the team on the right */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-transparent md:bg-gradient-to-r md:from-black/70 md:via-black/40 md:to-transparent z-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-transparent md:bg-gradient-to-r md:from-black/70 md:via-black/40 md:to-transparent z-10 pointer-events-none" />
 
       {/* Text Overlay — pinned to top-left */}
-      <div className="relative z-30 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 flex items-start pt-[10vh] md:pt-[15vh]">
+      <div className="relative z-30 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 flex items-start pt-8 md:pt-12">
         <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-start text-left">
           <h1
             id="hero-heading"
@@ -331,64 +308,62 @@ const HeroSection = () => (
               marginBottom: 'clamp(0.75rem, 2vh, 1.25rem)',
             }}
           >
-            Best Tile Installers<br />
+            Professional Tile Installers<br />
             <span className="text-[#00a8e8]">in Jacksonville FL</span>
           </h1>
 
-          <div className="flex flex-row items-center sm:block w-full mt-2 sm:mt-0">
-            <ul className="flex flex-col flex-shrink-0" style={{ gap: 'clamp(0.4rem, 1vh, 0.75rem)' }}>
-              {['The Best', 'Honest', 'Hardworking'].map((item) => (
-                <li key={item} className="flex items-center justify-start gap-2.5">
-                  <CheckCircle
-                    className="text-green-400 flex-shrink-0"
-                    style={{ width: 'clamp(1.1rem, 1.5vw, 1.5rem)', height: 'clamp(1.1rem, 1.5vw, 1.5rem)' }}
-                  />
-                  <span
-                    className="text-white/90 font-semibold uppercase"
-                    style={{
-                      fontFamily: 'var(--font-outfit), sans-serif',
-                      fontSize: 'clamp(0.8rem, 1.3vw, 1rem)',
-                      letterSpacing: '0.12em',
-                    }}
-                  >
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 ml-auto sm:ml-0 sm:mt-8 pl-4 sm:pl-0">
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-3 py-2 text-xs sm:text-base sm:px-6 sm:py-3.5 rounded-lg font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
-              >
-                Get a Free Estimate
-                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-              </Link>
-              <a
-                href={GOOGLE_BUSINESS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full hover:bg-white/20 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
-              >
-                <img
-                  src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
-                  alt="Google"
-                  className="h-3 sm:h-5 w-auto flex-shrink-0"
+          <ul className="flex flex-col" style={{ gap: 'clamp(0.4rem, 1vh, 0.75rem)' }}>
+            {[' Bathrooms, Kitchens, Floors & Backsplashes', 'Honest Pricing With No Surprises', 'Craftsmanship You Can Count On'].map((item) => (
+              <li key={item} className="flex items-center justify-start gap-2.5">
+                <CheckCircle
+                  className="text-green-400 flex-shrink-0"
+                  style={{ width: 'clamp(1.1rem, 1.5vw, 1.5rem)', height: 'clamp(1.1rem, 1.5vw, 1.5rem)' }}
                 />
-                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 border-l border-white/20 pl-2 sm:pl-3 ml-0.5 sm:ml-1">
-                  <span className="text-white font-bold text-xs sm:text-base flex-shrink-0">5.0</span>
-                  <div className="flex flex-shrink-0">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-2.5 w-2.5 sm:h-4 sm:w-4 text-yellow-400 fill-yellow-400"
-                      />
-                    ))}
-                  </div>
+                <span
+                  className="text-white/90 font-semibold uppercase"
+                  style={{
+                    fontFamily: 'var(--font-outfit), sans-serif',
+                    fontSize: 'clamp(0.8rem, 1.3vw, 1rem)',
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
+            >
+              Get a Free Estimate
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            <a
+              href={GOOGLE_BUSINESS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5 rounded-full hover:bg-white/20 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
+            >
+              <img
+                src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
+                alt="Google"
+                className="h-5 w-auto flex-shrink-0"
+              />
+              <div className="flex items-center gap-1.5 min-w-0 border-l border-white/20 pl-3 ml-1">
+                <span className="text-white font-bold flex-shrink-0">5.0</span>
+                <div className="flex flex-shrink-0">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 text-yellow-400 fill-yellow-400"
+                    />
+                  ))}
                 </div>
-              </a>
-            </div>
+              </div>
+            </a>
           </div>
         </div>
       </div>
@@ -918,9 +893,9 @@ const FinalCTASection = ({ content }: { content: LocationContent }) => {
   }, []);
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="relative py-16 overflow-hidden bg-blue-950" 
+      className="relative py-16 overflow-hidden bg-blue-950"
       aria-labelledby="final-cta-heading"
     >
       {/* Background Image Layer */}
@@ -938,12 +913,11 @@ const FinalCTASection = ({ content }: { content: LocationContent }) => {
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-          
+
           {/* Left Side: Text and Buttons (Slides in from Left) */}
-          <div 
-            className={`w-full md:w-1/2 text-center md:text-left transition-all duration-1000 ease-out ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'
-            }`}
+          <div
+            className={`w-full md:w-1/2 text-center md:text-left transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'
+              }`}
           >
             <h2 id="final-cta-heading" className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
               Ready to Start Your {content.locationName} Tile Project?
@@ -971,10 +945,9 @@ const FinalCTASection = ({ content }: { content: LocationContent }) => {
           </div>
 
           {/* Right Side: Truck Image (Slides in from Right) */}
-          <div 
-            className={`w-full md:w-1/2 flex justify-center md:justify-end transition-all duration-1000 delay-200 ease-out ${
-              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'
-            }`}
+          <div
+            className={`w-full md:w-1/2 flex justify-center md:justify-end transition-all duration-1000 delay-200 ease-out ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'
+              }`}
           >
             <div className="relative w-full h-64 sm:h-72 md:h-80 lg:h-96" style={{ minHeight: '300px' }}>
               <Image

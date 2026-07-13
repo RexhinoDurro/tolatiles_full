@@ -1,7 +1,7 @@
 'use client';
 
 import { SERVICE_TYPES } from '@/types/api';
-import type { Project, ProjectStatus, ProjectLocation, ServiceTypeSlug } from '@/types/api';
+import type { Project, ProjectStatus, WorkStatus, ServiceTypeSlug } from '@/types/api';
 
 interface ProjectFormProps {
   project: Partial<Project>;
@@ -9,16 +9,14 @@ interface ProjectFormProps {
 }
 
 const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'archived', label: 'Archived' },
+  { value: 'draft', label: 'Draft (hidden)' },
+  { value: 'published', label: 'Published (visible on /projects)' },
 ];
 
-const LOCATION_OPTIONS: { value: ProjectLocation; label: string }[] = [
-  { value: 'florida', label: 'Florida' },
-  { value: 'jacksonville', label: 'Jacksonville' },
-  { value: 'st-augustine', label: 'St. Augustine' },
+const WORK_STATUS_OPTIONS: { value: WorkStatus; label: string }[] = [
+  { value: 'started', label: 'Started' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' },
 ];
 
 export default function ProjectForm({ project, onChange }: ProjectFormProps) {
@@ -57,10 +55,10 @@ export default function ProjectForm({ project, onChange }: ProjectFormProps) {
         />
       </div>
 
-      {/* Status + Location row */}
+      {/* Project Status + Work Status row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Project Status</label>
           <select
             value={project.status ?? 'draft'}
             onChange={(e) => onChange({ status: e.target.value as ProjectStatus })}
@@ -70,19 +68,21 @@ export default function ProjectForm({ project, onChange }: ProjectFormProps) {
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">Controls whether the project appears on the public projects page.</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Work Status</label>
           <select
-            value={project.location ?? 'florida'}
-            onChange={(e) => onChange({ location: e.target.value as ProjectLocation })}
+            value={project.work_status ?? 'started'}
+            onChange={(e) => onChange({ work_status: e.target.value as WorkStatus })}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {LOCATION_OPTIONS.map((o) => (
+            {WORK_STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
+          <p className="text-xs text-gray-500 mt-1">How far along the actual work is.</p>
         </div>
       </div>
 

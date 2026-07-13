@@ -1166,10 +1166,9 @@ export const SERVICE_TYPES = [
 ] as const;
 
 export type ServiceTypeSlug = typeof SERVICE_TYPES[number]['slug'];
-export type ProjectLocation = 'florida' | 'jacksonville' | 'st-augustine';
-export type ProjectStatus = 'draft' | 'in_progress' | 'completed' | 'archived';
-export type DisplayStyle = 'before_after_slider' | 'cinematic_video_header' | 'process_grid';
-export type SlotType = 'hero' | 'mid_slider' | 'bottom_grid';
+export type ProjectStatus = 'draft' | 'published';
+export type WorkStatus = 'started' | 'in_progress' | 'completed';
+export type MainVideoType = 'none' | 'video' | 'youtube';
 
 export interface ProjectMedia {
   id: number;
@@ -1197,9 +1196,14 @@ export interface Project {
   title: string;
   description: string;
   status: ProjectStatus;
+  work_status: WorkStatus;
   is_featured: boolean;
-  location: ProjectLocation;
   job_types: ServiceTypeSlug[];
+  main_video: string | null;
+  main_video_url: string;
+  main_video_type: MainVideoType;
+  main_video_embed_url: string | null;
+  main_video_thumbnail: string | null;
   phases: Phase[];
   created_at: string;
   updated_at: string;
@@ -1209,36 +1213,24 @@ export interface ProjectListItem {
   id: number;
   title: string;
   status: ProjectStatus;
-  location: ProjectLocation;
+  work_status: WorkStatus;
   is_featured: boolean;
   job_types: ServiceTypeSlug[];
   phase_count: number;
+  main_video: string | null;
+  main_video_type: MainVideoType;
   cover_image: string | null;
   cover_media_type: 'image' | 'video' | 'youtube';
   created_at: string;
   updated_at: string;
 }
 
-export interface HomepageSlot {
-  slot_type: SlotType;
-  project: ProjectListItem | null;
-  display_style: DisplayStyle | '';
-  before_media: ProjectMedia | null;
-  after_media: ProjectMedia | null;
-  updated_at: string;
-}
-
-export interface ServicePin {
-  project: ProjectListItem;
-  order: number;
-}
-
 export interface ProjectCreate {
   title: string;
   description?: string;
   status?: ProjectStatus;
+  work_status?: WorkStatus;
   is_featured?: boolean;
-  location: ProjectLocation;
   job_types?: ServiceTypeSlug[];
 }
 
@@ -1246,19 +1238,6 @@ export interface PhaseCreate {
   title: string;
   description?: string;
   order?: number;
-}
-
-export interface HomepageSlotUpdate {
-  slot_type: SlotType;
-  project_id?: number | null;
-  display_style?: DisplayStyle | '';
-  before_media_id?: number | null;
-  after_media_id?: number | null;
-}
-
-export interface ServicePinItem {
-  project_id: number;
-  order: number;
 }
 
 // Site FAQ Types (standalone FAQ management, not blog inline FAQs)

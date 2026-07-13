@@ -46,6 +46,20 @@ async function getBlogSitemapData(): Promise<Array<{ slug: string; location: str
   }
 }
 
+// Fetch public projects for sitemap
+async function getProjectsSitemapData(): Promise<Array<{ id: number; updated_at: string }>> {
+  try {
+    const response = await fetch(`${API_BASE}/projects/public/`, {
+      next: { revalidate: 3600 },
+    });
+    if (!response.ok) return [];
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch projects sitemap data:', error);
+    return [];
+  }
+}
+
 // Fetch blog categories for sitemap
 async function getBlogCategories(): Promise<Array<{ slug: string }>> {
   try {
@@ -62,10 +76,11 @@ async function getBlogCategories(): Promise<Array<{ slug: string }>> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch blog data
-  const [blogPosts, blogCategories] = await Promise.all([
+  // Fetch blog + projects data
+  const [blogPosts, blogCategories, projects] = await Promise.all([
     getBlogSitemapData(),
     getBlogCategories(),
+    getProjectsSitemapData(),
   ]);
 
   // Root homepage (Florida content) + city pages
@@ -168,6 +183,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  // Projects — single global URLs (not location-prefixed)
+  const projectPages: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/projects`, lastModified: currentDate, changeFrequency: 'weekly' as const, priority: 0.85 },
+    ...projects.map((p) => ({
+      url: `${BASE_URL}/projects/${p.id}`,
+      lastModified: p.updated_at?.split('T')[0] || currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
+  ];
+
   // Blog category pages — root only, no per-city variants.
   const blogCategoryPages: MetadataRoute.Sitemap = blogCategories.map((category) => ({
     url: `${BASE_URL}/blog/category/${category.slug}`,
@@ -197,6 +223,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...servicePages,
     ...galleryPages,
     ...locationStaticPages,
+    ...projectPages,
     ...blogPostPages,
     ...blogCategoryPages,
     ...globalStaticPages,

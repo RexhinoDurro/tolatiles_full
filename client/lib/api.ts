@@ -79,13 +79,9 @@ import type {
   Phase,
   PhaseCreate,
   ProjectMedia,
-  HomepageSlot,
-  HomepageSlotUpdate,
-  ServicePin,
-  ServicePinItem,
-  ProjectLocation,
   ServiceTypeSlug,
   ProjectStatus,
+  WorkStatus,
   SiteFAQ,
   SiteFAQCreate,
   SiteFAQUpdate,
@@ -1511,13 +1507,13 @@ class ApiClient {
 
   async getProjects(filters?: {
     status?: ProjectStatus;
-    location?: ProjectLocation;
+    work_status?: WorkStatus;
     job_type?: ServiceTypeSlug;
     is_featured?: boolean;
   }): Promise<ProjectListItem[]> {
     const params = new URLSearchParams();
     if (filters?.status) params.set('status', filters.status);
-    if (filters?.location) params.set('location', filters.location);
+    if (filters?.work_status) params.set('work_status', filters.work_status);
     if (filters?.job_type) params.set('job_type', filters.job_type);
     if (filters?.is_featured !== undefined) params.set('is_featured', String(filters.is_featured));
     const query = params.toString() ? `?${params.toString()}` : '';
@@ -1607,34 +1603,40 @@ class ApiClient {
     });
   }
 
-  async getHomepageSlots(location: ProjectLocation): Promise<HomepageSlot[]> {
-    return this.fetch<HomepageSlot[]>(`/projects/homepage-slots/${location}/`);
-  }
-
-  async updateHomepageSlot(location: ProjectLocation, data: HomepageSlotUpdate): Promise<HomepageSlot> {
-    return this.fetch<HomepageSlot>(`/projects/homepage-slots/${location}/`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+  async uploadMainVideo(projectId: number, file: File): Promise<Project> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.fetch<Project>(`/projects/${projectId}/main-video/`, {
+      method: 'POST',
+      body: formData,
     });
   }
 
-  async getServicePins(location: ProjectLocation, serviceSlug: ServiceTypeSlug): Promise<ServicePin[]> {
-    return this.fetch<ServicePin[]>(`/projects/service-pins/${location}/${serviceSlug}/`);
-  }
-
-  async updateServicePins(location: ProjectLocation, serviceSlug: ServiceTypeSlug, pins: ServicePinItem[]): Promise<ServicePin[]> {
-    return this.fetch<ServicePin[]>(`/projects/service-pins/${location}/${serviceSlug}/`, {
-      method: 'PUT',
-      body: JSON.stringify(pins),
+  async setMainVideoUrl(projectId: number, youtubeUrl: string): Promise<Project> {
+    return this.fetch<Project>(`/projects/${projectId}/main-video/`, {
+      method: 'POST',
+      body: JSON.stringify({ youtube_url: youtubeUrl }),
     });
   }
 
-  async getPublicHomepage(location: ProjectLocation): Promise<HomepageSlot[]> {
-    return this.fetch<HomepageSlot[]>(`/projects/public/homepage/${location}/`);
+  async removeMainVideo(projectId: number): Promise<Project> {
+    return this.fetch<Project>(`/projects/${projectId}/main-video/`, { method: 'DELETE' });
   }
 
-  async getPublicServiceProjects(location: ProjectLocation, serviceSlug: string): Promise<ProjectListItem[]> {
-    return this.fetch<ProjectListItem[]>(`/projects/public/service/${location}/${serviceSlug}/`);
+  async getPublicProjects(): Promise<ProjectListItem[]> {
+    return this.fetch<ProjectListItem[]>('/projects/public/');
+  }
+
+  async getPublicFeaturedProjects(): Promise<ProjectListItem[]> {
+    return this.fetch<ProjectListItem[]>('/projects/public/?is_featured=true');
+  }
+
+  async getPublicProject(id: number): Promise<Project> {
+    return this.fetch<Project>(`/projects/public/${id}/`);
+  }
+
+  async getPublicServiceProjects(serviceSlug: string): Promise<ProjectListItem[]> {
+    return this.fetch<ProjectListItem[]>(`/projects/public/service/${serviceSlug}/`);
   }
 
   // ============ FAQs ============

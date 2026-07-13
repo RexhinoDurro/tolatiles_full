@@ -3,11 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  Hammer, ChefHat, Bath, Home, Palette, Wrench,
-  Clock, CheckCircle, ArrowRight, ChevronRight, ChevronDown,
-  Phone, Mail, Loader2, MapPin, Star, Layers,
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CheckCircle, Phone, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
@@ -15,12 +12,6 @@ import type { Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 
-// ─── Icon map ────────────────────────────────────────────────────────────────
-const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  Hammer, ChefHat, Bath, Home, Palette, Wrench,
-};
-
-// ─── Gallery path map ─────────────────────────────────────────────────────────
 const serviceToGalleryPath: Record<string, string> = {
   'kitchen-backsplash': 'backsplashes',
   bathroom: 'showers',
@@ -30,7 +21,6 @@ const serviceToGalleryPath: Record<string, string> = {
   shower: 'showers',
 };
 
-// ─── Project slug map ─────────────────────────────────────────────────────────
 const serviceIdToProjectSlug: Record<string, string> = {
   'kitchen-backsplash': 'kitchen-backsplash',
   bathroom: 'bathroom-tile',
@@ -40,134 +30,15 @@ const serviceIdToProjectSlug: Record<string, string> = {
   shower: 'shower-tile',
 };
 
-// ─── Visual theme system ──────────────────────────────────────────────────────
-// All class strings are static literals so Tailwind's scanner includes them.
-interface ServiceTheme {
-  heroBg: string;
-  accentBg: string;
-  accentBgHover: string;
-  accentText: string;
-  accentBorder: string;
-  accentLight: string;
-  accentLightHover: string;
-  accentLightMed: string;
-  accentLightMedHover: string;
-  accentLightBorder: string;
-  featureHover: string;
-  ctaBg: string;
-  ctaSubtitle: string;
-}
-
-const serviceThemes: Record<string, ServiceTheme> = {
-  'kitchen-backsplash': {
-    heroBg: 'bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100',
-    accentBg: 'bg-amber-600',
-    accentBgHover: 'hover:bg-amber-700',
-    accentText: 'text-amber-600',
-    accentBorder: 'border-amber-600',
-    accentLight: 'bg-amber-50',
-    accentLightHover: 'hover:bg-amber-100',
-    accentLightMed: 'bg-amber-100',
-    accentLightMedHover: 'group-hover:bg-amber-200',
-    accentLightBorder: 'border-amber-200',
-    featureHover: 'hover:bg-amber-50',
-    ctaBg: 'bg-gradient-to-r from-amber-600 to-orange-600',
-    ctaSubtitle: 'text-amber-100',
-  },
-  bathroom: {
-    heroBg: 'bg-gradient-to-br from-teal-50 via-cyan-50 to-teal-100',
-    accentBg: 'bg-teal-600',
-    accentBgHover: 'hover:bg-teal-700',
-    accentText: 'text-teal-600',
-    accentBorder: 'border-teal-600',
-    accentLight: 'bg-teal-50',
-    accentLightHover: 'hover:bg-teal-100',
-    accentLightMed: 'bg-teal-100',
-    accentLightMedHover: 'group-hover:bg-teal-200',
-    accentLightBorder: 'border-teal-200',
-    featureHover: 'hover:bg-teal-50',
-    ctaBg: 'bg-gradient-to-r from-teal-600 to-cyan-700',
-    ctaSubtitle: 'text-teal-100',
-  },
-  flooring: {
-    heroBg: 'bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100',
-    accentBg: 'bg-stone-700',
-    accentBgHover: 'hover:bg-stone-800',
-    accentText: 'text-stone-700',
-    accentBorder: 'border-stone-700',
-    accentLight: 'bg-stone-50',
-    accentLightHover: 'hover:bg-stone-100',
-    accentLightMed: 'bg-stone-100',
-    accentLightMedHover: 'group-hover:bg-stone-200',
-    accentLightBorder: 'border-stone-200',
-    featureHover: 'hover:bg-stone-50',
-    ctaBg: 'bg-gradient-to-r from-stone-700 to-slate-700',
-    ctaSubtitle: 'text-stone-200',
-  },
-  patio: {
-    heroBg: 'bg-gradient-to-br from-green-50 via-emerald-50 to-green-100',
-    accentBg: 'bg-green-600',
-    accentBgHover: 'hover:bg-green-700',
-    accentText: 'text-green-600',
-    accentBorder: 'border-green-600',
-    accentLight: 'bg-green-50',
-    accentLightHover: 'hover:bg-green-100',
-    accentLightMed: 'bg-green-100',
-    accentLightMedHover: 'group-hover:bg-green-200',
-    accentLightBorder: 'border-green-200',
-    featureHover: 'hover:bg-green-50',
-    ctaBg: 'bg-gradient-to-r from-green-600 to-emerald-700',
-    ctaSubtitle: 'text-green-100',
-  },
-  fireplace: {
-    heroBg: 'bg-gradient-to-br from-red-50 via-rose-50 to-orange-50',
-    accentBg: 'bg-red-600',
-    accentBgHover: 'hover:bg-red-700',
-    accentText: 'text-red-600',
-    accentBorder: 'border-red-600',
-    accentLight: 'bg-red-50',
-    accentLightHover: 'hover:bg-red-100',
-    accentLightMed: 'bg-red-100',
-    accentLightMedHover: 'group-hover:bg-red-200',
-    accentLightBorder: 'border-red-200',
-    featureHover: 'hover:bg-red-50',
-    ctaBg: 'bg-gradient-to-r from-red-600 to-rose-700',
-    ctaSubtitle: 'text-red-100',
-  },
-  shower: {
-    heroBg: 'bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50',
-    accentBg: 'bg-sky-600',
-    accentBgHover: 'hover:bg-sky-700',
-    accentText: 'text-sky-600',
-    accentBorder: 'border-sky-600',
-    accentLight: 'bg-sky-50',
-    accentLightHover: 'hover:bg-sky-100',
-    accentLightMed: 'bg-sky-100',
-    accentLightMedHover: 'group-hover:bg-sky-200',
-    accentLightBorder: 'border-sky-200',
-    featureHover: 'hover:bg-sky-50',
-    ctaBg: 'bg-gradient-to-r from-sky-600 to-blue-700',
-    ctaSubtitle: 'text-sky-100',
-  },
+const serviceHeroImageMap: Record<string, string> = {
+  'kitchen-backsplash': '/images/services/service_hero/kitchen_services_hero.jpg',
+  bathroom: '/images/services/service_hero/shower_services_hero.jpg',
+  flooring: '/images/services/service_hero/floor_services_hero.jpg',
+  patio: '/images/services/service_hero/patio_services_hero.jpg',
+  fireplace: '/images/services/service_hero/fireplace_services_hero.jpg',
+  shower: '/images/services/service_hero/shower_services_hero.jpg',
 };
 
-const defaultTheme: ServiceTheme = {
-  heroBg: 'bg-gradient-to-r from-blue-50 to-blue-100',
-  accentBg: 'bg-blue-600',
-  accentBgHover: 'hover:bg-blue-700',
-  accentText: 'text-blue-600',
-  accentBorder: 'border-blue-600',
-  accentLight: 'bg-blue-50',
-  accentLightHover: 'hover:bg-blue-100',
-  accentLightMed: 'bg-blue-100',
-  accentLightMedHover: 'group-hover:bg-blue-200',
-  accentLightBorder: 'border-blue-200',
-  featureHover: 'hover:bg-blue-50',
-  ctaBg: 'bg-gradient-to-r from-blue-600 to-blue-700',
-  ctaSubtitle: 'text-blue-100',
-};
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface DisplayImage {
   id: number;
   src: string;
@@ -182,7 +53,21 @@ interface ServiceDetailPageProps {
   location?: string;
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15
+    }
+  }
+};
+
 const ServiceDetailPage = ({
   service,
   relatedServices,
@@ -194,35 +79,28 @@ const ServiceDetailPage = ({
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   const locPrefix = location === 'florida' ? '' : `/${location}`;
-
-  // Theme and details lookup
-  const theme = serviceThemes[service.id] ?? defaultTheme;
   const details = serviceDetailsMap[service.id];
-
   const locationContent = service.locations.florida;
-  const IconComponent = iconMap[service.icon];
   const galleryKey = serviceToGalleryPath[service.id] || 'backsplashes';
   const apiCategory = serviceToCategoryMap[service.id] || 'backsplash';
 
-  // H1: use keyword base from details, or fall back to service title
-  const h1Text = details
-    ? `${details.keywordBase} in Northeast Florida`
-    : `${service.title} in Northeast Florida`;
-
-  // Fetch gallery images from API with fallback
   useEffect(() => {
     const fetchGalleryImages = async () => {
       setIsLoading(true);
       try {
         const images = await api.getGalleryImages(apiCategory);
-        setGalleryImages(
-          images.slice(0, 6).map((img) => ({
-            id: img.id,
-            src: img.image_url || img.image,
-            title: img.title,
-            description: img.description,
-          }))
-        );
+        if (images.length > 0) {
+          setGalleryImages(
+            images.slice(0, 6).map((img) => ({
+              id: img.id,
+              src: img.image_url || img.image,
+              title: img.title,
+              description: img.description,
+            }))
+          );
+        } else {
+          throw new Error("No images found via API");
+        }
       } catch {
         const staticKey =
           service.id === 'kitchen-backsplash' ? 'backsplashes' :
@@ -240,14 +118,6 @@ const ServiceDetailPage = ({
     fetchGalleryImages();
   }, [service.id, apiCategory]);
 
-  const createQuoteEmailLink = () => {
-    const subject = encodeURIComponent(`Quote Request - ${service.title} in Northeast Florida`);
-    const body = encodeURIComponent(
-      `Hello Tola Tiles,\n\nI would like to request a quote for ${service.title} in Northeast Florida.\n\nProject Details:\n- Service: ${service.title}\n- Location: Northeast Florida\n- Timeline:\n- Budget Range:\n- Additional Notes:\n\nThank you,`.trim()
-    );
-    return `mailto:menitola@tolatiles.com?subject=${subject}&body=${body}`;
-  };
-
   const processSteps = details?.processSteps ?? [
     { step: '01', title: 'Consultation', description: 'Free in-home assessment and design planning' },
     { step: '02', title: 'Preparation', description: 'Surface preparation and material delivery' },
@@ -256,391 +126,171 @@ const ServiceDetailPage = ({
   ];
 
   return (
-    <div className="pt-[var(--navbar-height)]">
+    <div className="overflow-hidden">
+      {/* Reserves space for the fixed navbar */}
+      <div style={{ height: 'var(--navbar-height)' }} aria-hidden="true" className="bg-white" />
+      
+      {/* ── Hero Section ─────────────────────────────── */}
+      <section
+        className="relative w-full flex flex-col bg-white"
+        style={{ minHeight: 'calc(100vh - var(--navbar-height))' }}
+      >
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-50/50 via-white to-gray-50/80" />
+        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-blue-100/30 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
 
-      {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
-      <nav className="bg-gray-50 py-4" aria-label="Breadcrumb">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ol className="flex items-center space-x-2 text-sm">
-            <li>
-              <Link href="/" className="text-gray-500 hover:text-gray-800 transition-colors">Home</Link>
-            </li>
-            <li><ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" /></li>
-            <li>
-              <Link href="/services" className="text-gray-500 hover:text-gray-800 transition-colors">Services</Link>
-            </li>
-            <li><ChevronRight className="h-4 w-4 text-gray-400" aria-hidden="true" /></li>
-            <li>
-              <span className="text-gray-900 font-medium" aria-current="page">{service.title}</span>
-            </li>
-          </ol>
-        </div>
-      </nav>
+        {/* Hero Content Container */}
+        <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col pt-8 md:pt-16 pb-8">
+          
+          {/* H1 Title - Takes full width on both mobile and desktop */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="w-full flex flex-col items-start text-left mb-6 md:mb-8"
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              {service.title}<br />
+              <span className="text-[#00a8e8]">in Northeast FL</span>
+            </h1>
+          </motion.div>
 
-      {/* ── Hero ───────────────────────────────────────────────────────────── */}
-      <section className={`${theme.heroBg} py-16`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <div className={`${theme.accentBg} p-3 rounded-xl`}>
-                  {IconComponent && <IconComponent className="h-8 w-8 text-white" aria-hidden="true" />}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="h-4 w-4" aria-hidden="true" />
-                  <span>Typical timeline: {service.timeline}</span>
-                </div>
+          {/* Container for Image & Text */}
+          <div className="w-full flex flex-col md:flex-row gap-6 md:gap-0 mt-2 md:mt-0">
+            
+            {/* Image Container: Order 1 on mobile, Order 2 on desktop */}
+            <div className="w-full md:w-[40%] flex items-center justify-center md:justify-end order-1 md:order-2 px-4 md:px-0 mb-2 md:mb-0">
+              <Image
+                src={serviceHeroImageMap[service.id] || '/images/services/service_hero/shower_services_hero.jpg'}
+                alt={`${service.title} Installation`}
+                width={600}
+                height={800}
+                className="w-[70%] sm:w-[60%] md:w-full max-h-[220px] sm:max-h-[300px] md:max-h-[500px] object-contain object-center md:object-right drop-shadow-2xl"
+                priority
+              />
+            </div>
+
+            {/* Text & CTAs Container: Order 2 on mobile, Order 1 on desktop */}
+            <div className="w-full md:w-[60%] flex flex-col order-2 md:order-1 z-30 pb-6 md:pb-12 md:pr-8">
+              
+              {/* Description & Checkmarks Container */}
+              <div className="flex flex-col items-start w-full mb-6 md:mb-10">
+                
+                {/* Description (Hidden on mobile, Top on desktop) */}
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.1 }}
+                  className="hidden md:block w-full text-gray-600 text-xl mb-8 leading-relaxed max-w-lg font-medium"
+                >
+                  {locationContent.localDescription}
+                </motion.p>
+
+                {/* Checkmarks */}
+                <motion.ul 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.2 }}
+                  className="w-full flex flex-col gap-3 md:gap-4"
+                >
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Flawless, Laser-Level Installation</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Bulletproof Waterproofing</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Clean, Efficient Job Sites</span>
+                  </li>
+                </motion.ul>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                {h1Text}
-              </h1>
-
-              <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-                {locationContent.localDescription}
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
+              {/* CTAs */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-col md:flex-row items-center gap-3 sm:gap-4 w-full"
+              >
                 <Link
                   href="/contact"
-                  className={`${theme.accentBg} ${theme.accentBgHover} text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2`}
+                  className="group flex w-full md:flex-1 items-center justify-center gap-2 bg-[#00a8e8] text-white px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-blue-500 transition-all text-sm sm:text-base shadow-lg shadow-blue-500/20 text-center"
                 >
-                  Get Free Quote
-                  <ArrowRight className="h-5 w-5" />
+                  Get a Free Estimate
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <a
                   href="tel:+1-904-866-1738"
-                  className={`border-2 ${theme.accentBorder} ${theme.accentText} px-8 py-4 rounded-lg font-semibold ${theme.accentBgHover} hover:text-white transition-all duration-300 flex items-center justify-center gap-2`}
+                  className="flex w-full md:flex-1 items-center justify-center gap-2 bg-white border-2 border-gray-100 text-gray-900 px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-gray-50 hover:border-gray-200 transition-all text-sm sm:text-base shadow-sm text-center"
                 >
-                  <Phone className="h-5 w-5" />
+                  <Phone className="w-4 h-4 text-[#00a8e8]" />
                   (904) 866-1738
                 </a>
-              </div>
+              </motion.div>
             </div>
-
-            <div className="relative">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {galleryImages.slice(0, 4).map((image, index) => (
-                    <div
-                      key={image.id}
-                      className={`rounded-xl overflow-hidden shadow-lg ${index === 0 ? 'col-span-2' : ''}`}
-                    >
-                      <Image
-                        src={image.src}
-                        alt={`${service.title} project in Northeast Florida — ${image.title}`}
-                        width={index === 0 ? 600 : 280}
-                        height={index === 0 ? 300 : 200}
-                        className={`w-full object-cover ${index === 0 ? 'h-64' : 'h-48'}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            
           </div>
         </div>
       </section>
 
-      {/* ── Why Choose Us ──────────────────────────────────────────────────── */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {details?.whyHeading ?? `Why Choose Tola Tiles in Northeast Florida`}
-            </h2>
-            <p className="text-xl text-gray-600">
-              {details?.whySubtitle ?? 'Local expertise for exceptional results'}
-            </p>
-          </header>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {locationContent.sellingPoints.map((point, index) => (
-              <div
-                key={index}
-                className={`${theme.accentLight} rounded-xl p-6 text-center ${theme.accentLightHover} transition-colors duration-300`}
-              >
-                <div className={`${theme.accentBg} p-3 rounded-full w-14 h-14 flex items-center justify-center mx-auto mb-4`}>
-                  <Star className="h-6 w-6 text-white" aria-hidden="true" />
-                </div>
-                <p className="text-gray-800 font-medium text-lg">{point}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── What's Included (Features) ─────────────────────────────────────── */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              What&apos;s Included with Every {service.title} Project
-            </h2>
-            <p className="text-xl text-gray-600">Comprehensive service for exceptional results</p>
-          </header>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Location-specific features first */}
-            {locationContent.localFeatures.map((feature, index) => (
-              <div
-                key={`local-${index}`}
-                className={`${theme.accentLight} rounded-xl p-6 ${theme.accentLightHover} transition-colors duration-300 border-2 ${theme.accentLightBorder}`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`${theme.accentBg} p-2 rounded-lg flex-shrink-0`}>
-                    <MapPin className="h-5 w-5 text-white" aria-hidden="true" />
-                  </div>
-                  <div>
-                    <p className="text-gray-700 font-medium">{feature}</p>
-                    <span className={`text-xs ${theme.accentText} font-semibold`}>Florida Specialty</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {/* Base features */}
-            {service.features.map((feature, index) => (
-              <div
-                key={`base-${index}`}
-                className={`bg-white rounded-xl p-6 ${theme.featureHover} transition-colors duration-300`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="bg-green-100 p-2 rounded-lg flex-shrink-0">
-                    <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
-                  </div>
-                  <p className="text-gray-700 font-medium">{feature}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Materials & Styles ─────────────────────────────────────────────── */}
-      {details?.materials && details.materials.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <header className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Tile Materials &amp; Styles for {service.title}
+      {/* ── Installation Expertise (Zig-Zag Layout) ────────────────────────────────────────────── */}
+      {details?.expertise && details.expertise.length > 0 && (
+        <section className="py-24 bg-white relative">
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <motion.header 
+              initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUpVariant}
+              className="text-center mb-16 md:mb-24"
+            >
+              <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                Our Installation Expertise
               </h2>
-              <p className="text-xl text-gray-600">
-                We help you choose the right material for your space, budget, and Northeast Florida climate
+              <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                We don't just sell tiles—we install the tiles you love with uncompromising precision. Our master craftsmen ensure flawless execution at every step.
               </p>
-            </header>
+            </motion.header>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {details.materials.map((material, index) => (
-                <div
-                  key={index}
-                  className={`rounded-xl border border-gray-200 p-6 ${theme.featureHover} transition-colors duration-300`}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`${theme.accentBg} p-2 rounded-lg flex-shrink-0`}>
-                      <Layers className="h-4 w-4 text-white" aria-hidden="true" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">{material.name}</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm leading-relaxed">{material.description}</p>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-center text-gray-500 mt-8 text-sm">
-              Not sure which material is right for you?{' '}
-              <Link href="/contact" className={`${theme.accentText} font-medium hover:underline`}>
-                Schedule a free material consultation →
-              </Link>
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* ── Service Areas ──────────────────────────────────────────────────── */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {service.title} Service Areas in Northeast Florida
-            </h2>
-            <p className="text-xl text-gray-600">Proudly serving these communities across Duval and St. Johns counties</p>
-          </header>
-
-          <div className="flex flex-wrap justify-center gap-4">
-            {locationContent.areasServed.map((area, index) => (
-              <div
-                key={index}
-                className={`bg-white px-6 py-3 rounded-full text-gray-700 font-medium border border-gray-200 ${theme.accentLightHover} transition-colors duration-300 flex items-center gap-2`}
-              >
-                <MapPin className="h-4 w-4" aria-hidden="true" />
-                {area}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Project Gallery ────────────────────────────────────────────────── */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {service.title} Project Gallery
-            </h2>
-            <p className="text-xl text-gray-600">
-              Real projects completed across Northeast Florida
-            </p>
-          </header>
-
-          {isLoading ? (
-            <div className="flex justify-center items-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              {galleryImages.map((image) => (
-                <article key={image.id} className="group cursor-pointer">
-                  <div className="relative overflow-hidden rounded-xl shadow-lg">
-                    <Image
-                      src={image.src}
-                      alt={`${image.title} — ${service.title} by Tola Tiles in Northeast Florida`}
-                      width={400}
-                      height={256}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
-                      <div className="text-white p-6">
-                        <h3 className="font-semibold text-lg mb-1">{image.title}</h3>
-                        <p className="text-sm text-gray-200">{image.description}</p>
+            <div className="space-y-16 md:space-y-24">
+              {details.expertise.map((item, index) => {
+                const isEven = index % 2 === 0;
+                return (
+                  <motion.div 
+                    key={index} 
+                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUpVariant}
+                    className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 ${!isEven ? 'md:flex-row-reverse' : ''}`}
+                  >
+                    {/* Image Column */}
+                    <div className="w-full md:w-1/2 relative">
+                      <div className="aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl">
+                        <Image 
+                          src={item.image} 
+                          alt={item.name} 
+                          fill 
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
                       </div>
                     </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-
-          <div className="text-center">
-            <Link
-              href={`${locPrefix}/gallery/${galleryKey}`}
-              className={`inline-flex items-center gap-2 ${theme.accentText} font-semibold hover:underline transition-colors`}
-            >
-              View Full {service.title} Gallery
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Installation Process ───────────────────────────────────────────── */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our {service.title} Installation Process
-            </h2>
-            <p className="text-xl text-gray-600">
-              A proven four-step approach that delivers lasting results every time
-            </p>
-          </header>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {processSteps.map((process, index) => (
-              <div key={index} className="text-center group">
-                <div
-                  className={`${theme.accentLightMed} ${theme.accentText} rounded-full w-16 h-16 flex items-center justify-center text-xl font-bold mx-auto mb-4 ${theme.accentLightMedHover} transition-colors`}
-                >
-                  {process.step}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{process.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{process.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ Accordion ─────────────────────────────────────────────────── */}
-      {details?.faqs && details.faqs.length > 0 && (
-        <section className="py-16 bg-white" aria-labelledby="faq-heading">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <header className="text-center mb-12">
-              <h2 id="faq-heading" className="text-3xl font-bold text-gray-900 mb-4">
-                Frequently Asked Questions About {service.title}
-              </h2>
-              <p className="text-xl text-gray-600">
-                Answers to the questions we hear most from Northeast Florida homeowners
-              </p>
-            </header>
-
-            <div className="space-y-3">
-              {details.faqs.map((faq, index) => (
-                <div
-                  key={index}
-                  className="border border-gray-200 rounded-xl overflow-hidden"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                    className={`w-full flex items-center justify-between px-6 py-5 text-left font-semibold text-gray-900 ${theme.featureHover} transition-colors duration-200`}
-                    aria-expanded={openFaqIndex === index}
-                  >
-                    <span className="pr-4">{faq.question}</span>
-                    <ChevronDown
-                      className={`h-5 w-5 flex-shrink-0 ${theme.accentText} transition-transform duration-300 ${openFaqIndex === index ? 'rotate-180' : ''}`}
-                      aria-hidden="true"
-                    />
-                  </button>
-                  {openFaqIndex === index && (
-                    <div className={`px-6 pb-5 ${theme.accentLight} border-t border-gray-100`}>
-                      <p className="text-gray-700 leading-relaxed pt-4">{faq.answer}</p>
+                    
+                    {/* Text Column */}
+                    <div className="w-full md:w-1/2 flex flex-col justify-center text-left">
+                      <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-6 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                        {item.name}
+                      </h3>
+                      <p className="text-gray-600 leading-relaxed text-lg md:text-xl">
+                        {item.description}
+                      </p>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
-
-            <p className="text-center text-gray-500 mt-8 text-sm">
-              Have a question we didn&apos;t answer?{' '}
-              <Link href="/contact" className={`${theme.accentText} font-medium hover:underline`}>
-                Contact us directly →
-              </Link>
-            </p>
           </div>
         </section>
       )}
-
-      {/* ── Cross-Location Links ────────────────────────────────────────────── */}
-      <section className="py-12 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-gray-600 mb-2 font-medium">Looking for location-specific service pages?</p>
-            <p className="text-gray-500 text-sm mb-6">
-              We serve all of Northeast Florida — find dedicated pages for Jacksonville and St. Augustine.
-            </p>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <Link
-                href={`/jacksonville/services/${serviceIdToSlug[service.id]}`}
-                className={`inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ${theme.accentText} font-medium`}
-              >
-                <MapPin className="h-4 w-4" />
-                Jacksonville
-              </Link>
-              <Link
-                href={`/st-augustine/services/${serviceIdToSlug[service.id]}`}
-                className={`inline-flex items-center gap-2 bg-white px-6 py-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ${theme.accentText} font-medium`}
-              >
-                <MapPin className="h-4 w-4" />
-                St. Augustine
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── Project Portfolio ──────────────────────────────────────────────── */}
       {serviceIdToProjectSlug[service.id] && (
@@ -651,68 +301,201 @@ const ServiceDetailPage = ({
         />
       )}
 
-      {/* ── Related Services ───────────────────────────────────────────────── */}
-      <section className="py-16 bg-gray-50">
+      {/* ── Gallery (Restored Original Layout) ────────────────────────────────────────────────────────── */}
+      <section className="py-24 bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Other Tile Installation Services</h2>
-            <p className="text-xl text-gray-600">
-              Explore our full range of professional tile services in Northeast Florida
-            </p>
-          </header>
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+            className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6"
+          >
+            <div>
+              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight text-white" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                {service.title} Gallery
+              </h2>
+              <p className="text-lg md:text-xl text-gray-400">
+                Flawless execution by our expert installers.
+              </p>
+            </div>
+            <Link
+              href={`${locPrefix}/gallery/${galleryKey}`}
+              className="group flex items-center gap-2 text-[#00a8e8] font-bold hover:text-blue-400 transition-colors whitespace-nowrap text-lg"
+            >
+              View Full Portfolio
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {relatedServices.map((relatedService, index) => {
-              const RelatedIcon = iconMap[relatedService.icon];
-              return (
-                <Link
-                  key={index}
-                  href={`${locPrefix}/services/${serviceIdToSlug[relatedService.id]}`}
-                  className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group"
+          {isLoading ? (
+            <div className="flex justify-center items-center py-20 text-gray-500">
+              <div className="animate-pulse flex items-center gap-3">
+                <div className="w-4 h-4 rounded-full bg-[#00a8e8]"></div>
+                <div className="w-4 h-4 rounded-full bg-[#00a8e8] animation-delay-200"></div>
+                <div className="w-4 h-4 rounded-full bg-[#00a8e8] animation-delay-400"></div>
+              </div>
+            </div>
+          ) : (
+            <motion.div 
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {galleryImages.map((image) => (
+                <motion.article 
+                  key={image.id} 
+                  variants={fadeUpVariant}
+                  className="group relative h-[300px] overflow-hidden rounded-xl bg-gray-800"
                 >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className={`${theme.accentLightMed} p-3 rounded-xl ${theme.accentLightMedHover} transition-colors`}>
-                      {RelatedIcon && <RelatedIcon className={`h-6 w-6 ${theme.accentText}`} aria-hidden="true" />}
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900">{relatedService.title}</h3>
+                  <Image
+                    src={image.src}
+                    alt={`${image.title} — ${service.title} Installation`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                    <h3 className="text-white font-bold text-xl mb-1">{image.title}</h3>
+                    <p className="text-gray-300 text-sm line-clamp-2">{image.description}</p>
                   </div>
-                  <p className="text-gray-600 mb-4">{relatedService.description}</p>
-                  <span className={`${theme.accentText} font-medium flex items-center gap-2 group-hover:gap-3 transition-all`}>
-                    Learn More
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
+                </motion.article>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Installation Process ───────────────────────────────────────────── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.header 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+            className="text-center mb-20"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              Our Installation Process
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Professional execution from the first phone call to the final walkthrough.
+            </p>
+          </motion.header>
+
+          <div className="grid md:grid-cols-4 gap-8 md:gap-12">
+            {processSteps.map((process, index) => {
+              const staticKey = serviceToGalleryPath[service.id] || 'backsplashes';
+              const processImgSrc = (sampleImages[staticKey as keyof typeof sampleImages] || sampleImages['backsplashes'])[index]?.src || serviceHeroImageMap[service.id];
+
+              return (
+                <motion.div 
+                  key={index} 
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant} custom={index}
+                  className="text-left flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-0"
+                >
+                  {/* Left Side (Text) */}
+                  <div className="flex-1">
+                    <div className="text-4xl md:text-5xl font-extrabold text-gray-100 mb-2 md:mb-4 tracking-tighter" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                      {process.step}
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-bold text-[#00a8e8] mb-2 md:mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                      {process.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed pr-2 md:pr-0">
+                      {process.description}
+                    </p>
+                  </div>
+
+                  {/* Right Side (Image - Mobile Only) */}
+                  <div className="md:hidden flex-none w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                    <img 
+                      src={processImgSrc}
+                      alt={process.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
       </section>
 
+      {/* ── FAQ (Restored Original Style) ───────────────────────────────────────────────────────────── */}
+      {details?.faqs && details.faqs.length > 0 && (
+        <section className="py-24 bg-gray-50" aria-labelledby="faq-heading">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.header 
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+              className="text-center mb-16"
+            >
+              <h2 id="faq-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                Frequently Asked Questions
+              </h2>
+            </motion.header>
+
+            <motion.div 
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}
+              className="space-y-2"
+            >
+              {details.faqs.map((faq, index) => (
+                <motion.div key={index} variants={fadeUpVariant} className="bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                    className="w-full flex items-center justify-between px-8 py-6 text-left"
+                    aria-expanded={openFaqIndex === index}
+                  >
+                    <span className="font-bold text-gray-900 text-lg">{faq.question}</span>
+                    <span className="text-[#00a8e8] font-bold text-xl">{openFaqIndex === index ? '−' : '+'}</span>
+                  </button>
+                  <div 
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      openFaqIndex === index ? 'max-h-96 opacity-100 pb-6' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="px-8 text-gray-600 text-lg leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className={`py-16 ${theme.ctaBg}`}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">
-            Ready to Start Your {service.title} Project?
-          </h2>
-          <p className={`text-xl ${theme.ctaSubtitle} mb-8`}>
-            Get a free consultation and detailed quote for your project in Northeast Florida.
-            Licensed, insured, and backed by our 2-year installation warranty.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <section className="py-24 bg-[#00a8e8] relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <motion.h2 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+            className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight" 
+            style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+          >
+            Ready for a Stunning New {service.title}?
+          </motion.h2>
+          <motion.p 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+            className="text-xl md:text-2xl text-blue-50 mb-12 max-w-3xl mx-auto leading-relaxed font-medium"
+          >
+            Purchase the tile you love. We'll provide the expert installation to make it look perfect.
+          </motion.p>
+          <motion.div 
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
             <Link
               href={`${locPrefix}/contact`}
-              className="bg-white text-gray-900 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
+              className="bg-white text-gray-900 px-8 py-4 md:py-5 rounded-none font-bold hover:bg-gray-100 hover:scale-105 transition-all text-lg shadow-xl"
             >
-              Schedule Free Consultation
+              Get a Free Estimate
             </Link>
             <a
-              href={createQuoteEmailLink()}
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 flex items-center justify-center gap-2"
+              href="tel:+1-904-866-1738"
+              className="bg-transparent border-2 border-white text-white px-8 py-4 md:py-5 rounded-none font-bold hover:bg-white hover:text-[#00a8e8] transition-all text-lg"
             >
-              <Mail className="h-5 w-5" />
-              Email Quote Request
+              Call (904) 866-1738
             </a>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

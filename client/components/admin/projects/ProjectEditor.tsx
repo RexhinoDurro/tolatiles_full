@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Save, Loader2 } from 'lucide-react';
+import { Plus, Save, Loader2, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Project, Phase, ProjectMedia, ProjectCreate } from '@/types/api';
 import ProjectForm from './ProjectForm';
+import MainVideoUploader from './MainVideoUploader';
 import PhaseDragList from './PhaseDragList';
 import LivePreview from './LivePreview';
 
@@ -17,7 +18,7 @@ const defaultProject: Partial<Project> = {
   title: '',
   description: '',
   status: 'draft',
-  location: 'florida',
+  work_status: 'started',
   is_featured: false,
   job_types: [],
   phases: [],
@@ -27,6 +28,7 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
   const router = useRouter();
   const [localProject, setLocalProject] = useState<Partial<Project>>(defaultProject);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(!!projectId);
   const [savedId, setSavedId] = useState<number | undefined>(projectId);
 
@@ -131,14 +133,14 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
     }));
   }, []);
 
-  const handleSave = async (targetStatus?: 'draft' | 'completed') => {
+  const handleSave = async (targetStatus?: 'draft' | 'published') => {
     setSaving(true);
     try {
       const payload: ProjectCreate = {
         title: localProject.title ?? '',
         description: localProject.description,
         status: targetStatus ?? localProject.status ?? 'draft',
-        location: localProject.location ?? 'florida',
+        work_status: localProject.work_status ?? 'started',
         is_featured: localProject.is_featured,
         job_types: localProject.job_types,
       };
@@ -154,9 +156,27 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
       setLocalProject((prev) => ({ ...prev, ...saved }));
     } catch (err) {
       console.error(err);
-      alert('Failed to save project.');
+      const message = err instanceof Error ? err.message : 'Failed to save project.';
+      alert(`Failed to save project: ${message}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!savedId) return;
+    if (!window.confirm(`Delete "${localProject.title || 'this project'}"? This permanently removes the project, its phases, and all media. This cannot be undone.`)) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      await api.deleteProject(savedId);
+      router.push('/admin/projects/all');
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Failed to delete project.';
+      alert(`Failed to delete project: ${message}`);
+      setDeleting(false);
     }
   };
 
@@ -177,6 +197,20 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
           <h2 className="text-base font-semibold text-gray-900 mb-4">Project Details</h2>
           <ProjectForm project={localProject} onChange={updateProject} />
         </div>
+
+        {/* Main video */}
+        {savedId ? (
+          <MainVideoUploader
+            project={localProject}
+            projectId={savedId}
+            onUpdated={(saved) => setLocalProject((prev) => ({ ...prev, ...saved }))}
+          />
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h2 className="text-base font-semibold text-gray-900 mb-2">Main Video</h2>
+            <p className="text-sm text-gray-500">Save the project first to add a main video.</p>
+          </div>
+        )}
 
         {/* Phases */}
         <div>
@@ -215,22 +249,35 @@ export default function ProjectEditor({ projectId }: ProjectEditorProps) {
         <div className="flex gap-3 pb-6">
           <button
             type="button"
-            onClick={() => handleSave('draft')}
+            onClick={() => handleSave()}
             disabled={saving}
             className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Draft
+            Save
           </button>
-          <button
-            type="button"
-            onClick={() => handleSave('completed')}
-            disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Publish
-          </button>
+          {localProject.status !== 'published' && (
+            <button
+              type="button"
+              onClick={() => handleSave('published')}
+              disabled={saving}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              Publish
+            </button>
+          )}
+          {savedId && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting || saving}
+              className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50 transition-colors"
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+              Delete Project
+            </button>
+          )}
         </div>
       </div>
 

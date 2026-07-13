@@ -42,7 +42,7 @@ export const services: Service[] = [
     timeline: '1-3 days',
     locations: {
       florida: {
-        localDescription: "Serving Northeast Florida homeowners, our kitchen backsplash installations combine coastal-inspired design with hurricane-ready durability. Whether you're in a Jacksonville high-rise, a St. Augustine historic home, or a Ponte Vedra beach house, we bring the same attention to detail and Florida Building Code compliance to every project. Our team understands the unique challenges of Florida's humid climate, selecting materials and adhesives that resist moisture and mold growth. We've completed hundreds of backsplash projects across Duval, St. Johns, and Clay counties, transforming kitchens from dated to stunning. From sleek glass tiles that reflect natural light to hand-painted ceramic pieces that add character, we help you find the perfect backsplash for your Florida lifestyle.",
+        localDescription: "Serving Northeast Florida, our kitchen backsplash installations combine stunning design with hurricane-ready durability. We specialize in precision layouts and moisture-resistant techniques that protect your walls while transforming the heart of your home.",
         localFeatures: [
           'Humidity-resistant materials and installation methods',
           'Florida Building Code compliant installations',
@@ -106,7 +106,7 @@ export const services: Service[] = [
     timeline: '3-7 days',
     locations: {
       florida: {
-        localDescription: "Bathroom tile installation in Northeast Florida demands expertise in waterproofing and humidity control that goes beyond typical installations. Our team serves homeowners from Jacksonville to Palm Coast, bringing professional-grade waterproofing systems and mold-resistant materials to every bathroom project. Florida's year-round humidity means we pay extra attention to ventilation considerations and moisture barriers behind every tile. We've renovated master bathrooms in Ponte Vedra mansions, updated guest baths in St. Augustine vacation homes, and transformed powder rooms in Orange Park family residences. Our installations meet Florida Building Code requirements and exceed industry standards for moisture protection, ensuring your bathroom remains beautiful and functional regardless of our subtropical climate.",
+        localDescription: "Bathroom tile installation in Northeast Florida demands uncompromising waterproofing to handle our intense humidity. We bring professional-grade moisture barriers and mold-resistant materials to every project, ensuring your new spa-like retreat is completely watertight and built to last.",
         localFeatures: [
           'Advanced waterproofing for Florida humidity',
           'Mold and mildew resistant materials',
@@ -170,7 +170,7 @@ export const services: Service[] = [
     timeline: '2-5 days',
     locations: {
       florida: {
-        localDescription: "Floor tile installation in Northeast Florida requires understanding how our climate affects both materials and subfloors. Concrete slabs common in Florida homes need proper preparation to ensure lasting adhesion, and we bring that expertise to every project from Jacksonville to Palm Coast. We specialize in large format porcelain tiles that create seamless, modern looks while hiding the imperfections common in Florida construction. Our installations handle the temperature fluctuations between air-conditioned interiors and humid outdoor air. We've tiled open-concept living spaces in Ponte Vedra, commercial lobbies in downtown Jacksonville, and cozy Florida rooms throughout the region. Every floor we install includes proper expansion joints and moisture barriers suited to our subtropical environment.",
+        localDescription: "Florida concrete slabs require expert preparation to ensure lasting floor tile adhesion. We specialize in precision leveling and crack-isolation techniques, delivering flawlessly flat, durable floors that can handle our subtropical environment.",
         localFeatures: [
           'Florida slab foundation expertise',
           'Temperature fluctuation considerations',
@@ -234,7 +234,7 @@ export const services: Service[] = [
     timeline: '3-6 days',
     locations: {
       florida: {
-        localDescription: "Outdoor living is year-round in Northeast Florida, making patio tile installation one of our most popular services. From Jacksonville pool decks to St. Augustine courtyard patios, we create beautiful outdoor spaces that handle Florida's intense sun, afternoon thunderstorms, and occasional tropical weather. Our slip-resistant tiles provide safety around pools while UV-resistant grouts maintain their color despite constant sun exposure. We've transformed backyards throughout Duval and St. Johns counties into entertainment destinations with outdoor kitchens, covered lanais, and elegant walkways. Proper drainage is critical in Florida's heavy rain season, and every installation includes careful slope planning. Whether you're enhancing a Ponte Vedra pool area or creating a cozy Fleming Island patio, we deliver outdoor spaces built for Florida living.",
+        localDescription: "Outdoor living is year-round in Northeast Florida, making durable patio tile essential. We create beautiful outdoor spaces using UV-resistant materials, slip-resistant finishes, and expert drainage planning to handle intense sun and afternoon thunderstorms.",
         localFeatures: [
           'Hurricane and storm-resistant installations',
           'UV-resistant materials for Florida sun',
@@ -298,7 +298,7 @@ export const services: Service[] = [
     timeline: '2-4 days',
     locations: {
       florida: {
-        localDescription: "While Florida's mild climate means fewer roaring fires, fireplace surrounds remain a beloved design feature in homes throughout Northeast Florida. Our fireplace tile installations create stunning focal points in living rooms from Jacksonville to St. Augustine. Gas fireplaces are particularly popular here, and we specialize in surrounds that safely accommodate these units while making a visual statement. We've installed elegant marble surrounds in Ponte Vedra estates, rustic stone treatments in Orange Park family rooms, and contemporary linear designs in modern Jacksonville condos. Even decorative fireplaces—those that never see flame—deserve beautiful tile work that anchors the room. Our installations meet all Florida building codes for heat clearance while allowing your creativity to shine.",
+        localDescription: "A beautifully tiled fireplace creates a stunning focal point in any Northeast Florida home. We strictly adhere to building codes for heat clearance, delivering precise, symmetrical layouts that elevate your living space.",
         localFeatures: [
           'Gas fireplace surround specialists',
           'Florida building code compliance',
@@ -362,7 +362,7 @@ export const services: Service[] = [
     timeline: '4-7 days',
     locations: {
       florida: {
-        localDescription: "Shower installations in Northeast Florida demand waterproofing expertise that goes beyond standard practices. Our team has perfected moisture protection systems designed for Florida's intense humidity, preventing the mold and mildew issues that plague many local bathrooms. From Jacksonville to Palm Coast, we've installed custom showers that combine luxury with lasting durability. Curbless walk-in showers have become especially popular for their accessibility and modern aesthetics—we ensure proper drainage slope even without traditional curbs. Our installations include vapor barriers, waterproofing membranes, and mold-resistant backer boards that work together to protect your home. Whether you want a spa-like rainfall shower in Ponte Vedra or a practical, beautiful guest shower in Orange Park, we deliver Florida-ready solutions.",
+        localDescription: "Our custom shower installations combine luxury aesthetics with bulletproof waterproofing systems. From perfectly sloped pans to elegant curbless entries, we build showers engineered to prevent leaks and mold in Florida's humid climate.",
         localFeatures: [
           'Advanced humidity-resistant waterproofing',
           'Curbless shower drainage expertise',

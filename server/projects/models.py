@@ -3,41 +3,33 @@ import re
 from django.db import models
 
 
-LOCATION_CHOICES = [
-    ('florida', 'Florida'),
-    ('jacksonville', 'Jacksonville'),
-    ('st-augustine', 'St. Augustine'),
-]
-
 STATUS_CHOICES = [
     ('draft', 'Draft'),
+    ('published', 'Published'),
+]
+
+WORK_STATUS_CHOICES = [
+    ('started', 'Started'),
     ('in_progress', 'In Progress'),
     ('completed', 'Completed'),
-    ('archived', 'Archived'),
-]
-
-SERVICE_TYPE_CHOICES = [
-    ('kitchen-backsplash', 'Kitchen Backsplash'),
-    ('bathroom-tile', 'Bathroom Tile'),
-    ('floor-tile', 'Floor Tiling'),
-    ('patio-tile', 'Patio & Outdoor'),
-    ('fireplace-tile', 'Fireplace Tile'),
-    ('shower-tile', 'Shower Installation'),
-]
-
-SLOT_TYPES = [
-    ('hero', 'Hero Section'),
-    ('mid_slider', 'Mid-Page Slider'),
-    ('bottom_grid', 'Bottom Grid'),
-]
-
-DISPLAY_STYLES = [
-    ('before_after_slider', 'Before/After Slider'),
-    ('cinematic_video_header', 'Cinematic Video Header'),
-    ('process_grid', 'Process Grid'),
 ]
 
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.webm', '.avi', '.mkv'}
+
+YOUTUBE_PATTERNS = [
+    r'(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})',
+    r'youtube\.com/embed/([a-zA-Z0-9_-]{11})',
+]
+
+
+def extract_youtube_id(url):
+    if not url:
+        return None
+    for pattern in YOUTUBE_PATTERNS:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
 
 
 class ProjectServiceType(models.Model):
@@ -52,12 +44,21 @@ class ProjectServiceType(models.Model):
 
 
 class Project(models.Model):
+    MAIN_VIDEO_TYPE_CHOICES = [
+        ('none', 'None'),
+        ('video', 'Uploaded Video'),
+        ('youtube', 'YouTube Video'),
+    ]
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICES, default='started')
     is_featured = models.BooleanField(default=False)
-    location = models.CharField(max_length=20, choices=LOCATION_CHOICES)
     job_types = models.ManyToManyField(ProjectServiceType, blank=True)
+    main_video = models.FileField(upload_to='projects/main_videos/', null=True, blank=True)
+    main_video_url = models.URLField(max_length=500, blank=True, default='')
+    main_video_type = models.CharField(max_length=10, choices=MAIN_VIDEO_TYPE_CHOICES, default='none')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,6 +67,25 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.main_video_url:
+            self.main_video_type = 'youtube'
+        elif self.main_video:
+            self.main_video_type = 'video'
+        else:
+            self.main_video_type = 'none'
+        super().save(*args, **kwargs)
+
+    @property
+    def main_video_embed_url(self):
+        vid = extract_youtube_id(self.main_video_url)
+        return f'https://www.youtube.com/embed/{vid}' if vid else None
+
+    @property
+    def main_video_thumbnail(self):
+        vid = extract_youtube_id(self.main_video_url)
+        return f'https://img.youtube.com/vi/{vid}/maxresdefault.jpg' if vid else None
 
 
 class Phase(models.Model):
@@ -87,11 +107,6 @@ class ProjectMedia(models.Model):
         ('image', 'Image'),
         ('video', 'Video'),
         ('youtube', 'YouTube Video'),
-    ]
-
-    YOUTUBE_PATTERNS = [
-        r'(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})',
-        r'youtube\.com/embed/([a-zA-Z0-9_-]{11})',
     ]
 
     phase = models.ForeignKey(Phase, related_name='media', on_delete=models.CASCADE)
@@ -116,61 +131,16 @@ class ProjectMedia(models.Model):
             self.media_type = 'video' if ext in VIDEO_EXTENSIONS else 'image'
         super().save(*args, **kwargs)
 
-    def _extract_youtube_id(self):
-        if not self.youtube_url:
-            return None
-        for pattern in self.YOUTUBE_PATTERNS:
-            match = re.search(pattern, self.youtube_url)
-            if match:
-                return match.group(1)
-        return None
-
     @property
     def youtube_video_id(self):
-        return self._extract_youtube_id()
+        return extract_youtube_id(self.youtube_url)
 
     @property
     def youtube_embed_url(self):
-        vid = self._extract_youtube_id()
+        vid = extract_youtube_id(self.youtube_url)
         return f'https://www.youtube.com/embed/{vid}' if vid else None
 
     @property
     def youtube_thumbnail(self):
-        vid = self._extract_youtube_id()
+        vid = extract_youtube_id(self.youtube_url)
         return f'https://img.youtube.com/vi/{vid}/maxresdefault.jpg' if vid else None
-
-
-class HomepageSlot(models.Model):
-    location = models.CharField(max_length=20, choices=LOCATION_CHOICES)
-    slot_type = models.CharField(max_length=20, choices=SLOT_TYPES)
-    project = models.ForeignKey(
-        Project, null=True, blank=True, on_delete=models.SET_NULL, related_name='homepage_slots'
-    )
-    display_style = models.CharField(max_length=30, choices=DISPLAY_STYLES, blank=True)
-    before_media = models.ForeignKey(
-        ProjectMedia, null=True, blank=True, on_delete=models.SET_NULL, related_name='before_slots'
-    )
-    after_media = models.ForeignKey(
-        ProjectMedia, null=True, blank=True, on_delete=models.SET_NULL, related_name='after_slots'
-    )
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = [('location', 'slot_type')]
-
-    def __str__(self):
-        return f"{self.get_location_display()} - {self.get_slot_type_display()}"
-
-
-class ServiceProjectPin(models.Model):
-    location = models.CharField(max_length=20, choices=LOCATION_CHOICES)
-    service_slug = models.CharField(max_length=50, choices=SERVICE_TYPE_CHOICES)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='service_pins')
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        unique_together = [('location', 'service_slug', 'project')]
-        ordering = ['order']
-
-    def __str__(self):
-        return f"{self.location} / {self.service_slug} - {self.project.title}"

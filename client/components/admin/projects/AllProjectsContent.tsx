@@ -5,23 +5,21 @@ import Link from 'next/link';
 import { LayoutGrid, List, Plus, Search, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { SERVICE_TYPES } from '@/types/api';
-import type { ProjectListItem, ProjectStatus, ProjectLocation, ServiceTypeSlug } from '@/types/api';
+import type { ProjectListItem, ProjectStatus, WorkStatus, ServiceTypeSlug } from '@/types/api';
 import ProjectCard from './ProjectCard';
 import ProjectsTable from './ProjectsTable';
 
 const STATUS_OPTIONS: { value: '' | ProjectStatus; label: string }[] = [
   { value: '', label: 'All Statuses' },
   { value: 'draft', label: 'Draft' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'archived', label: 'Archived' },
+  { value: 'published', label: 'Published' },
 ];
 
-const LOCATION_OPTIONS: { value: '' | ProjectLocation; label: string }[] = [
-  { value: '', label: 'All Locations' },
-  { value: 'florida', label: 'Florida' },
-  { value: 'jacksonville', label: 'Jacksonville' },
-  { value: 'st-augustine', label: 'St. Augustine' },
+const WORK_STATUS_OPTIONS: { value: '' | WorkStatus; label: string }[] = [
+  { value: '', label: 'All Work Statuses' },
+  { value: 'started', label: 'Started' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' },
 ];
 
 export default function AllProjectsContent() {
@@ -30,7 +28,7 @@ export default function AllProjectsContent() {
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'' | ProjectStatus>('');
-  const [locationFilter, setLocationFilter] = useState<'' | ProjectLocation>('');
+  const [workStatusFilter, setWorkStatusFilter] = useState<'' | WorkStatus>('');
   const [jobTypeFilter, setJobTypeFilter] = useState<'' | ServiceTypeSlug>('');
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export default function AllProjectsContent() {
         setLoading(true);
         const data = await api.getProjects({
           status: statusFilter || undefined,
-          location: locationFilter || undefined,
+          work_status: workStatusFilter || undefined,
           job_type: jobTypeFilter || undefined,
         });
         setProjects(data);
@@ -50,13 +48,27 @@ export default function AllProjectsContent() {
       }
     };
     load();
-  }, [statusFilter, locationFilter, jobTypeFilter]);
+  }, [statusFilter, workStatusFilter, jobTypeFilter]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return projects;
     const q = search.toLowerCase();
     return projects.filter((p) => p.title.toLowerCase().includes(q));
   }, [projects, search]);
+
+  const handleDelete = async (project: ProjectListItem) => {
+    if (!window.confirm(`Delete "${project.title}"? This permanently removes the project, its phases, and all media. This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await api.deleteProject(project.id);
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+    } catch (err) {
+      console.error(err);
+      const message = err instanceof Error ? err.message : 'Failed to delete project.';
+      alert(`Failed to delete project: ${message}`);
+    }
+  };
 
   return (
     <div>
@@ -85,11 +97,11 @@ export default function AllProjectsContent() {
           </select>
 
           <select
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value as '' | ProjectLocation)}
+            value={workStatusFilter}
+            onChange={(e) => setWorkStatusFilter(e.target.value as '' | WorkStatus)}
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {LOCATION_OPTIONS.map((o) => (
+            {WORK_STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </select>
@@ -137,14 +149,14 @@ export default function AllProjectsContent() {
       ) : view === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard key={project.id} project={project} onDelete={handleDelete} />
           ))}
           {filtered.length === 0 && (
             <div className="col-span-full text-center py-16 text-gray-400">No projects found.</div>
           )}
         </div>
       ) : (
-        <ProjectsTable projects={filtered} />
+        <ProjectsTable projects={filtered} onDelete={handleDelete} />
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeft, LayoutGrid, PlusSquare, Home, Bookmark, X } from 'lucide-react';
+import { ArrowLeft, LayoutGrid, PlusSquare, X } from 'lucide-react';
 
 interface ProjectsSidebarProps {
   onClose?: () => void;
@@ -11,8 +11,6 @@ interface ProjectsSidebarProps {
 const navItems = [
   { name: 'All Projects', href: '/admin/projects/all', icon: LayoutGrid },
   { name: 'Add New', href: '/admin/projects/new', icon: PlusSquare },
-  { name: 'Homepage Layout', href: '/admin/projects/homepage', icon: Home },
-  { name: 'Service Pins', href: '/admin/projects/services', icon: Bookmark },
 ];
 
 export default function ProjectsSidebar({ onClose }: ProjectsSidebarProps) {

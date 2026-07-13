@@ -6,21 +6,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import (
-    Project, Phase, ProjectMedia, HomepageSlot, ServiceProjectPin,
-    LOCATION_CHOICES, SERVICE_TYPE_CHOICES
-)
+from .models import Project, Phase, ProjectMedia
 from .serializers import (
     ProjectListSerializer, ProjectDetailSerializer, PhaseSerializer,
-    ProjectMediaSerializer, HomepageSlotSerializer, ServicePinSerializer,
-    ProjectListSerializer
+    ProjectMediaSerializer,
 )
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['status', 'location', 'is_featured']
+    filterset_fields = ['status', 'work_status', 'is_featured']
     pagination_class = None  # return plain array, not paginated response
 
     def get_queryset(self):
@@ -39,6 +35,45 @@ class ProjectViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def perform_destroy(self, instance):
+        # DB-level CASCADE removes Phase/ProjectMedia rows but never touches the
+        # underlying files on disk, so clean those up explicitly before the delete.
+        if instance.main_video:
+            instance.main_video.delete(save=False)
+        for media in ProjectMedia.objects.filter(phase__project=instance).exclude(file=''):
+            media.file.delete(save=False)
+        instance.delete()
+
+    @action(detail=True, methods=['post', 'delete'], url_path='main-video')
+    def main_video(self, request, pk=None):
+        project = self.get_object()
+
+        if request.method == 'DELETE':
+            if project.main_video:
+                project.main_video.delete(save=False)
+                project.main_video = None
+            project.main_video_url = ''
+            project.save()
+            serializer = ProjectDetailSerializer(project, context={'request': request})
+            return Response(serializer.data)
+
+        file = request.FILES.get('file')
+        youtube_url = (request.data.get('youtube_url') or '').strip()
+        if not file and not youtube_url:
+            return Response({'detail': 'No file or YouTube URL provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if project.main_video:
+            project.main_video.delete(save=False)
+            project.main_video = None
+        if youtube_url:
+            project.main_video_url = youtube_url
+        else:
+            project.main_video_url = ''
+            project.main_video = file
+        project.save()
+        serializer = ProjectDetailSerializer(project, context={'request': request})
+        return Response(serializer.data)
 
     @action(detail=True, methods=['get', 'post'])
     def phases(self, request, pk=None):
@@ -143,104 +178,42 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class HomepageSlotsView(APIView):
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return [IsAuthenticated()]
-        return [IsAuthenticated()]
-
-    def get(self, request, location):
-        slots = HomepageSlot.objects.filter(location=location).select_related(
-            'project', 'before_media', 'after_media'
-        )
-        serializer = HomepageSlotSerializer(slots, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def put(self, request, location):
-        slot_type = request.data.get('slot_type')
-        try:
-            slot = HomepageSlot.objects.get(location=location, slot_type=slot_type)
-        except HomepageSlot.DoesNotExist:
-            return Response({'detail': 'Slot not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = HomepageSlotSerializer(slot, data=request.data, partial=True, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ServicePinsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, location, service_slug):
-        pins = ServiceProjectPin.objects.filter(
-            location=location, service_slug=service_slug
-        ).select_related('project').order_by('order')
-        serializer = ServicePinSerializer(pins, many=True, context={'request': request})
-        return Response(serializer.data)
-
-    def put(self, request, location, service_slug):
-        items = request.data  # [{project_id, order}]
-        with transaction.atomic():
-            ServiceProjectPin.objects.filter(location=location, service_slug=service_slug).delete()
-            for item in items:
-                try:
-                    project = Project.objects.get(pk=item['project_id'])
-                    ServiceProjectPin.objects.create(
-                        location=location,
-                        service_slug=service_slug,
-                        project=project,
-                        order=item.get('order', 0)
-                    )
-                except Project.DoesNotExist:
-                    pass
-        pins = ServiceProjectPin.objects.filter(
-            location=location, service_slug=service_slug
-        ).select_related('project').order_by('order')
-        serializer = ServicePinSerializer(pins, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PublicHomepageView(APIView):
+class PublicProjectsView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, location):
-        slots = HomepageSlot.objects.filter(location=location).select_related(
-            'project', 'before_media', 'after_media'
-        ).prefetch_related('project__phases__media', 'project__job_types')
-        serializer = HomepageSlotSerializer(slots, many=True, context={'request': request})
+    def get(self, request):
+        qs = Project.objects.filter(status='published').prefetch_related('phases__media', 'job_types')
+        is_featured = request.query_params.get('is_featured')
+        if is_featured is not None and is_featured.lower() in ('true', '1'):
+            qs = qs.filter(is_featured=True)
+        job_type = request.query_params.get('job_type')
+        if job_type:
+            qs = qs.filter(job_types__slug=job_type).distinct()
+        serializer = ProjectListSerializer(qs, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class PublicProjectDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        try:
+            project = Project.objects.filter(status='published').prefetch_related(
+                'phases__media', 'job_types'
+            ).get(pk=pk)
+        except Project.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ProjectDetailSerializer(project, context={'request': request})
         return Response(serializer.data)
 
 
 class PublicServiceProjectsView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, location, service_slug):
-        # Pinned projects first
-        pins = ServiceProjectPin.objects.filter(
-            location=location, service_slug=service_slug
-        ).select_related('project').prefetch_related(
-            'project__phases__media', 'project__job_types'
-        ).order_by('order')
-
-        pinned_ids = [pin.project.id for pin in pins]
-        pinned_projects = [pin.project for pin in pins]
-
-        # Up to 6 total: fill with unpinned matching projects
-        remaining = 6 - len(pinned_projects)
-        unpinned = []
-        if remaining > 0:
-            unpinned = list(
-                Project.objects.filter(
-                    location=location,
-                    job_types__slug=service_slug,
-                    status='completed'
-                ).exclude(id__in=pinned_ids).prefetch_related(
-                    'phases__media', 'job_types'
-                )[:remaining]
-            )
-
-        all_projects = pinned_projects + unpinned
-        serializer = ProjectListSerializer(all_projects, many=True, context={'request': request})
+    def get(self, request, service_slug):
+        projects = Project.objects.filter(
+            job_types__slug=service_slug,
+            status='published'
+        ).prefetch_related('phases__media', 'job_types').distinct()[:6]
+        serializer = ProjectListSerializer(projects, many=True, context={'request': request})
         return Response(serializer.data)

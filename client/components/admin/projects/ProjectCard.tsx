@@ -1,22 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit2, Layers } from 'lucide-react';
+import { Edit2, Layers, Trash2 } from 'lucide-react';
 import type { ProjectListItem } from '@/types/api';
 import { SERVICE_TYPES } from '@/types/api';
-import ProjectStatusBadge from './ProjectStatusBadge';
+import ProjectStatusBadge, { WorkStatusBadge } from './ProjectStatusBadge';
 
 interface ProjectCardProps {
   project: ProjectListItem;
+  onDelete?: (project: ProjectListItem) => void;
 }
 
-const locationLabels: Record<string, string> = {
-  florida: 'Florida',
-  jacksonville: 'Jacksonville',
-  'st-augustine': 'St. Augustine',
-};
-
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
   const serviceTypeMap = Object.fromEntries(SERVICE_TYPES.map((s) => [s.slug, s.name]));
 
   return (
@@ -52,19 +47,28 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">
             {project.title}
           </h3>
-          <Link
-            href={`/admin/projects/${project.id}/edit`}
-            className="flex-shrink-0 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-          >
-            <Edit2 className="w-4 h-4" />
-          </Link>
+          <div className="flex-shrink-0 flex items-center gap-1">
+            <Link
+              href={`/admin/projects/${project.id}/edit`}
+              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Link>
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(project)}
+                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5 mb-3">
           <ProjectStatusBadge status={project.status} />
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-            {locationLabels[project.location] ?? project.location}
-          </span>
+          <WorkStatusBadge workStatus={project.work_status} />
           {project.is_featured && (
             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700">
               Featured

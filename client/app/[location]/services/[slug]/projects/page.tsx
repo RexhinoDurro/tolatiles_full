@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { SERVICE_TYPES } from '@/types/api';
-import type { ProjectListItem, ProjectLocation } from '@/types/api';
+import type { ProjectListItem } from '@/types/api';
 import ProjectCard from '@/components/projects/ProjectCard';
 
 const LOCATION_LABELS: Record<string, string> = {
@@ -29,11 +29,11 @@ export default function ServiceProjectsGallery({ params }: ServiceProjectsGaller
 
   useEffect(() => {
     api
-      .getPublicServiceProjects(location as ProjectLocation, slug)
+      .getPublicServiceProjects(slug)
       .then(setProjects)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [location, slug]);
+  }, [slug]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,7 +63,7 @@ export default function ServiceProjectsGallery({ params }: ServiceProjectsGaller
         ) : projects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} location={location} serviceSlug={slug} />
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         ) : (
