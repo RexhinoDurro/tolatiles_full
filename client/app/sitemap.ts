@@ -16,12 +16,12 @@ const locations = ['jacksonville', 'st-augustine'];
 
 // Service slugs (same for all locations now)
 const serviceSlugs = [
-  'kitchen-backsplash',
-  'bathroom-tile',
-  'floor-tile',
-  'patio-tile',
-  'fireplace-tile',
-  'shower-tile',
+  'kitchen-backsplash-installation',
+  'bathroom-tile-installation',
+  'floor-tile-installation',
+  'patio-tile-installation',
+  'fireplace-tile-installation',
+  'shower-tile-installation',
 ];
 
 // Gallery categories
@@ -93,14 +93,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  // Service pages — root level + city pages
+  // Service pages — root level + city pages. /services and /{location}/services
+  // are deliberately absent: they're a URL grouping prefix only, not a real
+  // page — nothing should ever crawl or link to the bare prefix itself.
   const servicePages: MetadataRoute.Sitemap = [
-    {
-      url: `${BASE_URL}/services`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    },
     ...serviceSlugs.map((slug) => ({
       url: `${BASE_URL}/services/${slug}`,
       lastModified: currentDate,
@@ -109,12 +105,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
   for (const loc of locations) {
-    servicePages.push({
-      url: `${BASE_URL}/${loc}/services`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    });
     for (const slug of serviceSlugs) {
       servicePages.push({
         url: `${BASE_URL}/${loc}/services/${slug}`,

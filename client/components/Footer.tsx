@@ -26,13 +26,12 @@ const Footer = () => {
   // Get service links using new location-prefixed URLs
   const serviceLinks = useMemo(() => {
     return {
-      all: `${basePath}/services`,
-      kitchenBacksplash: `${basePath}/services/kitchen-backsplash`,
-      bathroom: `${basePath}/services/bathroom-tile`,
-      floor: `${basePath}/services/floor-tile`,
-      patio: `${basePath}/services/patio-tile`,
-      fireplace: `${basePath}/services/fireplace-tile`,
-      shower: `${basePath}/services/shower-tile`,
+      kitchenBacksplash: `${basePath}/services/kitchen-backsplash-installation`,
+      bathroom: `${basePath}/services/bathroom-tile-installation`,
+      floor: `${basePath}/services/floor-tile-installation`,
+      patio: `${basePath}/services/patio-tile-installation`,
+      fireplace: `${basePath}/services/fireplace-tile-installation`,
+      shower: `${basePath}/services/shower-tile-installation`,
     };
   }, [basePath]);
 
@@ -97,11 +96,6 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-6">Our Services in {locationName}</h3>
             <nav aria-label="Services">
               <ul className="space-y-3 text-gray-300">
-                <li>
-                  <Link href={serviceLinks.all} className="hover:text-white transition-colors hover:translate-x-1 transform duration-200 inline-block">
-                    All Tile Installation Services
-                  </Link>
-                </li>
                 <li>
                   <Link
                     href={serviceLinks.kitchenBacksplash}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, Clock, ArrowRight, Tag, Phone, Image as ImageIcon } from 'lucide-react';
@@ -22,31 +22,42 @@ const ctaDescriptions: Record<string, string> = {
 interface ContentIndexPageProps {
   contentType: ContentType;
   location?: string;
+  /** Server-fetched so the "All Posts" view is present in the initial HTML for crawlers, not just after client hydration. */
+  initialPosts: BlogPostListItem[];
+  initialCategories: BlogCategory[];
 }
 
-export default function ContentIndexPage({ contentType, location = 'florida' }: ContentIndexPageProps) {
+export default function ContentIndexPage({ contentType, location = 'florida', initialPosts, initialCategories }: ContentIndexPageProps) {
   const hero = CONTENT_TYPE_HERO_COPY[contentType];
   const ctaDescription = ctaDescriptions[location] || ctaDescriptions.florida;
   const prefix = CONTENT_TYPE_ROUTE_PREFIX[contentType];
-  const [posts, setPosts] = useState<BlogPostListItem[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<BlogPostListItem[]>(initialPosts);
+  const [categories] = useState<BlogCategory[]>(initialCategories);
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const isFirstRender = useRef(true);
 
+  // Skip the mount-time fetch entirely — initialPosts/initialCategories already
+  // carry the server-rendered "All Posts" view. Only hit the API again when the
+  // visitor actually changes the category filter client-side.
   useEffect(() => {
-    loadData();
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!selectedCategory) {
+      setPosts(initialPosts);
+      return;
+    }
+    loadFilteredPosts(selectedCategory);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, contentType]);
+  }, [selectedCategory]);
 
-  const loadData = async () => {
+  const loadFilteredPosts = async (category: string) => {
     try {
       setLoading(true);
-      const [postsData, categoriesData] = await Promise.all([
-        api.getBlogPosts({ content_type: contentType, category: selectedCategory || undefined }),
-        api.getBlogCategories(),
-      ]);
+      const postsData = await api.getBlogPosts({ content_type: contentType, category });
       setPosts(postsData);
-      setCategories(categoriesData);
     } catch (error) {
       console.error('Failed to load content data:', error);
     } finally {

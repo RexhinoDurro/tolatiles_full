@@ -14,6 +14,21 @@ const LOCATION_LABELS: Record<string, string> = {
   'st-augustine': 'St. Augustine',
 };
 
+// This route's [slug] param is the JobType/project-filter slug (unchanged,
+// e.g. 'kitchen-backsplash') — decoupled from the service detail page's own
+// URL slug (now 'kitchen-backsplash-installation'), which stores richer
+// data (JobType.slug in the DB) that isn't safe to rename without a
+// migration. This map translates back so "Back to {service}" links to the
+// real, current service page instead of 404ing.
+const JOB_TYPE_SLUG_TO_PAGE_SLUG: Record<string, string> = {
+  'kitchen-backsplash': 'kitchen-backsplash-installation',
+  'bathroom-tile': 'bathroom-tile-installation',
+  'floor-tile': 'floor-tile-installation',
+  'patio-tile': 'patio-tile-installation',
+  'fireplace-tile': 'fireplace-tile-installation',
+  'shower-tile': 'shower-tile-installation',
+};
+
 interface ServiceProjectsGalleryProps {
   params: Promise<{ location: string; slug: string }>;
 }
@@ -41,7 +56,7 @@ export default function ServiceProjectsGallery({ params }: ServiceProjectsGaller
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Link
-            href={`/${location}/services/${slug}`}
+            href={`/${location}/services/${JOB_TYPE_SLUG_TO_PAGE_SLUG[slug] ?? slug}`}
             className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

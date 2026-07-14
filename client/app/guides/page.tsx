@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import ContentIndexPage from '@/components/pages/ContentIndexPage';
+import BreadcrumbSchema from '@/components/BreadcrumbSchema';
+import { getContentPosts, getContentCategories } from '@/lib/contentServer';
 
 export const metadata: Metadata = {
   title: 'Guides - Tile Installation Guides Jacksonville & St. Augustine FL | Tola Tiles',
@@ -10,6 +12,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Guides() {
-  return <ContentIndexPage contentType="guide" location="florida" />;
+export default async function Guides() {
+  const [posts, categories] = await Promise.all([
+    getContentPosts('guide'),
+    getContentCategories(),
+  ]);
+
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://tolatiles.com' },
+          { name: 'Guides', url: 'https://tolatiles.com/guides' },
+        ]}
+      />
+      <ContentIndexPage contentType="guide" location="florida" initialPosts={posts} initialCategories={categories} />
+    </>
+  );
 }

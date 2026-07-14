@@ -65,13 +65,28 @@ const nextConfig = {
         ],
       },
       {
-        source: '/:path((?!_next|images|fonts|api).*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
-          },
-        ],
+        // Private/dynamic routes only — admin console, the customer quotes
+        // portal, and per-customer quote/invoice views by reference. These
+        // must never be cached. Marketing pages (services, gallery, blog,
+        // etc.) are intentionally excluded so they can be cached normally —
+        // no-store on every route was forcing a full revalidation round trip
+        // on every page view/back-navigation sitewide, a real Core Web
+        // Vitals / repeat-visit performance cost with no benefit for content
+        // that isn't actually that volatile.
+        source: '/admin/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        source: '/quotes-portal/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        source: '/quotes/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
+      {
+        source: '/invoices/:path*',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
       },
       {
         source: '/(.*)',
@@ -196,6 +211,85 @@ const nextConfig = {
       {
         source: '/services/:slug-st-augustine',
         destination: '/st-augustine/services/:slug',
+        permanent: true,
+      },
+
+      // Service slugs renamed to match each page's actual title/H1 intent
+      // (e.g. kitchen-backsplash -> kitchen-backsplash-installation).
+      // One rule per service covers root + both cities via the location
+      // capture group re-used in the destination.
+      {
+        source: '/services/kitchen-backsplash',
+        destination: '/services/kitchen-backsplash-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/kitchen-backsplash',
+        destination: '/:location/services/kitchen-backsplash-installation',
+        permanent: true,
+      },
+      {
+        source: '/services/bathroom-tile',
+        destination: '/services/bathroom-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/bathroom-tile',
+        destination: '/:location/services/bathroom-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/services/floor-tile',
+        destination: '/services/floor-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/floor-tile',
+        destination: '/:location/services/floor-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/services/patio-tile',
+        destination: '/services/patio-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/patio-tile',
+        destination: '/:location/services/patio-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/services/fireplace-tile',
+        destination: '/services/fireplace-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/fireplace-tile',
+        destination: '/:location/services/fireplace-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/services/shower-tile',
+        destination: '/services/shower-tile-installation',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services/shower-tile',
+        destination: '/:location/services/shower-tile-installation',
+        permanent: true,
+      },
+
+      // /services and /{location}/services are a URL grouping prefix only —
+      // no hub page exists there by design. Anything hitting the bare
+      // prefix goes to the relevant homepage instead of 404ing.
+      {
+        source: '/services',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/:location(jacksonville|st-augustine)/services',
+        destination: '/:location',
         permanent: true,
       },
 

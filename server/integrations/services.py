@@ -283,7 +283,7 @@ class SearchConsoleService:
         Response:
         {
             "rows": [
-                {"keys": ["https://tolatiles.com/services/kitchen-backsplash"], "clicks": 320, "impressions": 5500, "ctr": 0.0582, "position": 5.3},
+                {"keys": ["https://tolatiles.com/services/kitchen-backsplash-installation"], "clicks": 320, "impressions": 5500, "ctr": 0.0582, "position": 5.3},
                 {"keys": ["https://tolatiles.com/gallery/backsplashes"], "clicks": 210, "impressions": 4200, "ctr": 0.05, "position": 6.1},
                 ...
             ]

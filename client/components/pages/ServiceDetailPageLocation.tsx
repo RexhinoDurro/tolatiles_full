@@ -32,12 +32,12 @@ const serviceIdToProjectSlug: Record<string, string> = {
 };
 
 const serviceHeroImageMap: Record<string, string> = {
-  'kitchen-backsplash': '/images/services/service_hero/kitchen_services_hero.jpg',
-  bathroom: '/images/services/service_hero/shower_services_hero.jpg',
-  flooring: '/images/services/service_hero/floor_services_hero.jpg',
-  patio: '/images/services/service_hero/patio_services_hero.jpg',
-  fireplace: '/images/services/service_hero/fireplace_services_hero.jpg',
-  shower: '/images/services/service_hero/shower_services_hero.jpg',
+  'kitchen-backsplash': '/images/services/service_hero/tolatiles-kitchen-backsplash-tile-installation-hero.webp',
+  bathroom: '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp',
+  flooring: '/images/services/service_hero/tolatiles-floor-tile-installation-hero.webp',
+  patio: '/images/services/service_hero/tolatiles-patio-tile-installation-hero.webp',
+  fireplace: '/images/services/service_hero/tolatiles-fireplace-tile-installation-hero.webp',
+  shower: '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp',
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ const ServiceDetailPageLocation = ({
         {/* Service Photo Layer — pinned to right side. White background of JPG blends into the white side of the gradient */}
         <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-20">
           <Image
-            src={serviceHeroImageMap[service.id] || '/images/services/service_hero/shower_services_hero.jpg'}
+            src={serviceHeroImageMap[service.id] || '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp'}
             alt={`${service.title} Installation`}
             fill
             sizes="(max-width: 768px) 95vw, 60vw"

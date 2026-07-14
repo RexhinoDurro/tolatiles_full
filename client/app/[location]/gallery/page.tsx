@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import GalleryPage from '@/components/pages/GalleryPage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
+import { getGalleryData } from '@/lib/galleryServer';
 
 export function generateStaticParams() {
   return VALID_LOCATIONS.map((location) => ({
@@ -41,11 +42,12 @@ export default async function Gallery({ params }: { params: Promise<{ location: 
     location === 'florida'
       ? null
       : buildCityBreadcrumbs(location, [{ name: 'Gallery', url: `https://tolatiles.com/${location}/gallery` }]);
+  const { images, categories } = await getGalleryData('all');
 
   return (
     <>
       {breadcrumbItems && <BreadcrumbSchema items={breadcrumbItems} />}
-      <GalleryPage location={location} />
+      <GalleryPage location={location} initialImages={images} initialCategories={categories} />
     </>
   );
 }

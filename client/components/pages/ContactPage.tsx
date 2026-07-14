@@ -225,7 +225,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
             <div className="w-full md:w-[42%] flex justify-center md:justify-end">
               <div className="relative w-full max-w-md h-56 md:h-72">
                 <Image
-                  src="/images/truck_photo.png"
+                  src="/images/tolatiles-service-truck-jacksonville-st-augustine.webp"
                   alt="Tola Tiles work truck — free estimates, (904) 866-1738"
                   fill
                   sizes="(max-width: 768px) 80vw, 40vw"

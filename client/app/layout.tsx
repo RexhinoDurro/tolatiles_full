@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import { headers } from 'next/headers';
 import './globals.css';
@@ -67,6 +67,13 @@ export const metadata: Metadata = {
     icon: '/assets/tolatiles_1.jpg',
     apple: '/assets/tolatiles_1.jpg',
   },
+  manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#00a8e8',
 };
 
 const localBusinessSchema = {

@@ -9,22 +9,22 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Zero-Entry (Curbless)",
         description: "The shower floor sits completely flush with the rest of your bathroom. There is no step, lip, or barrier to trip over, creating a seamless, modern look that is also fully accessible.",
-        image: "/images/services/wet_room_enclosure.jpg"
+        image: "/images/services/tolatiles-wet-room-shower-enclosure-tile.webp"
       },
       {
         title: "Linear Drain System",
         description: "Instead of a traditional round drain in the center, water flows into a sleek trench at the edge of the shower. This allows us to use large, elegant tiles on the floor rather than small mosaic pieces.",
-        image: "/images/services/linear_shower_drain.jpg"
+        image: "/images/services/tolatiles-linear-shower-drain-tile.webp"
       },
       {
         title: "Envelope Cut Layout",
         description: "If you want large tiles but need a standard center drain, we use this precision technique. We cut the large tiles diagonally from the corners to the drain, creating a subtle, clean 'envelope' shape that guides the water perfectly.",
-        image: "/images/services/Envelope_cut_shower.jpg"
+        image: "/images/services/tolatiles-envelope-cut-shower-pan-tile.webp"
       },
       {
         title: "Built-in Niches & Benches",
         description: "Instead of using wire racks or plastic stools, we frame custom recessed shelves and seating directly into the wall structure before tiling. This gives you permanent, waterproof storage that blends perfectly with your design.",
-        image: "/images/services/built_in_niches.jpeg"
+        image: "/images/services/tolatiles-built-in-shower-niche-tile.webp"
       }
     ]
   },
@@ -34,17 +34,17 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Wet Room Enclosure",
         description: "We waterproof the entire bathroom space, allowing the shower and even a freestanding tub to share an open, seamless environment. It maximizes space and creates a high-end spa feel.",
-        image: "/images/services/wet_room_enclosure.jpg"
+        image: "/images/services/tolatiles-wet-room-shower-enclosure-tile.webp"
       },
       {
         title: "Wainscoting (Half-Wall)",
         description: "Tile is installed on the lower half of the walls to protect against splashing and moisture, capped with decorative trim. It provides durability exactly where you need it while keeping material costs manageable.",
-        image: "/images/services/half_wall_wainscoting.png"
+        image: "/images/services/tolatiles-half-wall-wainscoting-tile.webp"
       },
       {
         title: "Cove Base (Tiled Baseboards)",
         description: "Instead of traditional wood baseboards that can rot or warp from moisture, we install a row of tile that curves slightly to meet the floor. It’s incredibly durable and makes cleaning effortless.",
-        image: "/images/services/cove_bathroom.jpg"
+        image: "/images/services/tolatiles-cove-base-bathroom-tile.webp"
       }
     ]
   },
@@ -54,17 +54,17 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Uncoupling Membrane",
         description: "Before laying any tile, we install a specialized flexible grid layer over your subfloor. This absorbs the natural shifting of your house, ensuring your tile and grout never crack over time.",
-        image: "/images/services/membrane_floor.jpg"
+        image: "/images/services/tolatiles-membrane-waterproofing-floor-tile.webp"
       },
       {
         title: "Radiant Heated Floors",
         description: "We embed a custom electric heating mat or hydronic system directly into the mortar beneath your tiles. You get perfectly warm floors controlled by a digital thermostat—ideal for chilly mornings.",
-        image: "/images/services/heated_floor.jpg"
+        image: "/images/services/tolatiles-heated-floor-tile-installation.webp"
       },
       {
         title: "Flush Transitions",
         description: "We carefully adjust the subfloor heights so your new tile meets your existing hardwood or carpet perfectly level, eliminating the need for bulky thresholds or tripping hazards between rooms.",
-        image: "/images/services/flush_transitions_floor.jpg"
+        image: "/images/services/tolatiles-flush-transition-floor-tile.webp"
       }
     ]
   },
@@ -74,7 +74,7 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Counter-to-Cabinet",
         description: "The classic installation that perfectly covers the exposed wall between your countertops and upper cabinets, protecting your drywall from cooking splatters while pulling the kitchen design together.",
-        image: "/images/services/counter_height_backsplash.jpg"
+        image: "/images/services/tolatiles-counter-height-kitchen-backsplash-tile.webp"
       },
       {
         title: "Full-Height / Ceiling",
@@ -99,7 +99,7 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Mortar Bed (Wet Set)",
         description: "Tiles are permanently bonded to a poured concrete slab using specialized, freeze-thaw resistant mortar. It feels just like an indoor floor but is built to withstand extreme outdoor weather.",
-        image: "/images/services/mortar_patio.jpg"
+        image: "/images/services/tolatiles-mortar-bed-patio-tile.webp"
       },
       {
         title: "Dry Lay (Sand Set)",
@@ -114,17 +114,17 @@ const WHAT_WE_DO_DATA = [
       {
         title: "Floor-to-Ceiling Surround",
         description: "We replace standard wooden mantels with a massive, modern focal point by running tile from the floor all the way up the chimney breast to the ceiling.",
-        image: "/images/services/floor_cieling_fireplace.jpg"
+        image: "/images/services/tolatiles-floor-to-ceiling-fireplace-tile.webp"
       },
       {
         title: "Floating Hearth",
         description: "The base in front of the firebox is built out as a raised, cantilevered bench and wrapped entirely in tile, creating a sleek, modern seating area.",
-        image: "/images/services/floating_hearth_fireplace.jpg"
+        image: "/images/services/tolatiles-floating-hearth-fireplace-tile.webp"
       },
       {
         title: "Flush Hearth",
         description: "The tiled floor area immediately in front of the fireplace is installed perfectly level with your surrounding hardwood or carpet, creating a safe, seamless transition.",
-        image: "/images/services/flush_fireplace.jpg"
+        image: "/images/services/tolatiles-flush-fireplace-tile-surround.webp"
       }
     ]
   }

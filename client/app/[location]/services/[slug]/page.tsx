@@ -9,12 +9,12 @@ import { VALID_LOCATIONS, isValidLocation, locationNames, geoCoordinates, areaSe
 
 // Service slug to service ID mapping
 const slugToServiceId: Record<string, string> = {
-  'kitchen-backsplash': 'kitchen-backsplash',
-  'bathroom-tile': 'bathroom',
-  'floor-tile': 'flooring',
-  'patio-tile': 'patio',
-  'fireplace-tile': 'fireplace',
-  'shower-tile': 'shower',
+  'kitchen-backsplash-installation': 'kitchen-backsplash',
+  'bathroom-tile-installation': 'bathroom',
+  'floor-tile-installation': 'flooring',
+  'patio-tile-installation': 'patio',
+  'fireplace-tile-installation': 'fireplace',
+  'shower-tile-installation': 'shower',
 };
 
 const validSlugs = Object.keys(slugToServiceId);
@@ -174,12 +174,12 @@ export default async function ServiceDetail({
     : null;
 
   const serviceIdToSlug: Record<string, string> = {
-    'kitchen-backsplash': 'kitchen-backsplash',
-    bathroom: 'bathroom-tile',
-    flooring: 'floor-tile',
-    patio: 'patio-tile',
-    fireplace: 'fireplace-tile',
-    shower: 'shower-tile',
+    'kitchen-backsplash': 'kitchen-backsplash-installation',
+    bathroom: 'bathroom-tile-installation',
+    flooring: 'floor-tile-installation',
+    patio: 'patio-tile-installation',
+    fireplace: 'fireplace-tile-installation',
+    shower: 'shower-tile-installation',
   };
 
   // Florida path handled by root /services/[slug] — but fall back gracefully if needed

@@ -4,15 +4,13 @@ import { useMemo, useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Loader2, X } from 'lucide-react';
-import { api } from '@/lib/api';
-import { categoryNameMap } from '@/types/api';
-import type { GalleryImage, Category } from '@/types/api';
-import { sampleImages } from '@/data/gallery';
-import type { TileImage, SampleImages } from '@/data/gallery';
 
 interface GalleryPageProps {
   category?: string;
   location?: string;
+  /** Server-fetched (see lib/galleryServer.ts) so the grid is present in the initial HTML for crawlers. */
+  initialImages: DisplayImage[];
+  initialCategories: { id: string; label: string; count: number }[];
 }
 
 // Per-location category description overrides
@@ -36,27 +34,27 @@ const locationContentMap: Record<string, GalleryLocationContent> = {
       backsplashes: {
         title: 'Kitchen Backsplash Installations - Jacksonville',
         description: 'Explore our Jacksonville kitchen backsplash projects featuring subway tiles, glass mosaics, and natural stone. Each backsplash is custom-designed for homes in Riverside, Ortega, Mandarin, and neighborhoods throughout Duval County.',
-        serviceLink: '/services/kitchen-backsplash',
+        serviceLink: '/services/kitchen-backsplash-installation',
       },
       showers: {
         title: 'Custom Shower Tile Work - Jacksonville',
         description: 'View our portfolio of custom shower installations across Jacksonville. From luxurious walk-in showers in San Marco to practical renovations in Mandarin, we create beautiful, water-tight enclosures designed for Duval County\'s humid climate.',
-        serviceLink: '/services/shower-tile',
+        serviceLink: '/services/shower-tile-installation',
       },
       flooring: {
         title: 'Floor Tile Installations - Jacksonville',
         description: 'See examples of our floor tile installations throughout Jacksonville — including large format porcelain in Southside condos, natural stone in Ortega estates, and durable ceramic in Jax Beach homes. Each installation features proper leveling and moisture protection.',
-        serviceLink: '/services/floor-tile',
+        serviceLink: '/services/floor-tile-installation',
       },
       patios: {
         title: 'Outdoor Patio & Pool Deck Tile - Jacksonville',
         description: 'Discover our outdoor tile installations across Jacksonville, from pool decks in Ponte Vedra to courtyard patios in Riverside. Using slip-resistant, UV-stable materials built for year-round Florida living and Duval County weather.',
-        serviceLink: '/services/patio-tile',
+        serviceLink: '/services/patio-tile-installation',
       },
       fireplaces: {
         title: 'Fireplace Surround Installations - Jacksonville',
         description: 'Browse our Jacksonville fireplace tile projects featuring marble surrounds, stacked stone, and contemporary designs. From updating original fireplaces in historic Riverside homes to framing new gas units in Southside builds.',
-        serviceLink: '/services/fireplace-tile',
+        serviceLink: '/services/fireplace-tile-installation',
       },
     },
   },
@@ -73,27 +71,27 @@ const locationContentMap: Record<string, GalleryLocationContent> = {
       backsplashes: {
         title: 'Kitchen Backsplash Installations - St Augustine',
         description: 'Explore our St. Augustine kitchen backsplash projects featuring custom designs for historic homes in Lincolnville, beachside condos on Anastasia Island, and modern kitchens in World Golf Village and Nocatee.',
-        serviceLink: '/services/kitchen-backsplash',
+        serviceLink: '/services/kitchen-backsplash-installation',
       },
       showers: {
         title: 'Custom Shower Tile Work - St Augustine',
         description: 'View our portfolio of custom shower installations across St. Johns County. From spa-inspired walk-in showers in Vilano Beach vacation homes to practical renovations in Palencia, we build water-tight enclosures for the coastal climate.',
-        serviceLink: '/services/shower-tile',
+        serviceLink: '/services/shower-tile-installation',
       },
       flooring: {
         title: 'Floor Tile Installations - St Augustine',
         description: 'See examples of our floor tile work throughout St. Augustine — including natural stone in historic downtown homes, large format porcelain in Nocatee new builds, and durable ceramic in St. Augustine Beach cottages.',
-        serviceLink: '/services/floor-tile',
+        serviceLink: '/services/floor-tile-installation',
       },
       patios: {
         title: 'Outdoor Patio & Pool Deck Tile - St Augustine',
         description: 'Discover our outdoor tile installations across St. Johns County, from pool decks in Nocatee to courtyard patios in the Historic District. Using slip-resistant, UV-stable materials built for coastal conditions and salt air exposure.',
-        serviceLink: '/services/patio-tile',
+        serviceLink: '/services/patio-tile-installation',
       },
       fireplaces: {
         title: 'Fireplace Surround Installations - St Augustine',
         description: 'Browse our St. Augustine fireplace tile projects. Whether restoring a period-appropriate surround in a historic downtown home or designing a modern focal point in a Nocatee living room, our installations combine safety with style.',
-        serviceLink: '/services/fireplace-tile',
+        serviceLink: '/services/fireplace-tile-installation',
       },
     },
   },
@@ -110,27 +108,27 @@ const locationContentMap: Record<string, GalleryLocationContent> = {
       backsplashes: {
         title: 'Kitchen Backsplash Installations',
         description: 'Explore our kitchen backsplash projects featuring subway tiles, glass mosaics, and natural stone installations. Each backsplash is custom-designed to complement the unique style of homes in Jacksonville, St. Augustine, and surrounding areas. Our precise installations protect walls while adding character to kitchens across Northeast Florida.',
-        serviceLink: '/services/kitchen-backsplash',
+        serviceLink: '/services/kitchen-backsplash-installation',
       },
       showers: {
         title: 'Custom Shower Tile Work',
         description: 'View our portfolio of custom shower installations with complete waterproofing systems designed for Florida\'s humid climate. From luxurious walk-in showers in Ponte Vedra homes to practical renovations in St. Augustine vacation rentals, we create beautiful, water-tight enclosures with built-in niches, benches, and stunning tile patterns.',
-        serviceLink: '/services/shower-tile',
+        serviceLink: '/services/shower-tile-installation',
       },
       flooring: {
         title: 'Floor Tile Installations',
         description: 'See examples of our floor tile installations including large format porcelain, natural stone, and durable ceramic tiles. Our flooring projects span open-concept living spaces, commercial lobbies, and cozy Florida rooms throughout Jacksonville and St. Augustine. Each installation features proper leveling and moisture protection for lasting results.',
-        serviceLink: '/services/floor-tile',
+        serviceLink: '/services/floor-tile-installation',
       },
       patios: {
         title: 'Outdoor Patio & Pool Deck Tile',
         description: 'Discover our outdoor tile installations including pool decks, courtyard patios, and covered lanais designed for year-round Florida living. Using slip-resistant, UV-stable materials, we create beautiful outdoor spaces that withstand intense sun, summer storms, and coastal conditions while requiring minimal maintenance.',
-        serviceLink: '/services/patio-tile',
+        serviceLink: '/services/patio-tile-installation',
       },
       fireplaces: {
         title: 'Fireplace Surround Installations',
         description: 'Browse our fireplace tile projects featuring marble surrounds, stacked stone, and contemporary designs that create stunning focal points. Whether updating an original fireplace in a historic Riverside home or framing a new gas unit in Nocatee, our installations combine safety with style.',
-        serviceLink: '/services/fireplace-tile',
+        serviceLink: '/services/fireplace-tile-installation',
       },
     },
   },
@@ -144,13 +142,16 @@ interface DisplayImage {
   description: string;
 }
 
-const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
+const GalleryPage = ({ category, location = 'florida', initialImages, initialCategories }: GalleryPageProps) => {
   const selectedCategory = category || 'all';
   const [currentPage, setCurrentPage] = useState(1);
-  const [images, setImages] = useState<DisplayImage[]>([]);
-  const [categories, setCategories] = useState<{ id: string; label: string; count: number }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Seeded directly from server-fetched props so the grid is present in the
+  // initial HTML for crawlers — each category is its own route (a <Link>
+  // navigation below, not a client-side toggle), so no client refetch is
+  // needed; a fresh server render already happens on navigation.
+  const [images] = useState<DisplayImage[]>(initialImages);
+  const [categories] = useState<{ id: string; label: string; count: number }[]>(initialCategories);
+  const isLoading = false;
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const imagesPerPage = 12;
 
@@ -162,72 +163,8 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
   const locationData = locationContentMap[location] || locationContentMap.florida;
   const categoryDescriptions = locationData.categoryDescriptions;
 
-  // Fetch images from API or fall back to static data
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Fetch categories
-        const categoryData = await api.getCategories();
-        const allCount = categoryData.reduce((sum, cat) => sum + cat.image_count, 0);
-
-        const formattedCategories = [
-          { id: 'all', label: 'All Projects', count: allCount },
-          ...categoryData.map((cat) => ({
-            id: cat.name === 'backsplash' ? 'backsplashes' :
-                cat.name === 'patio' ? 'patios' :
-                cat.name === 'shower' ? 'showers' :
-                cat.name === 'fireplace' ? 'fireplaces' :
-                cat.name,
-            label: cat.label,
-            count: cat.image_count,
-          })),
-        ];
-        setCategories(formattedCategories);
-
-        // Fetch images
-        const apiCategory = categoryNameMap[selectedCategory];
-        const imageData = apiCategory
-          ? await api.getGalleryImages(apiCategory)
-          : await api.getAllGalleryImages();
-
-        const formattedImages = imageData.map((img) => ({
-          id: img.id,
-          src: img.image_url || img.image,
-          title: img.title,
-          description: img.description,
-        }));
-
-        setImages(formattedImages);
-      } catch (err) {
-        console.warn('API fetch failed, using static data:', err);
-        setError('Using offline data');
-
-        // Fall back to static data
-        const staticCategories = [
-          { id: 'all', label: 'All Projects', count: Object.values(sampleImages).flat().length },
-          { id: 'backsplashes', label: 'Backsplashes', count: sampleImages.backsplashes.length },
-          { id: 'patios', label: 'Patios', count: sampleImages.patios.length },
-          { id: 'showers', label: 'Showers', count: sampleImages.showers.length },
-          { id: 'flooring', label: 'Flooring', count: sampleImages.flooring.length },
-          { id: 'fireplaces', label: 'Fireplaces', count: sampleImages.fireplaces.length },
-        ];
-        setCategories(staticCategories);
-
-        const staticImages: TileImage[] = selectedCategory === 'all'
-          ? Object.values(sampleImages).flat()
-          : sampleImages[selectedCategory as keyof SampleImages] || [];
-
-        setImages(staticImages);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-    setCurrentPage(1); // Reset page when category changes
+    setCurrentPage(1); // Reset page when category changes (route navigation remounts with new props)
   }, [selectedCategory]);
 
   // Calculate pagination

@@ -29,12 +29,12 @@ const Navbar = () => {
   const serviceCategories = useMemo(() => {
     const prefix = currentLocation === 'florida' ? '' : `/${currentLocation}`;
     return [
-      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `${prefix}/services/kitchen-backsplash` },
-      { id: 'bathroom', label: 'Bathroom Tile', href: `${prefix}/services/bathroom-tile` },
-      { id: 'flooring', label: 'Floor Tiling', href: `${prefix}/services/floor-tile` },
-      { id: 'patio', label: 'Patio & Outdoor', href: `${prefix}/services/patio-tile` },
-      { id: 'fireplace', label: 'Fireplace Tile', href: `${prefix}/services/fireplace-tile` },
-      { id: 'shower', label: 'Shower Installation', href: `${prefix}/services/shower-tile` },
+      { id: 'kitchen-backsplash', label: 'Kitchen Backsplash', href: `${prefix}/services/kitchen-backsplash-installation` },
+      { id: 'bathroom', label: 'Bathroom Tile', href: `${prefix}/services/bathroom-tile-installation` },
+      { id: 'flooring', label: 'Floor Tiling', href: `${prefix}/services/floor-tile-installation` },
+      { id: 'patio', label: 'Patio & Outdoor', href: `${prefix}/services/patio-tile-installation` },
+      { id: 'fireplace', label: 'Fireplace Tile', href: `${prefix}/services/fireplace-tile-installation` },
+      { id: 'shower', label: 'Shower Installation', href: `${prefix}/services/shower-tile-installation` },
     ];
   }, [currentLocation]);
 

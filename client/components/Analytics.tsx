@@ -2,6 +2,7 @@
 
 import Script from 'next/script';
 import { buildGaScript, buildGtmNoscript, buildGtmScript } from '@/lib/tracking-snippets';
+import WebVitalsReporter from '@/components/WebVitalsReporter';
 
 interface AnalyticsProps {
   gtmId?: string;
@@ -11,6 +12,8 @@ interface AnalyticsProps {
 const Analytics = ({ gtmId, gaId }: AnalyticsProps) => {
   return (
     <>
+      {gaId && <WebVitalsReporter />}
+
       {/* Google Tag Manager */}
       {gtmId && (
         <>

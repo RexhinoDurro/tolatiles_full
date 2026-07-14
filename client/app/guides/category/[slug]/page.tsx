@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ContentCategoryPage from '@/components/pages/ContentCategoryPage';
+import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -48,5 +49,16 @@ export default async function GuideCategoryPage({ params }: { params: Promise<{ 
 
   const posts = await getCategoryPosts(slug);
 
-  return <ContentCategoryPage category={category} posts={posts} contentType="guide" location="florida" />;
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://tolatiles.com' },
+          { name: 'Guides', url: 'https://tolatiles.com/guides' },
+          { name: category.name, url: `https://tolatiles.com/guides/category/${category.slug}` },
+        ]}
+      />
+      <ContentCategoryPage category={category} posts={posts} contentType="guide" location="florida" />
+    </>
+  );
 }

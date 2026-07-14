@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ContentDetailPage from '@/components/pages/ContentDetailPage';
+import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -71,5 +72,16 @@ export default async function DesignIdea({ params }: { params: Promise<{ slug: s
 
   const relatedPosts = await getRelatedPosts(slug);
 
-  return <ContentDetailPage post={post} relatedPosts={relatedPosts} contentType="design_idea" location="florida" />;
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://tolatiles.com' },
+          { name: 'Design Ideas', url: 'https://tolatiles.com/design-ideas' },
+          { name: post.title, url: `https://tolatiles.com/design-ideas/${post.slug}` },
+        ]}
+      />
+      <ContentDetailPage post={post} relatedPosts={relatedPosts} contentType="design_idea" location="florida" />
+    </>
+  );
 }

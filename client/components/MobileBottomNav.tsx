@@ -66,7 +66,7 @@ export default function MobileBottomNav() {
       <div className="md:hidden h-[90px] safe-area-bottom w-full" aria-hidden="true" />
 
       {/* The Bottom Nav Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-brand-light border-t-2 border-[#00a8e8] shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-brand-light border-t-2 border-[#00a8e8] shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50 safe-area-bottom"  style={{ backgroundColor: '#86d5f7' }} >
         <div className="flex justify-around items-center h-[90px] px-2 pb-2">
           {primaryTabs.map((tab) => {
             const isActive = isActiveRoute(tab.href);

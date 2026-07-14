@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import GalleryPage from '@/components/pages/GalleryPage';
+import { getGalleryData } from '@/lib/galleryServer';
 
 export const metadata: Metadata = {
   title: 'Tile Installation Gallery Jacksonville & St. Augustine FL | Tola Tiles',
@@ -54,12 +55,14 @@ const breadcrumbSchema = {
   ],
 };
 
-export default function Gallery() {
+export default async function Gallery() {
+  const { images, categories } = await getGalleryData('all');
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(gallerySchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <GalleryPage location="florida" />
+      <GalleryPage location="florida" initialImages={images} initialCategories={categories} />
     </>
   );
 }

@@ -48,12 +48,12 @@ const locationContent: Record<string, FAQsLocationContent> = {
 };
 
 const serviceLinks = [
-  { label: 'Kitchen Backsplash FAQs', slug: 'kitchen-backsplash', category: 'services' },
-  { label: 'Bathroom Tile FAQs', slug: 'bathroom-tile', category: 'services' },
-  { label: 'Floor Tile FAQs', slug: 'floor-tile', category: 'services' },
-  { label: 'Shower Tile FAQs', slug: 'shower-tile', category: 'services' },
-  { label: 'Patio Tile FAQs', slug: 'patio-tile', category: 'services' },
-  { label: 'Fireplace Tile FAQs', slug: 'fireplace-tile', category: 'services' },
+  { label: 'Kitchen Backsplash FAQs', slug: 'kitchen-backsplash-installation', category: 'services' },
+  { label: 'Bathroom Tile FAQs', slug: 'bathroom-tile-installation', category: 'services' },
+  { label: 'Floor Tile FAQs', slug: 'floor-tile-installation', category: 'services' },
+  { label: 'Shower Tile FAQs', slug: 'shower-tile-installation', category: 'services' },
+  { label: 'Patio Tile FAQs', slug: 'patio-tile-installation', category: 'services' },
+  { label: 'Fireplace Tile FAQs', slug: 'fireplace-tile-installation', category: 'services' },
 ];
 
 interface FAQsPageProps {

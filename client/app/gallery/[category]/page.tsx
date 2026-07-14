@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import GalleryPage from '@/components/pages/GalleryPage';
+import { getGalleryData } from '@/lib/galleryServer';
 
 const validCategories = ['backsplashes', 'patios', 'showers', 'flooring', 'fireplaces'];
 
@@ -103,6 +104,7 @@ export default async function GalleryCategory({
   if (!validCategories.includes(category)) notFound();
 
   const meta = categoryMeta[category];
+  const { images, categories } = await getGalleryData(category);
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -144,7 +146,7 @@ export default async function GalleryCategory({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(imageGallerySchema) }} />
-      <GalleryPage location="florida" category={category} />
+      <GalleryPage location="florida" category={category} initialImages={images} initialCategories={categories} />
     </>
   );
 }

@@ -61,7 +61,7 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
             <div className="w-full md:w-[42%] flex justify-center md:justify-end">
               <div className="relative w-full max-w-md h-64 md:h-80">
                 <Image
-                  src="/images/team_people.png"
+                  src="/images/tolatiles-installation-team-group-photo.webp"
                   alt="The Tola Tiles team — expert tile installers in Jacksonville and St. Augustine FL"
                   fill
                   sizes="(max-width: 768px) 80vw, 40vw"

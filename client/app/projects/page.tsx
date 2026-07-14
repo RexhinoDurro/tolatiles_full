@@ -107,12 +107,12 @@ export default async function ProjectsPage() {
             </p>
             <div className="flex flex-col divide-y divide-gray-200 border-t border-b border-gray-200">
               {[
-                { label: 'Kitchen Backsplash Installation', slug: 'kitchen-backsplash' },
-                { label: 'Bathroom Tile Installation', slug: 'bathroom-tile' },
-                { label: 'Shower Installation', slug: 'shower-tile' },
-                { label: 'Floor Tiling', slug: 'floor-tile' },
-                { label: 'Patio & Outdoor Tile', slug: 'patio-tile' },
-                { label: 'Fireplace Tile', slug: 'fireplace-tile' },
+                { label: 'Kitchen Backsplash Installation', slug: 'kitchen-backsplash-installation' },
+                { label: 'Bathroom Tile Installation', slug: 'bathroom-tile-installation' },
+                { label: 'Shower Installation', slug: 'shower-tile-installation' },
+                { label: 'Floor Tiling', slug: 'floor-tile-installation' },
+                { label: 'Patio & Outdoor Tile', slug: 'patio-tile-installation' },
+                { label: 'Fireplace Tile', slug: 'fireplace-tile-installation' },
               ].map((svc) => (
                 <a
                   key={svc.slug}

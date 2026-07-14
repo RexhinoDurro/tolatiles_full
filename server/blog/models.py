@@ -12,21 +12,21 @@ from django.utils.text import slugify
 RELATED_SERVICE_PAGE_CHOICES = [
     ('Jacksonville', [
         ('/jacksonville', 'Jacksonville — City Hub'),
-        ('/jacksonville/services/kitchen-backsplash', 'Jacksonville — Kitchen Backsplash'),
-        ('/jacksonville/services/bathroom-tile', 'Jacksonville — Bathroom Tile'),
-        ('/jacksonville/services/floor-tile', 'Jacksonville — Floor Tile'),
-        ('/jacksonville/services/patio-tile', 'Jacksonville — Patio Tile'),
-        ('/jacksonville/services/fireplace-tile', 'Jacksonville — Fireplace Tile'),
-        ('/jacksonville/services/shower-tile', 'Jacksonville — Shower Tile'),
+        ('/jacksonville/services/kitchen-backsplash-installation', 'Jacksonville — Kitchen Backsplash'),
+        ('/jacksonville/services/bathroom-tile-installation', 'Jacksonville — Bathroom Tile'),
+        ('/jacksonville/services/floor-tile-installation', 'Jacksonville — Floor Tile'),
+        ('/jacksonville/services/patio-tile-installation', 'Jacksonville — Patio Tile'),
+        ('/jacksonville/services/fireplace-tile-installation', 'Jacksonville — Fireplace Tile'),
+        ('/jacksonville/services/shower-tile-installation', 'Jacksonville — Shower Tile'),
     ]),
     ('St. Augustine', [
         ('/st-augustine', 'St. Augustine — City Hub'),
-        ('/st-augustine/services/kitchen-backsplash', 'St. Augustine — Kitchen Backsplash'),
-        ('/st-augustine/services/bathroom-tile', 'St. Augustine — Bathroom Tile'),
-        ('/st-augustine/services/floor-tile', 'St. Augustine — Floor Tile'),
-        ('/st-augustine/services/patio-tile', 'St. Augustine — Patio Tile'),
-        ('/st-augustine/services/fireplace-tile', 'St. Augustine — Fireplace Tile'),
-        ('/st-augustine/services/shower-tile', 'St. Augustine — Shower Tile'),
+        ('/st-augustine/services/kitchen-backsplash-installation', 'St. Augustine — Kitchen Backsplash'),
+        ('/st-augustine/services/bathroom-tile-installation', 'St. Augustine — Bathroom Tile'),
+        ('/st-augustine/services/floor-tile-installation', 'St. Augustine — Floor Tile'),
+        ('/st-augustine/services/patio-tile-installation', 'St. Augustine — Patio Tile'),
+        ('/st-augustine/services/fireplace-tile-installation', 'St. Augustine — Fireplace Tile'),
+        ('/st-augustine/services/shower-tile-installation', 'St. Augustine — Shower Tile'),
     ]),
 ]
 

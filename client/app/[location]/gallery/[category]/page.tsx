@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import GalleryPage from '@/components/pages/GalleryPage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
+import { getGalleryData } from '@/lib/galleryServer';
 
 const validCategories = ['backsplashes', 'patios', 'showers', 'flooring', 'fireplaces'];
 
@@ -91,11 +92,12 @@ export default async function GalleryCategory({ params }: { params: Promise<{ lo
           { name: 'Gallery', url: `https://tolatiles.com/${location}/gallery` },
           { name: categoryLabel, url: `https://tolatiles.com/${location}/gallery/${resolvedParams.category}` },
         ]);
+  const { images, categories } = await getGalleryData(resolvedParams.category);
 
   return (
     <>
       {breadcrumbItems && <BreadcrumbSchema items={breadcrumbItems} />}
-      <GalleryPage category={resolvedParams.category} location={location} />
+      <GalleryPage category={resolvedParams.category} location={location} initialImages={images} initialCategories={categories} />
     </>
   );
 }

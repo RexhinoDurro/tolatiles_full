@@ -53,7 +53,7 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
         return GalleryImageSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'all_images']:
             return [AllowAny()]
         return [IsAdminUser()]
 

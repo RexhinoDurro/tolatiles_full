@@ -32,12 +32,12 @@ const serviceIdToProjectSlug: Record<string, string> = {
 };
 
 const serviceHeroImageMap: Record<string, string> = {
-  'kitchen-backsplash': '/images/services/service_hero/kitchen_services_hero.jpg',
-  bathroom: '/images/services/service_hero/shower_services_hero.jpg',
-  flooring: '/images/services/service_hero/floor_services_hero.jpg',
-  patio: '/images/services/service_hero/patio_services_hero.jpg',
-  fireplace: '/images/services/service_hero/fireplace_services_hero.jpg',
-  shower: '/images/services/service_hero/shower_services_hero.jpg',
+  'kitchen-backsplash': '/images/services/service_hero/tolatiles-kitchen-backsplash-tile-installation-hero.webp',
+  bathroom: '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp',
+  flooring: '/images/services/service_hero/tolatiles-floor-tile-installation-hero.webp',
+  patio: '/images/services/service_hero/tolatiles-patio-tile-installation-hero.webp',
+  fireplace: '/images/services/service_hero/tolatiles-fireplace-tile-installation-hero.webp',
+  shower: '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp',
 };
 
 interface DisplayImage {
@@ -162,7 +162,7 @@ const ServiceDetailPage = ({
             {/* Image Container: Order 1 on mobile, Order 2 on desktop */}
             <div className="w-full md:w-[40%] flex items-center justify-center md:justify-end order-1 md:order-2 px-4 md:px-0 mb-2 md:mb-0">
               <Image
-                src={serviceHeroImageMap[service.id] || '/images/services/service_hero/shower_services_hero.jpg'}
+                src={serviceHeroImageMap[service.id] || '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp'}
                 alt={`${service.title} Installation`}
                 width={600}
                 height={800}
@@ -450,11 +450,13 @@ const ServiceDetailPage = ({
                   </div>
 
                   {/* Right Side (Image - Mobile Only) */}
-                  <div className="md:hidden flex-none w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                    <img 
+                  <div className="md:hidden flex-none w-28 h-28 sm:w-32 sm:h-32 rounded-xl overflow-hidden shadow-lg bg-gray-100 relative">
+                    <Image
                       src={processImgSrc}
                       alt={process.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="128px"
+                      className="object-cover"
                     />
                   </div>
                 </motion.div>

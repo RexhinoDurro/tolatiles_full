@@ -257,8 +257,8 @@ const HeroSection = () => (
       {/* Background Layer — stretches to fill */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/team_background.jpg"
-          alt="Beautiful tile installation background"
+          src="/images/tolatiles-team-background-jacksonville-tile-installers.webp"
+          alt="Tola Tiles tile installation project in Jacksonville and St. Augustine, FL"
           fill
           sizes="100vw"
           className="object-cover object-center opacity-90"
@@ -269,7 +269,7 @@ const HeroSection = () => (
       {/* People Layer — pinned to bottom right, scales proportionally */}
       <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-20">
         <Image
-          src="/images/team_people.png"
+          src="/images/tolatiles-installation-team-group-photo.webp"
           alt="Tola Tiles team — expert tile installers in Jacksonville FL"
           fill
           sizes="(max-width: 768px) 95vw, 60vw"
@@ -421,12 +421,12 @@ const WhoWeAreSection = () => (
 // ─── Renovate Questions Section ─────────────────────────────────────────────────
 
 const renovationQuestions = [
-  { slug: 'kitchen-backsplash', icon: ChefHat, question: 'Ready to finally renovate that outdated kitchen?' },
-  { slug: 'bathroom-tile', icon: Bath, question: 'Dreaming of a full bathroom remodel?' },
-  { slug: 'floor-tile', icon: Home, question: 'Time to replace the flooring throughout the whole house?' },
-  { slug: 'patio-tile', icon: Hammer, question: 'Want to turn your backyard into an outdoor living space?' },
-  { slug: 'fireplace-tile', icon: Palette, question: 'Ready to make your fireplace the centerpiece of the room?' },
-  { slug: 'shower-tile', icon: Wrench, question: "Ready for the custom walk-in shower you've always wanted?" },
+  { slug: 'kitchen-backsplash-installation', icon: ChefHat, question: 'Ready to finally renovate that outdated kitchen?' },
+  { slug: 'bathroom-tile-installation', icon: Bath, question: 'Dreaming of a full bathroom remodel?' },
+  { slug: 'floor-tile-installation', icon: Home, question: 'Time to replace the flooring throughout the whole house?' },
+  { slug: 'patio-tile-installation', icon: Hammer, question: 'Want to turn your backyard into an outdoor living space?' },
+  { slug: 'fireplace-tile-installation', icon: Palette, question: 'Ready to make your fireplace the centerpiece of the room?' },
+  { slug: 'shower-tile-installation', icon: Wrench, question: "Ready for the custom walk-in shower you've always wanted?" },
 ];
 
 const RenovateQuestionsSection = ({ basePath }: { basePath: string }) => (
@@ -468,10 +468,10 @@ const GeoSplitterSection = () => {
       image: '/images/flooring/1.webp',
       description: 'Expert tile installation in Jax, the Beaches, and all of Duval County.',
       services: [
-        { label: 'Kitchen Backsplash', href: '/jacksonville/services/kitchen-backsplash' },
-        { label: 'Bathroom Tile', href: '/jacksonville/services/bathroom-tile' },
-        { label: 'Floor Tile', href: '/jacksonville/services/floor-tile' },
-        { label: 'Shower Tile', href: '/jacksonville/services/shower-tile' },
+        { label: 'Kitchen Backsplash', href: '/jacksonville/services/kitchen-backsplash-installation' },
+        { label: 'Bathroom Tile', href: '/jacksonville/services/bathroom-tile-installation' },
+        { label: 'Floor Tile', href: '/jacksonville/services/floor-tile-installation' },
+        { label: 'Shower Tile', href: '/jacksonville/services/shower-tile-installation' },
       ],
     },
     {
@@ -481,10 +481,10 @@ const GeoSplitterSection = () => {
       image: '/images/patio/2.webp',
       description: 'Tile specialists for the Ancient City, coastal homes, and historic properties.',
       services: [
-        { label: 'Kitchen Backsplash', href: '/st-augustine/services/kitchen-backsplash' },
-        { label: 'Bathroom Tile', href: '/st-augustine/services/bathroom-tile' },
-        { label: 'Floor Tile', href: '/st-augustine/services/floor-tile' },
-        { label: 'Shower Tile', href: '/st-augustine/services/shower-tile' },
+        { label: 'Kitchen Backsplash', href: '/st-augustine/services/kitchen-backsplash-installation' },
+        { label: 'Bathroom Tile', href: '/st-augustine/services/bathroom-tile-installation' },
+        { label: 'Floor Tile', href: '/st-augustine/services/floor-tile-installation' },
+        { label: 'Shower Tile', href: '/st-augustine/services/shower-tile-installation' },
       ],
     },
   ];
@@ -579,42 +579,42 @@ const CrossCitySection = ({ content }: { content: LocationContent }) => {
 
 const cityServiceCards = [
   {
-    slug: 'kitchen-backsplash',
+    slug: 'kitchen-backsplash-installation',
     label: 'Kitchen Backsplash Installation',
     description: 'Custom subway, mosaic, and large-format backsplashes — precision-set with waterproof grout for lasting beauty.',
     icon: ChefHat,
     anchor: 'kitchen backsplash installation',
   },
   {
-    slug: 'bathroom-tile',
+    slug: 'bathroom-tile-installation',
     label: 'Bathroom Tile Installation',
     description: 'Full bathroom tile transformations — walls, floors, and shower surrounds — from elegant marble to modern porcelain.',
     icon: Bath,
     anchor: 'bathroom tile installation',
   },
   {
-    slug: 'floor-tile',
+    slug: 'floor-tile-installation',
     label: 'Floor Tile Installation',
     description: 'Durable, level floor tile for every room using porcelain, ceramic, and natural stone options.',
     icon: Home,
     anchor: 'floor tile installation',
   },
   {
-    slug: 'shower-tile',
+    slug: 'shower-tile-installation',
     label: 'Shower Tile Installation',
     description: "Fully waterproofed shower systems using Schluter or mud-bed methods — built for Florida's humid climate.",
     icon: Wrench,
     anchor: 'shower tile installation',
   },
   {
-    slug: 'patio-tile',
+    slug: 'patio-tile-installation',
     label: 'Patio Tile Installation',
     description: "Slip-resistant outdoor porcelain and stone tile rated for Florida's heat, UV exposure, and heavy rainfall.",
     icon: Hammer,
     anchor: 'patio tile installation',
   },
   {
-    slug: 'fireplace-tile',
+    slug: 'fireplace-tile-installation',
     label: 'Fireplace Tile Surround',
     description: 'Heat-rated stone, porcelain, or mosaic tile surrounds that make your fireplace the focal point of any room.',
     icon: Palette,
@@ -988,8 +988,8 @@ const FinalCTASection = ({ content }: { content: LocationContent }) => {
       {/* Background Image Layer */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/team_background.jpg"
-          alt="Tola Tiles team background"
+          src="/images/tolatiles-team-background-jacksonville-tile-installers.webp"
+          alt="Tola Tiles tile installation team — Jacksonville and St. Augustine FL"
           fill
           sizes="100vw"
           className="object-cover object-center"
@@ -1038,8 +1038,8 @@ const FinalCTASection = ({ content }: { content: LocationContent }) => {
           >
             <div className="relative w-full h-64 sm:h-72 md:h-80 lg:h-96" style={{ minHeight: '300px' }}>
               <Image
-                src="/images/truck_photo.png"
-                alt="Tola Tiles Work Truck"
+                src="/images/tolatiles-service-truck-jacksonville-st-augustine.webp"
+                alt="Tola Tiles service truck — tile installation company serving Jacksonville and St. Augustine FL"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-contain object-right"
