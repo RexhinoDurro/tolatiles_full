@@ -2,20 +2,27 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, Clock, User, Tag, Phone, ArrowRight, ArrowLeft, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Calendar, Clock, User, Tag, Phone, ArrowRight, ArrowLeft, Facebook, Twitter, Linkedin, Image as ImageIcon } from 'lucide-react';
 import type { BlogPost, BlogPostListItem } from '@/types/api';
+import { CONTENT_TYPE_ROUTE_PREFIX, CONTENT_TYPE_LABELS_PLURAL, type ContentType } from '@/lib/contentTypes';
+import { areaServed, isValidLocation } from '@/lib/locations';
 
 const PHONE_NUMBER = '(904) 866-1738';
 const COMPANY_NAME = 'Tola Tiles';
 const COMPANY_ADDRESS = '445 Hutchinson Ln, St. Augustine, FL 32095';
+const BASE_URL = 'https://tolatiles.com';
 
-interface BlogPostPageProps {
+interface ContentDetailPageProps {
   post: BlogPost;
   relatedPosts: BlogPostListItem[];
+  contentType: ContentType;
   location?: string;
 }
 
-export default function BlogPostPage({ post, relatedPosts, location = 'florida' }: BlogPostPageProps) {
+export default function ContentDetailPage({ post, relatedPosts, contentType, location = 'florida' }: ContentDetailPageProps) {
+  const prefix = CONTENT_TYPE_ROUTE_PREFIX[contentType];
+  const indexLabel = CONTENT_TYPE_LABELS_PLURAL[contentType];
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -29,20 +36,49 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(post.title);
 
+  const postSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${BASE_URL}/${prefix}/${post.slug}` },
+    headline: post.title,
+    description: post.effective_meta_description || post.excerpt,
+    image: post.featured_image || `${BASE_URL}/images/logo.webp`,
+    author: { '@type': 'Person', name: post.author_name },
+    publisher: { '@type': 'Organization', name: 'Tola Tiles', logo: { '@type': 'ImageObject', url: `${BASE_URL}/images/logo.webp` } },
+    datePublished: post.publish_date,
+    dateModified: post.last_updated,
+    areaServed: isValidLocation(post.location) ? areaServed[post.location] : areaServed.florida,
+  };
+
+  const faqSchema = post.has_faq_schema && post.faq_data?.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: post.faq_data.map((faq) => ({
+          '@type': 'Question',
+          name: faq.question,
+          acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+        })),
+      }
+    : null;
+
   return (
-      <article className="min-h-screen bg-white">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(postSchema) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
+      <article className="min-h-screen bg-white pt-[var(--navbar-height)]">
         {/* Hero Section */}
-        <header className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-12 md:py-20">
+        <header className="bg-brand-light text-white py-12 md:py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Breadcrumbs */}
-              <nav className="flex items-center gap-2 text-blue-200 text-sm mb-6">
-                <Link href={`/${location}`} className="hover:text-white">
+              <nav className="flex items-center gap-2 text-white/80 text-sm mb-6">
+                <Link href="/" className="hover:text-white">
                   Home
                 </Link>
                 <span>/</span>
-                <Link href={`/${location}/blog`} className="hover:text-white">
-                  Blog
+                <Link href={`/${prefix}`} className="hover:text-white">
+                  {indexLabel}
                 </Link>
                 <span>/</span>
                 <span className="text-white truncate">{post.title}</span>
@@ -54,7 +90,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                   {post.categories.map((cat) => (
                     <Link
                       key={cat.id}
-                      href={`/${location}/blog/category/${cat.slug}`}
+                      href={`/${prefix}/category/${cat.slug}`}
                       className="inline-flex items-center gap-1 px-3 py-1 bg-white/20 text-white text-sm rounded-full hover:bg-white/30 transition-colors"
                     >
                       <Tag className="w-3 h-3" />
@@ -65,10 +101,10 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
               )}
 
               {/* Title */}
-              <h1 className="text-3xl md:text-5xl font-bold mb-6">{post.title}</h1>
+              <h1 className="text-3xl md:text-5xl font-bold mb-6" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{post.title}</h1>
 
               {/* Meta */}
-              <div className="flex flex-wrap items-center gap-4 text-blue-100">
+              <div className="flex flex-wrap items-center gap-4 text-white/90">
                 <span className="flex items-center gap-2">
                   <User className="w-4 h-4" />
                   {post.author_name}
@@ -111,7 +147,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
               <div className="lg:col-span-3">
                 {/* Article Content */}
                 <div
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-blue-600 prose-img:rounded-lg"
+                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-[#00a8e8] prose-img:rounded-lg"
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
@@ -129,7 +165,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                         >
                           <summary className="flex items-center justify-between px-6 py-4 cursor-pointer font-medium text-gray-900 hover:bg-gray-100">
                             {faq.question}
-                            <span className="text-blue-600 group-open:rotate-180 transition-transform">
+                            <span className="text-[#00a8e8] group-open:rotate-180 transition-transform">
                               ▼
                             </span>
                           </summary>
@@ -152,14 +188,14 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                   <div className="flex flex-wrap gap-4">
                     <a
                       href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-brand-light text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm"
                     >
                       <Phone className="w-5 h-5" />
                       {PHONE_NUMBER}
                     </a>
                     <Link
-                      href={`/${location}/contact`}
-                      className="inline-flex items-center gap-2 px-6 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-600 hover:text-white transition-colors"
+                      href="/contact"
+                      className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#00a8e8] text-[#00a8e8] font-semibold rounded-lg hover:bg-[#00a8e8] hover:text-white transition-colors"
                     >
                       Get Free Estimate
                       <ArrowRight className="w-5 h-5" />
@@ -176,7 +212,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="p-2 bg-[#00a8e8] text-white rounded-lg hover:bg-[#0097d2] transition-colors"
                         aria-label="Share on Facebook"
                       >
                         <Facebook className="w-5 h-5" />
@@ -194,7 +230,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                         href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
+                        className="p-2 bg-[#0097d2] text-white rounded-lg hover:bg-blue-800 transition-colors"
                         aria-label="Share on LinkedIn"
                       >
                         <Linkedin className="w-5 h-5" />
@@ -215,7 +251,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                     </p>
                     <a
                       href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-                      className="flex items-center gap-2 text-blue-600 font-semibold hover:underline"
+                      className="flex items-center gap-2 text-[#00a8e8] font-semibold hover:underline"
                     >
                       <Phone className="w-4 h-4" />
                       {PHONE_NUMBER}
@@ -244,7 +280,7 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                   {relatedPosts.map((relatedPost) => (
                     <Link
                       key={relatedPost.id}
-                      href={`/${location}/blog/${relatedPost.slug}`}
+                      href={`/${CONTENT_TYPE_ROUTE_PREFIX[relatedPost.content_type]}/${relatedPost.slug}`}
                       className="flex gap-4 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                     >
                       {relatedPost.featured_image ? (
@@ -257,12 +293,12 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
                           />
                         </div>
                       ) : (
-                        <div className="w-24 h-24 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <span className="text-2xl">📝</span>
+                        <div className="w-24 h-24 flex-shrink-0 bg-[#e6f6fd] rounded-lg flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-[#00a8e8]" aria-hidden="true" />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 hover:text-blue-600 transition-colors">
+                        <h3 className="font-semibold text-gray-900 line-clamp-2 hover:text-[#00a8e8] transition-colors">
                           {relatedPost.title}
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">
@@ -277,18 +313,19 @@ export default function BlogPostPage({ post, relatedPosts, location = 'florida' 
           </section>
         )}
 
-        {/* Back to Blog */}
+        {/* Back to index */}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <Link
-              href={`/${location}/blog`}
-              className="inline-flex items-center gap-2 text-blue-600 font-medium hover:underline"
+              href={`/${prefix}`}
+              className="inline-flex items-center gap-2 text-[#00a8e8] font-medium hover:underline"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Blog
+              Back to {indexLabel}
             </Link>
           </div>
         </div>
       </article>
+    </>
   );
 }

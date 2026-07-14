@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import type { Project } from '@/types/api';
 import ProjectDetailPage from '@/components/pages/ProjectDetailPage';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
-async function getProject(id: string): Promise<Project | null> {
-  if (!/^\d+$/.test(id)) return null;
+async function getProject(slugOrId: string): Promise<Project | null> {
   try {
-    const response = await fetch(`${API_BASE}/projects/public/${id}/`, {
+    const response = await fetch(`${API_BASE}/projects/public/${slugOrId}/`, {
       cache: 'no-store',
     });
     if (!response.ok) return null;
@@ -28,9 +27,9 @@ function firstPhaseImage(project: Project): string | null {
   return null;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  const project = await getProject(id);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProject(slug);
 
   if (!project) {
     return { title: 'Project Not Found | Tola Tiles' };
@@ -47,12 +46,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title: `${project.title} | Tola Tiles Projects`,
     description,
     alternates: {
-      canonical: `https://tolatiles.com/projects/${project.id}`,
+      canonical: `https://tolatiles.com/projects/${project.slug}`,
     },
     openGraph: {
       title: project.title,
       description,
-      url: `https://tolatiles.com/projects/${project.id}`,
+      url: `https://tolatiles.com/projects/${project.slug}`,
       type: 'website',
       siteName: 'Tola Tiles',
       images: [{ url: ogImage, alt: project.title }],
@@ -60,11 +59,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const project = await getProject(id);
+export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const project = await getProject(slug);
 
   if (!project) notFound();
+
+  // Old numeric /projects/{id} links (already indexed/bookmarked) still resolve via
+  // the API's dual lookup — canonicalize them to the real slug URL with a permanent
+  // redirect so search engines transfer ranking signal to the new URL instead of
+  // treating it as a duplicate.
+  if (project.slug !== slug) {
+    permanentRedirect(`/projects/${project.slug}`);
+  }
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -72,7 +79,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tolatiles.com' },
       { '@type': 'ListItem', position: 2, name: 'Projects', item: 'https://tolatiles.com/projects' },
-      { '@type': 'ListItem', position: 3, name: project.title, item: `https://tolatiles.com/projects/${project.id}` },
+      { '@type': 'ListItem', position: 3, name: project.title, item: `https://tolatiles.com/projects/${project.slug}` },
     ],
   };
 

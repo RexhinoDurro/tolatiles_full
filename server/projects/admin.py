@@ -21,9 +21,10 @@ class ProjectServiceTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ['title', 'status', 'work_status', 'is_featured', 'created_at']
+    list_display = ['title', 'slug', 'status', 'work_status', 'is_featured', 'created_at']
     list_filter = ['status', 'work_status', 'is_featured']
-    search_fields = ['title', 'description']
+    search_fields = ['title', 'slug', 'description']
+    readonly_fields = ['slug']
     inlines = [PhaseInline]
     filter_horizontal = ['job_types']
 

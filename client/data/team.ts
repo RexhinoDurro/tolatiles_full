@@ -14,7 +14,7 @@ export const teamMembers: TeamMember[] = [
     id: 1,
     name: 'Gazmend Tola',
     position: 'Founder & Master Craftsman',
-    bio: "With over 15 years of experience in the tile industry, Michael founded Tola Tiles with a vision to bring exceptional craftsmanship to every project. His attention to detail and commitment to quality has made Tola Tiles the premier choice for tile installation.",
+    bio: "With over 15 years of experience in the tile industry, Gazmend founded Tola Tiles with a vision to bring exceptional craftsmanship to every project. His attention to detail and commitment to quality has made Tola Tiles the premier choice for tile installation.",
     experience: '15+ years',
     specialties: ['Natural Stone Installation', 'Custom Design', 'Large Format Tiles', 'Historical Restoration'],
     image: '/images/team/meni.JPG',

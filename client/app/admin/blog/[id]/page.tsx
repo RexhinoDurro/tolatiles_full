@@ -22,8 +22,8 @@ export default function EditBlogPostPage() {
     try {
       setLoading(true);
       // The ID in the URL is actually the post ID, but we need the slug for the API
-      // First, get all posts and find the one with this ID
-      const posts = await api.getBlogPosts();
+      // First, get all blog posts and find the one with this ID
+      const posts = await api.getBlogPosts({ content_type: 'blog' });
       const postData = posts.find((p) => p.id === Number(params.id));
 
       if (!postData) {
@@ -66,7 +66,7 @@ export default function EditBlogPostPage() {
 
   return (
     <AdminLayout hideDefaultPadding>
-      <BlogEditor post={post} />
+      <BlogEditor post={post} contentType="blog" />
     </AdminLayout>
   );
 }

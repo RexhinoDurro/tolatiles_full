@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import BlogCategoryPage from '@/components/pages/BlogCategoryPage';
+import ContentCategoryPage from '@/components/pages/ContentCategoryPage';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -16,7 +16,7 @@ async function getCategory(slug: string) {
 
 async function getCategoryPosts(slug: string) {
   try {
-    const response = await fetch(`${API_BASE}/blog/posts/?category=${slug}&location=florida`, { next: { revalidate: 60 } });
+    const response = await fetch(`${API_BASE}/blog/posts/?category=${slug}&content_type=blog`, { next: { revalidate: 60 } });
     if (!response.ok) return [];
     const data = await response.json();
     return Array.isArray(data) ? data : data.results || [];
@@ -48,5 +48,5 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   const posts = await getCategoryPosts(slug);
 
-  return <BlogCategoryPage category={category} posts={posts} location="florida" />;
+  return <ContentCategoryPage category={category} posts={posts} contentType="blog" location="florida" />;
 }

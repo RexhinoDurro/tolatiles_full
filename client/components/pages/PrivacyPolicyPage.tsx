@@ -10,7 +10,7 @@ const PrivacyPolicyPage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
-            <Shield className="w-8 h-8 text-blue-600" />
+            <Shield className="w-8 h-8 text-[#00a8e8]" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
           <p className="text-gray-600">Last updated: January 2026</p>
@@ -145,14 +145,14 @@ const PrivacyPolicyPage = () => {
             </p>
             <div className="space-y-3">
               <div className="flex items-center text-gray-600">
-                <Mail className="w-5 h-5 mr-3 text-blue-600" />
-                <a href="mailto:menitola@tolatiles.com" className="hover:text-blue-600 transition-colors">
+                <Mail className="w-5 h-5 mr-3 text-[#00a8e8]" />
+                <a href="mailto:menitola@tolatiles.com" className="hover:text-[#00a8e8] transition-colors">
                   menitola@tolatiles.com
                 </a>
               </div>
               <div className="flex items-center text-gray-600">
-                <Phone className="w-5 h-5 mr-3 text-blue-600" />
-                <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">
+                <Phone className="w-5 h-5 mr-3 text-[#00a8e8]" />
+                <a href="tel:+1-904-866-1738" className="hover:text-[#00a8e8] transition-colors">
                   (904) 866-1738
                 </a>
               </div>
@@ -162,7 +162,7 @@ const PrivacyPolicyPage = () => {
 
         {/* Back Link */}
         <div className="text-center mt-8">
-          <Link href="/" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+          <Link href="/" className="text-[#00a8e8] hover:text-[#0097d2] font-medium transition-colors">
             &larr; Back to Home
           </Link>
         </div>

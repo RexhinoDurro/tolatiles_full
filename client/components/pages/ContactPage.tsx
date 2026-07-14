@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { Phone, Mail, MapPin, Clock, CheckCircle, Send, AlertCircle, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
@@ -216,10 +217,24 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
     <div className="pt-[var(--navbar-height)]">
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">{content.heroH1}</h1>
-            <p className="text-xl text-gray-600">{content.heroSubtitle}</p>
-          </header>
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-16">
+            <header className="text-center md:text-left md:w-[58%]">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{content.heroH1}</h1>
+              <p className="text-xl text-gray-600">{content.heroSubtitle}</p>
+            </header>
+            <div className="w-full md:w-[42%] flex justify-center md:justify-end">
+              <div className="relative w-full max-w-md h-56 md:h-72">
+                <Image
+                  src="/images/truck_photo.png"
+                  alt="Tola Tiles work truck — free estimates, (904) 866-1738"
+                  fill
+                  sizes="(max-width: 768px) 80vw, 40vw"
+                  className="object-contain drop-shadow-xl"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Information */}
@@ -229,11 +244,11 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
               <div className="space-y-6 mb-12">
                 <div className="flex items-center group">
                   <div className="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors duration-300">
-                    <Phone className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                    <Phone className="h-6 w-6 text-[#00a8e8]" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">Phone</div>
-                    <a href="tel:+1-904-866-1738" className="text-lg text-gray-700 hover:text-blue-600 transition-colors">
+                    <a href="tel:+1-904-866-1738" className="text-lg text-gray-700 hover:text-[#00a8e8] transition-colors">
                       +1 (904) 866-1738
                     </a>
                   </div>
@@ -241,11 +256,11 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
 
                 <div className="flex items-center group">
                   <div className="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors duration-300">
-                    <Mail className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                    <Mail className="h-6 w-6 text-[#00a8e8]" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">Email</div>
-                    <a href="mailto:menitola@tolatiles.com" className="text-lg text-gray-700 hover:text-blue-600 transition-colors">
+                    <a href="mailto:menitola@tolatiles.com" className="text-lg text-gray-700 hover:text-[#00a8e8] transition-colors">
                       menitola@tolatiles.com
                     </a>
                   </div>
@@ -253,7 +268,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
 
                 <div className="flex items-center group">
                   <div className="bg-blue-100 p-3 rounded-full mr-4 group-hover:bg-blue-200 transition-colors duration-300">
-                    <MapPin className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                    <MapPin className="h-6 w-6 text-[#00a8e8]" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="font-medium text-gray-900">Address</div>
@@ -268,7 +283,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
 
               <div className="bg-gray-50 rounded-xl p-6">
                 <div className="flex items-center mb-4">
-                  <Clock className="h-6 w-6 text-blue-600 mr-3" aria-hidden="true" />
+                  <Clock className="h-6 w-6 text-[#00a8e8] mr-3" aria-hidden="true" />
                   <h3 className="text-lg font-semibold text-gray-900">Business Hours</h3>
                 </div>
                 <div className="space-y-2 text-gray-600">
@@ -393,7 +408,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   </label>
                   <div className="relative flex">
                     {formData.phone && (
-                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-blue-600 font-bold text-sm select-none">
+                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-[#00a8e8] font-bold text-sm select-none">
                         +1
                       </span>
                     )}
@@ -456,7 +471,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-all duration-300 font-semibold transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-[#00a8e8] text-white py-4 px-6 rounded-lg hover:bg-[#0097d2] disabled:bg-blue-400 transition-all duration-300 font-semibold transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -477,7 +492,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   * Required fields. We&apos;ll respond within 24 hours.
                   <br />
                   For immediate assistance, call{' '}
-                  <a href="tel:+1-904-866-1738" className="text-blue-600 hover:underline">
+                  <a href="tel:+1-904-866-1738" className="text-[#00a8e8] hover:underline">
                     +1 (904) 866-1738
                   </a>
                 </p>
@@ -505,23 +520,23 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Our Location</h3>
                 <address className="not-italic space-y-4 text-gray-600 mb-6">
                   <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <MapPin className="w-5 h-5 text-[#00a8e8] mt-0.5 flex-shrink-0" />
                     <span>445 Hutchinson Ln<br />Saint Augustine, FL 32084</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">+1 (904) 866-1738</a>
+                    <Phone className="w-5 h-5 text-[#00a8e8] flex-shrink-0" />
+                    <a href="tel:+1-904-866-1738" className="hover:text-[#00a8e8] transition-colors">+1 (904) 866-1738</a>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                    <a href="mailto:menitola@tolatiles.com" className="hover:text-blue-600 transition-colors">menitola@tolatiles.com</a>
+                    <Mail className="w-5 h-5 text-[#00a8e8] flex-shrink-0" />
+                    <a href="mailto:menitola@tolatiles.com" className="hover:text-[#00a8e8] transition-colors">menitola@tolatiles.com</a>
                   </div>
                 </address>
                 <a
                   href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Get Directions

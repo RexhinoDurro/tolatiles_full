@@ -49,31 +49,45 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
   return (
     <div className="pt-[var(--navbar-height)]">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-20">
+      <section className="bg-gradient-to-r from-blue-50 to-blue-100 py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <header className="text-center mb-16">
-            <h1 className="text-6xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
-            <p className="text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed animate-slideInUp">
-              {content.heroSubtitle}
-            </p>
-          </header>
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-16">
+            <header className="text-center md:text-left md:w-[58%]">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 animate-fadeIn">{content.heroH1}</h1>
+              <p className="text-lg md:text-2xl text-gray-600 leading-relaxed animate-slideInUp">
+                {content.heroSubtitle}
+              </p>
+            </header>
+            <div className="w-full md:w-[42%] flex justify-center md:justify-end">
+              <div className="relative w-full max-w-md h-64 md:h-80">
+                <Image
+                  src="/images/team_people.png"
+                  alt="The Tola Tiles team — expert tile installers in Jacksonville and St. Augustine FL"
+                  fill
+                  sizes="(max-width: 768px) 80vw, 40vw"
+                  className="object-contain drop-shadow-xl"
+                  priority
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Key Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 animate-slideInUp">
-            <div className="text-center bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="text-4xl font-bold text-blue-600 mb-2">1,500+</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 animate-slideInUp">
+            <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
+              <div className="text-4xl font-bold text-[#00a8e8] mb-2">1,500+</div>
               <div className="text-gray-600 font-medium">Projects Completed</div>
             </div>
-            <div className="text-center bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="text-4xl font-bold text-blue-600 mb-2">15+</div>
+            <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
+              <div className="text-4xl font-bold text-[#00a8e8] mb-2">15+</div>
               <div className="text-gray-600 font-medium">Years of Excellence</div>
             </div>
-            <div className="text-center bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
+            <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
+              <div className="text-4xl font-bold text-[#00a8e8] mb-2">98%</div>
               <div className="text-gray-600 font-medium">Customer Satisfaction</div>
             </div>
-            <div className="text-center bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="text-4xl font-bold text-blue-600 mb-2">2-Year</div>
+            <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
+              <div className="text-4xl font-bold text-[#00a8e8] mb-2">2-Year</div>
               <div className="text-gray-600 font-medium">Quality Warranty</div>
             </div>
           </div>
@@ -105,11 +119,11 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
 
               <div className="mt-8 flex items-center space-x-6">
                 <div className="flex items-center">
-                  <Award className="h-6 w-6 text-blue-600 mr-2" aria-hidden="true" />
+                  <Award className="h-6 w-6 text-[#00a8e8] mr-2" aria-hidden="true" />
                   <span className="text-gray-700 font-medium">Licensed & Insured</span>
                 </div>
                 <div className="flex items-center">
-                  <Shield className="h-6 w-6 text-blue-600 mr-2" aria-hidden="true" />
+                  <Shield className="h-6 w-6 text-[#00a8e8] mr-2" aria-hidden="true" />
                   <span className="text-gray-700 font-medium">Bonded & Certified</span>
                 </div>
               </div>
@@ -166,10 +180,10 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
               return (
                 <article
                   key={index}
-                  className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group"
+                  className="text-center p-8 bg-white rounded-xl border border-gray-100"
                 >
-                  <div className="bg-blue-100 p-4 rounded-full w-20 h-20 mx-auto mb-6 group-hover:bg-blue-200 transition-colors duration-300">
-                    <IconComponent className="h-12 w-12 text-blue-600 mx-auto" aria-hidden="true" />
+                  <div className="bg-[#e6f6fd] p-4 rounded-full w-20 h-20 mx-auto mb-6">
+                    <IconComponent className="h-12 w-12 text-[#00a8e8] mx-auto" aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-semibold mb-4 text-gray-900">{value.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{value.description}</p>
@@ -181,8 +195,14 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
       </section>
 
       {/* Mission Statement */}
-      <section className="py-20" aria-labelledby="mission-heading">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative py-20" aria-labelledby="mission-heading">
+        {/* Wavy top transition from Values section */}
+        <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-20">
+          <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px] rotate-180" preserveAspectRatio="none">
+            <path className="fill-gray-50" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 id="mission-heading" className="text-4xl font-bold text-gray-900 mb-8">
             Our Mission
           </h2>
@@ -196,8 +216,14 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
       </section>
 
       {/* Why Choose Us */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700" aria-labelledby="why-choose-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-20 bg-gradient-to-r from-[#00a8e8] to-[#0097d2]" aria-labelledby="why-choose-heading">
+        {/* Wavy top transition from Mission section */}
+        <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-20">
+          <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px] rotate-180" preserveAspectRatio="none">
+            <path className="fill-white" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <header className="text-center mb-16">
             <h2 id="why-choose-heading" className="text-4xl font-bold text-white mb-6">
               {content.whyChooseHeading}
@@ -284,11 +310,11 @@ const TeamSlider = () => {
               height={128}
               className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-blue-100"
             />
-            <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">{currentMember.experience}</div>
+            <div className="absolute -bottom-2 -right-2 bg-[#00a8e8] text-white text-xs px-2 py-1 rounded-full">{currentMember.experience}</div>
           </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-1">{currentMember.name}</h3>
-          <p className="text-blue-600 font-semibold mb-4">{currentMember.position}</p>
+          <p className="text-[#00a8e8] font-semibold mb-4">{currentMember.position}</p>
 
           <blockquote className="text-gray-600 italic mb-6 text-sm leading-relaxed">&quot;{currentMember.quote}&quot;</blockquote>
         </div>
@@ -332,7 +358,7 @@ const TeamSlider = () => {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-blue-600 scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-[#00a8e8] scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
             aria-label={`Go to team member ${index + 1}`}
           />
         ))}

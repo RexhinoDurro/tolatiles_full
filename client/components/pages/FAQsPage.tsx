@@ -94,7 +94,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <nav className="flex justify-center mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
             <ol className="flex items-center gap-2">
-              <li><Link href={locPrefix || '/'} className="hover:text-blue-600">Home</Link></li>
+              <li><Link href={locPrefix || '/'} className="hover:text-[#00a8e8]">Home</Link></li>
               <li>/</li>
               <li className="text-gray-900 font-medium">FAQs</li>
             </ol>
@@ -127,7 +127,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
             <button
               onClick={() => setSelectedCategory('all')}
               className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
-                selectedCategory === 'all' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
+                selectedCategory === 'all' ? 'bg-[#00a8e8] text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
               }`}
               aria-pressed={selectedCategory === 'all'}
             >
@@ -147,7 +147,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
                     selectedCategory === category.id
-                      ? 'bg-blue-600 text-white shadow-lg'
+                      ? 'bg-[#00a8e8] text-white shadow-lg'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
                   }`}
                   aria-pressed={selectedCategory === category.id}
@@ -192,7 +192,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                     >
                       <span className="font-semibold text-gray-900 text-lg pr-4 leading-relaxed" itemProp="name">{faq.question}</span>
                       <ChevronDown
-                        className={`h-6 w-6 text-blue-600 transition-transform duration-300 flex-shrink-0 ${openFAQ === index ? 'transform rotate-180' : ''}`}
+                        className={`h-6 w-6 text-[#00a8e8] transition-transform duration-300 flex-shrink-0 ${openFAQ === index ? 'transform rotate-180' : ''}`}
                         aria-hidden="true"
                       />
                     </button>
@@ -221,7 +221,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
               </p>
               <button
                 onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-[#00a8e8] hover:text-[#0097d2] font-medium"
               >
                 View all questions
               </button>
@@ -241,7 +241,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                 <Link
                   key={svc.slug}
                   href={`${locPrefix}/services/${svc.slug}`}
-                  className="flex items-center justify-between bg-white rounded-xl px-5 py-4 shadow-sm hover:shadow-md hover:text-blue-600 transition-all duration-200 group font-medium text-gray-700"
+                  className="flex items-center justify-between bg-white rounded-xl px-5 py-4 shadow-sm hover:shadow-md hover:text-[#00a8e8] transition-all duration-200 group font-medium text-gray-700"
                 >
                   <span>{svc.label}</span>
                   <ArrowRight className="h-4 w-4 text-blue-400 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
@@ -251,7 +251,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
           </section>
 
           {/* Contact CTA */}
-          <section className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-12 text-center text-white" aria-labelledby="contact-cta-heading">
+          <section className="bg-gradient-to-r from-[#00a8e8] to-[#0097d2] rounded-2xl p-12 text-center text-white" aria-labelledby="contact-cta-heading">
             <h2 id="contact-cta-heading" className="text-3xl font-bold mb-4">Still Have Questions?</h2>
             <p className="text-blue-100 mb-8 text-lg max-w-2xl mx-auto">{content.ctaDescription}</p>
 
@@ -280,7 +280,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                 <p className="text-blue-100 text-sm mb-3">Schedule an in-home visit</p>
                 <Link
                   href={`${locPrefix}/contact`}
-                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+                  className="bg-white text-[#00a8e8] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
                 >
                   Book Now
                 </Link>

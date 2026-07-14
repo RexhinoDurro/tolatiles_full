@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import GalleryPage from '@/components/pages/GalleryPage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
+import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 
 const validCategories = ['backsplashes', 'patios', 'showers', 'flooring', 'fireplaces'];
 
@@ -81,5 +82,20 @@ export default async function GalleryCategory({ params }: { params: Promise<{ lo
     notFound();
   }
 
-  return <GalleryPage category={resolvedParams.category} location={resolvedParams.location} />;
+  const location = resolvedParams.location;
+  const categoryLabel = categoryLabels[resolvedParams.category];
+  const breadcrumbItems =
+    location === 'florida'
+      ? null
+      : buildCityBreadcrumbs(location, [
+          { name: 'Gallery', url: `https://tolatiles.com/${location}/gallery` },
+          { name: categoryLabel, url: `https://tolatiles.com/${location}/gallery/${resolvedParams.category}` },
+        ]);
+
+  return (
+    <>
+      {breadcrumbItems && <BreadcrumbSchema items={breadcrumbItems} />}
+      <GalleryPage category={resolvedParams.category} location={location} />
+    </>
+  );
 }

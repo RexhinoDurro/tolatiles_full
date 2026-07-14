@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import FAQsPage from '@/components/pages/FAQsPage';
 import { faqs as staticFaqs } from '@/data/faqs';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
+import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -55,32 +56,34 @@ function generateFAQSchema(faqList: Array<{ question: string; answer: string }>,
   };
 }
 
-function generateBreadcrumbSchema(location: string, locationName: string) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://tolatiles.com' },
-      { '@type': 'ListItem', position: 2, name: `Tola Tiles ${locationName}`, item: `https://tolatiles.com/${location}` },
-      { '@type': 'ListItem', position: 3, name: 'FAQs', item: `https://tolatiles.com/${location}/faqs` },
-    ],
-  };
+function buildFaqBreadcrumbs(location: LocationType) {
+  const faqCrumb = { name: 'FAQs', url: `https://tolatiles.com/${location}/faqs` };
+
+  if (location === 'florida') {
+    return [
+      { name: 'Home', url: 'https://tolatiles.com' },
+      { name: 'Florida', url: 'https://tolatiles.com' },
+      faqCrumb,
+    ];
+  }
+
+  return buildCityBreadcrumbs(location, [faqCrumb]);
 }
 
 export default async function FAQs({ params }: { params: Promise<{ location: string }> }) {
   const resolvedParams = await params;
   if (!isValidLocation(resolvedParams.location)) notFound();
 
-  const locationName = locationNames[resolvedParams.location as LocationType];
+  const location = resolvedParams.location;
   const faqList = await getFAQs();
-  const faqSchema = generateFAQSchema(faqList, resolvedParams.location);
-  const breadcrumbSchema = generateBreadcrumbSchema(resolvedParams.location, locationName);
+  const faqSchema = generateFAQSchema(faqList, location);
+  const breadcrumbItems = buildFaqBreadcrumbs(location);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <FAQsPage location={resolvedParams.location} initialFAQs={faqList} />
+      <BreadcrumbSchema items={breadcrumbItems} />
+      <FAQsPage location={location} initialFAQs={faqList} />
     </>
   );
 }

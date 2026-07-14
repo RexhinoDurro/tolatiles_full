@@ -92,6 +92,7 @@ import type {
   LandingPageSectionType,
   SubdomainCheckResponse,
 } from '@/types/api';
+import type { ContentType } from '@/lib/contentTypes';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -1071,12 +1072,14 @@ class ApiClient {
   async getBlogPosts(params?: {
     status?: BlogPostStatus;
     category?: string;
+    content_type?: ContentType;
     search?: string;
     ordering?: string;
   }): Promise<BlogPostListItem[]> {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.set('status', params.status);
     if (params?.category) queryParams.set('category', params.category);
+    if (params?.content_type) queryParams.set('content_type', params.content_type);
     if (params?.search) queryParams.set('search', params.search);
     if (params?.ordering) queryParams.set('ordering', params.ordering);
 
@@ -1631,8 +1634,8 @@ class ApiClient {
     return this.fetch<ProjectListItem[]>('/projects/public/?is_featured=true');
   }
 
-  async getPublicProject(id: number): Promise<Project> {
-    return this.fetch<Project>(`/projects/public/${id}/`);
+  async getPublicProject(slug: string): Promise<Project> {
+    return this.fetch<Project>(`/projects/public/${slug}/`);
   }
 
   async getPublicServiceProjects(serviceSlug: string): Promise<ProjectListItem[]> {

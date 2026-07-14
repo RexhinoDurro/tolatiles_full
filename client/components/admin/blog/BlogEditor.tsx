@@ -26,6 +26,7 @@ import type {
   BlogLocation,
   FAQItem,
 } from '@/types/api';
+import { CONTENT_TYPE_LABELS, CONTENT_TYPE_ROUTE_PREFIX, RELATED_SERVICE_PAGE_OPTIONS, type ContentType } from '@/lib/contentTypes';
 import TipTapEditor from './TipTapEditor';
 import SEOFields from './SEOFields';
 import FAQEditor from './FAQEditor';
@@ -36,9 +37,10 @@ import InlineCalendarPicker from './InlineCalendarPicker';
 interface BlogEditorProps {
   post?: BlogPost;
   isNew?: boolean;
+  contentType?: ContentType;
 }
 
-export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
+export default function BlogEditor({ post, isNew = false, contentType: contentTypeProp }: BlogEditorProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +66,9 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
   );
   const [status, setStatus] = useState<BlogPostStatus>(post?.status || 'draft');
   const [location, setLocation] = useState<BlogLocation>(post?.location || 'florida');
+  const [contentType, setContentType] = useState<ContentType>(post?.content_type || contentTypeProp || 'blog');
+  const [relatedServicePage, setRelatedServicePage] = useState(post?.related_service_page || '');
+  const [autoAppended, setAutoAppended] = useState(post?.related_link_auto_appended || false);
   const [scheduledDate, setScheduledDate] = useState(
     post?.scheduled_publish_date
       ? new Date(post.scheduled_publish_date).toISOString().slice(0, 16)
@@ -146,6 +151,11 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
       return;
     }
 
+    if (finalStatus === 'published' && contentType === 'blog' && !relatedServicePage.trim()) {
+      setError('Related Service Page is required to publish a Blog post');
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -164,6 +174,8 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
         faq_data: faqData,
         category_ids: selectedCategories,
         location,
+        content_type: contentType,
+        related_service_page: relatedServicePage,
         status: finalStatus,
         scheduled_publish_date: finalStatus === 'scheduled' ? scheduledDate : null,
       };
@@ -177,12 +189,14 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
 
       if (isNew) {
         const newPost = await api.createBlogPost(postData as BlogPostCreate);
-        router.push(`/admin/blog/${newPost.id}`);
+        setAutoAppended(newPost.related_link_auto_appended);
+        router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${newPost.id}`);
       } else if (post) {
-        await api.updateBlogPost(post.slug, postData as BlogPostUpdate);
+        const updatedPost = await api.updateBlogPost(post.slug, postData as BlogPostUpdate);
+        setAutoAppended(updatedPost.related_link_auto_appended);
         // If slug changed, redirect to new URL
         if (slug !== post.slug) {
-          router.push(`/admin/blog/${post.id}`);
+          router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${post.id}`);
         }
       }
 
@@ -233,7 +247,7 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push('/admin/blog')}
+              onClick={() => router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}`)}
               className="text-gray-600 hover:text-gray-900"
             >
               ← Back
@@ -259,7 +273,7 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
           <div className="flex items-center gap-3">
             {status === 'published' && !isNew && (
               <a
-                href={`/blog/${slug}`}
+                href={`/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -339,6 +353,23 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
                 Changing the URL slug will break existing links to this post. The old URL{' '}
                 <code className="bg-yellow-100 px-1 rounded">/blog/{originalSlug}</code> will no
                 longer work.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto-appended CTA Review Banner */}
+      {autoAppended && (
+        <div className="max-w-7xl mx-auto px-6 pt-4">
+          <div className="p-4 bg-blue-50 text-blue-800 rounded-lg flex items-start gap-2">
+            <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">Review: CTA link auto-appended</p>
+              <p className="text-sm mt-1">
+                This post&apos;s body didn&apos;t already link to the selected Related Service Page, so a CTA link
+                was automatically appended to the end of the content on publish. Consider integrating it more
+                naturally into the body copy.
               </p>
             </div>
           </div>
@@ -514,6 +545,54 @@ export default function BlogEditor({ post, isNew = false }: BlogEditorProps) {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Content Type */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="font-medium text-gray-900 mb-4">Content Type</h3>
+              <select
+                value={contentType}
+                onChange={(e) => setContentType(e.target.value as ContentType)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {Object.entries(CONTENT_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Which site section this post publishes to: /blog, /guides, /design-ideas, or /stories.
+              </p>
+            </div>
+
+            {/* Related Service Page */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <h3 className="font-medium text-gray-900 mb-4">
+                Related Service Page
+                {contentType === 'blog' && <span className="text-red-500 ml-1">*</span>}
+              </h3>
+              <select
+                value={relatedServicePage}
+                onChange={(e) => setRelatedServicePage(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">— None selected —</option>
+                {RELATED_SERVICE_PAGE_OPTIONS.map((group) => (
+                  <optgroup key={group.city} label={group.city}>
+                    {group.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                {contentType === 'blog'
+                  ? 'Required to publish. On publish, we check the body for an existing link to this page; if missing, a CTA link is auto-appended and flagged for review.'
+                  : 'Optional for this content type. If set, we’ll still check the body for a link and auto-append a CTA if missing.'}
+              </p>
             </div>
 
             {/* Location */}

@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import MobileBottomNav from './MobileBottomNav';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -27,7 +28,8 @@ export default function LayoutWrapper({ children, forceNoChrome }: LayoutWrapper
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      <main role="main">{children}</main>
+      <main role="main" className="pb-[100px] md:pb-0">{children}</main>
+      <MobileBottomNav />
       <Footer />
     </div>
   );

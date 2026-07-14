@@ -1,6 +1,40 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+# Related Service Page choices: the 2 city hubs + 6 services x 2 cities.
+# Slugs must stay in sync with next.config.js redirects and the
+# serviceIdToSlug maps in ServiceDetailPage(Location).tsx.
+RELATED_SERVICE_PAGE_CHOICES = [
+    ('Jacksonville', [
+        ('/jacksonville', 'Jacksonville — City Hub'),
+        ('/jacksonville/services/kitchen-backsplash', 'Jacksonville — Kitchen Backsplash'),
+        ('/jacksonville/services/bathroom-tile', 'Jacksonville — Bathroom Tile'),
+        ('/jacksonville/services/floor-tile', 'Jacksonville — Floor Tile'),
+        ('/jacksonville/services/patio-tile', 'Jacksonville — Patio Tile'),
+        ('/jacksonville/services/fireplace-tile', 'Jacksonville — Fireplace Tile'),
+        ('/jacksonville/services/shower-tile', 'Jacksonville — Shower Tile'),
+    ]),
+    ('St. Augustine', [
+        ('/st-augustine', 'St. Augustine — City Hub'),
+        ('/st-augustine/services/kitchen-backsplash', 'St. Augustine — Kitchen Backsplash'),
+        ('/st-augustine/services/bathroom-tile', 'St. Augustine — Bathroom Tile'),
+        ('/st-augustine/services/floor-tile', 'St. Augustine — Floor Tile'),
+        ('/st-augustine/services/patio-tile', 'St. Augustine — Patio Tile'),
+        ('/st-augustine/services/fireplace-tile', 'St. Augustine — Fireplace Tile'),
+        ('/st-augustine/services/shower-tile', 'St. Augustine — Shower Tile'),
+    ]),
+]
+
+RELATED_SERVICE_PAGE_LABELS = {
+    value: label
+    for _, options in RELATED_SERVICE_PAGE_CHOICES
+    for value, label in options
+}
 
 
 class BlogCategory(models.Model):
@@ -39,6 +73,22 @@ class BlogPost(models.Model):
         ('jacksonville', 'Jacksonville'),
         ('st-augustine', 'St. Augustine'),
     ]
+
+    CONTENT_TYPE_CHOICES = [
+        ('blog', 'Blog'),
+        ('guide', 'Guide'),
+        ('design_idea', 'Design Idea'),
+        ('story', 'Story'),
+    ]
+
+    # Content type
+    content_type = models.CharField(
+        max_length=20,
+        choices=CONTENT_TYPE_CHOICES,
+        default='blog',
+        db_index=True,
+        help_text='Which site section this post belongs to'
+    )
 
     # Core content
     title = models.CharField(max_length=200)
@@ -113,6 +163,21 @@ class BlogPost(models.Model):
         help_text='Target location for this blog post'
     )
 
+    # Related Service Page (required to publish for content_type='blog';
+    # optional for guide/design_idea/story)
+    related_service_page = models.CharField(
+        max_length=100,
+        choices=RELATED_SERVICE_PAGE_CHOICES,
+        blank=True,
+        default='',
+        help_text='Internal city/service page this post should support. Required to publish Blog posts.'
+    )
+    related_link_auto_appended = models.BooleanField(
+        default=False,
+        help_text='Set automatically when publishing appended a CTA link to Related Service Page because the '
+                   'body did not already link to it. Flagged here for editorial review.'
+    )
+
     # Publishing
     status = models.CharField(
         max_length=20,
@@ -142,10 +207,51 @@ class BlogPost(models.Model):
     def __str__(self):
         return self.title
 
+    def clean(self):
+        super().clean()
+        self._validate_related_service_page()
+
+    def _validate_related_service_page(self):
+        if self.status == 'published' and self.content_type == 'blog' and not self.related_service_page:
+            raise ValidationError({
+                'related_service_page': 'Related Service Page is required to publish a Blog post.'
+            })
+
+    def _content_links_to(self, path):
+        """Plain regex scan for an existing href pointing at `path`."""
+        pattern = r'href=["\'][^"\']*' + re.escape(path) + r'[^"\']*["\']'
+        return re.search(pattern, self.content or '') is not None
+
+    def _append_cta_link(self, path):
+        """Append a CTA <p> linking to `path` and flag it for editorial review."""
+        label = RELATED_SERVICE_PAGE_LABELS.get(path, path)
+        cta_html = f'<p><a href="{path}">Learn more: {label}</a></p>'
+        self.content = f'{self.content}\n{cta_html}' if self.content else cta_html
+        self.related_link_auto_appended = True
+
     def save(self, *args, **kwargs):
+        was_published = False
+        if self.pk:
+            was_published = BlogPost.objects.filter(pk=self.pk, status='published').exists()
+
         # Set publish_date when publishing for the first time
         if self.status == 'published' and not self.publish_date:
             self.publish_date = timezone.now()
+
+        self._validate_related_service_page()
+
+        # Hybrid enforcement on the transition to published: if the body
+        # doesn't already link to the Related Service Page, auto-append a
+        # CTA link and flag the post for editorial review. Runs through
+        # save() (not just the DRF serializer) so Django admin and the
+        # Celery publish_scheduled_posts task get the same guarantee.
+        transitioning_to_published = self.status == 'published' and not was_published
+        if transitioning_to_published and self.related_service_page and not self._content_links_to(self.related_service_page):
+            self._append_cta_link(self.related_service_page)
+            update_fields = kwargs.get('update_fields')
+            if update_fields is not None:
+                kwargs['update_fields'] = list(set(update_fields) | {'content', 'related_link_auto_appended'})
+
         super().save(*args, **kwargs)
 
     @property

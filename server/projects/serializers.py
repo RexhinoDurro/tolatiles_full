@@ -60,7 +60,7 @@ class ProjectListSerializer(MainVideoSerializerMixin, serializers.ModelSerialize
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'status', 'work_status', 'is_featured', 'job_types', 'phase_count', 'main_video', 'main_video_type', 'cover_image', 'cover_media_type', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'slug', 'status', 'work_status', 'is_featured', 'job_types', 'phase_count', 'main_video', 'main_video_type', 'cover_image', 'cover_media_type', 'created_at', 'updated_at']
 
     def get_job_types(self, obj):
         return list(obj.job_types.values_list('slug', flat=True))
@@ -109,10 +109,11 @@ class ProjectDetailSerializer(MainVideoSerializerMixin, serializers.ModelSeriali
     class Meta:
         model = Project
         fields = [
-            'id', 'title', 'description', 'status', 'work_status', 'is_featured', 'job_types',
+            'id', 'title', 'slug', 'description', 'status', 'work_status', 'is_featured', 'job_types',
             'main_video', 'main_video_url', 'main_video_type', 'main_video_embed_url', 'main_video_thumbnail',
             'phases', 'created_at', 'updated_at'
         ]
+        read_only_fields = ['slug']
 
     def update(self, instance, validated_data):
         job_types = validated_data.pop('job_types', None)

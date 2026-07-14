@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import HomePage from '@/components/pages/HomePage';
-import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
+import { VALID_LOCATIONS, isValidLocation, locationNames, areaServed, type LocationType } from '@/lib/locations';
+import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 
 // Location-specific metadata
 const locationMetadata: Record<LocationType, {
@@ -74,15 +75,7 @@ const locationSchemas: Record<LocationType, object> = {
       latitude: '30.3322',
       longitude: '-81.6557',
     },
-    areaServed: [
-      { '@type': 'City', name: 'Jacksonville', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Jacksonville Beach', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Neptune Beach', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Atlantic Beach', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Orange Park', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Mandarin', addressRegion: 'FL' },
-      { '@type': 'AdministrativeArea', name: 'Duval County', addressRegion: 'FL' },
-    ],
+    areaServed: areaServed.jacksonville,
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Tile Installation Services Jacksonville',
@@ -143,14 +136,7 @@ const locationSchemas: Record<LocationType, object> = {
       latitude: '29.8946',
       longitude: '-81.3145',
     },
-    areaServed: [
-      { '@type': 'City', name: 'St Augustine', addressRegion: 'FL' },
-      { '@type': 'City', name: 'St Augustine Beach', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Vilano Beach', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Palm Coast', addressRegion: 'FL' },
-      { '@type': 'City', name: 'Ponte Vedra', addressRegion: 'FL' },
-      { '@type': 'AdministrativeArea', name: 'St Johns County', addressRegion: 'FL' },
-    ],
+    areaServed: areaServed['st-augustine'],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Tile Installation Services St Augustine',
@@ -231,16 +217,17 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
 export default async function LocationHomePage({ params }: { params: Promise<{ location: string }> }) {
   const resolvedParams = await params;
 
-  if (resolvedParams.location === 'florida') {
-    redirect('/');
-  }
-
   if (!isValidLocation(resolvedParams.location)) {
     notFound();
   }
 
+  if (resolvedParams.location === 'florida') {
+    redirect('/');
+  }
+
   const location = resolvedParams.location;
   const schema = locationSchemas[location];
+  const breadcrumbItems = buildCityBreadcrumbs(location);
 
   return (
     <>
@@ -248,6 +235,7 @@ export default async function LocationHomePage({ params }: { params: Promise<{ l
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
+      <BreadcrumbSchema items={breadcrumbItems} />
       <HomePage location={location} />
     </>
   );

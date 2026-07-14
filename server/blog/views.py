@@ -47,7 +47,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'categories', 'is_indexed', 'has_faq_schema']
+    filterset_fields = ['status', 'categories', 'is_indexed', 'has_faq_schema', 'content_type']
     search_fields = ['title', 'content', 'excerpt']
     ordering_fields = ['publish_date', 'created_at', 'last_updated', 'title']
     ordering = ['-publish_date', '-created_at']
@@ -84,6 +84,11 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         location = self.request.query_params.get('location')
         if location:
             queryset = queryset.filter(location=location)
+
+        # Filter by content type (blog / guide / design_idea / story)
+        content_type = self.request.query_params.get('content_type')
+        if content_type:
+            queryset = queryset.filter(content_type=content_type)
 
         return queryset.prefetch_related('categories')
 
@@ -141,9 +146,10 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         posts = BlogPost.objects.filter(
             status='published',
             is_indexed=True
-        ).values('slug', 'location', 'last_updated', 'publish_date')
+        ).prefetch_related('categories')
 
-        return Response(list(posts))
+        serializer = BlogPostSitemapSerializer(posts, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
     def related(self, request, slug=None):

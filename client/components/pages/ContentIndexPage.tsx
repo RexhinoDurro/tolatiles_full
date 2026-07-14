@@ -3,45 +3,31 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, Clock, ArrowRight, Tag, Phone } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Tag, Phone, Image as ImageIcon } from 'lucide-react';
 import { api } from '@/lib/api';
+import { CONTENT_TYPE_ROUTE_PREFIX, CONTENT_TYPE_HERO_COPY, type ContentType } from '@/lib/contentTypes';
 import type { BlogPostListItem, BlogCategory } from '@/types/api';
 
 const PHONE_NUMBER = '(904) 866-1738';
 
-interface BlogLocationContent {
-  heroH1: string;
-  heroSubtitle: string;
-  ctaDescription: string;
-}
-
-const locationContent: Record<string, BlogLocationContent> = {
-  jacksonville: {
-    heroH1: 'Tile Installation Blog - Jacksonville FL',
-    heroSubtitle: 'Expert tips, design inspiration, and tile installation insights for Jacksonville and Duval County homeowners',
-    ctaDescription:
-      'Contact Tola Tiles today for a free estimate. We serve all of Jacksonville, from Riverside and San Marco to Mandarin, Southside, and the Beaches.',
-  },
-  'st-augustine': {
-    heroH1: 'Tile Installation Blog - St Augustine FL',
-    heroSubtitle: 'Expert tips, design inspiration, and tile installation insights for St. Augustine and St. Johns County homeowners',
-    ctaDescription:
-      'Contact Tola Tiles today for a free estimate. We serve all of St. Augustine and St. Johns County, including the Historic District, Vilano Beach, Nocatee, and World Golf Village.',
-  },
-  florida: {
-    heroH1: 'Tile Installation Blog - Northeast Florida',
-    heroSubtitle: 'Expert tips, design inspiration, and industry insights from the Tola Tiles team',
-    ctaDescription:
-      'Contact Tola Tiles today for a free estimate. We serve Jacksonville, St. Augustine, Ponte Vedra, Palm Coast, and the greater Northeast Florida area.',
-  },
+const ctaDescriptions: Record<string, string> = {
+  jacksonville:
+    'Contact Tola Tiles today for a free estimate. We serve all of Jacksonville, from Riverside and San Marco to Mandarin, Southside, and the Beaches.',
+  'st-augustine':
+    'Contact Tola Tiles today for a free estimate. We serve all of St. Augustine and St. Johns County, including the Historic District, Vilano Beach, Nocatee, and World Golf Village.',
+  florida:
+    'Contact Tola Tiles today for a free estimate. We serve Jacksonville, St. Augustine, Ponte Vedra, Palm Coast, and the greater Northeast Florida area.',
 };
 
-interface BlogIndexPageProps {
+interface ContentIndexPageProps {
+  contentType: ContentType;
   location?: string;
 }
 
-export default function BlogIndexPage({ location = 'florida' }: BlogIndexPageProps) {
-  const content = locationContent[location] || locationContent.florida;
+export default function ContentIndexPage({ contentType, location = 'florida' }: ContentIndexPageProps) {
+  const hero = CONTENT_TYPE_HERO_COPY[contentType];
+  const ctaDescription = ctaDescriptions[location] || ctaDescriptions.florida;
+  const prefix = CONTENT_TYPE_ROUTE_PREFIX[contentType];
   const [posts, setPosts] = useState<BlogPostListItem[]>([]);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,19 +35,20 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
 
   useEffect(() => {
     loadData();
-  }, [selectedCategory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, contentType]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [postsData, categoriesData] = await Promise.all([
-        api.getBlogPosts({ category: selectedCategory || undefined }),
+        api.getBlogPosts({ content_type: contentType, category: selectedCategory || undefined }),
         api.getBlogCategories(),
       ]);
       setPosts(postsData);
       setCategories(categoriesData);
     } catch (error) {
-      console.error('Failed to load blog data:', error);
+      console.error('Failed to load content data:', error);
     } finally {
       setLoading(false);
     }
@@ -77,18 +64,18 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-[var(--navbar-height)]">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-16 md:py-24">
+      <section className="bg-brand-light text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{content.heroH1}</h1>
-            <p className="text-xl text-blue-100 mb-8">
-              {content.heroSubtitle}
+            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{hero.heroH1}</h1>
+            <p className="text-xl text-white/90 mb-8">
+              {hero.heroSubtitle}
             </p>
             <a
               href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-900 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-light border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-brand-light transition-colors shadow-sm"
             >
               <Phone className="w-5 h-5" />
               Call for Free Estimate: {PHONE_NUMBER}
@@ -106,7 +93,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                 onClick={() => setSelectedCategory('')}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   !selectedCategory
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-[#00a8e8] text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -118,7 +105,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                   onClick={() => setSelectedCategory(category.slug)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     selectedCategory === category.slug
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-[#00a8e8] text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -130,7 +117,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
         </section>
       )}
 
-      {/* Blog Posts */}
+      {/* Posts */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           {loading ? (
@@ -148,11 +135,11 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No blog posts found</p>
+              <p className="text-gray-500 text-lg">No posts found</p>
               {selectedCategory && (
                 <button
                   onClick={() => setSelectedCategory('')}
-                  className="mt-4 text-blue-600 hover:underline"
+                  className="mt-4 text-[#00a8e8] hover:underline"
                 >
                   View all posts
                 </button>
@@ -165,7 +152,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow group"
                 >
-                  <Link href={`/${location}/blog/${post.slug}`}>
+                  <Link href={`/${prefix}/${post.slug}`}>
                     <div className="relative aspect-video overflow-hidden bg-gray-100">
                       {post.featured_image ? (
                         <Image
@@ -175,8 +162,8 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200">
-                          <span className="text-4xl">📝</span>
+                        <div className="w-full h-full flex items-center justify-center bg-[#e6f6fd]">
+                          <ImageIcon className="w-10 h-10 text-[#00a8e8]" aria-hidden="true" />
                         </div>
                       )}
                     </div>
@@ -187,7 +174,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                           {post.categories.map((cat) => (
                             <span
                               key={cat.id}
-                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded"
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-50 text-[#0097d2] rounded"
                             >
                               <Tag className="w-3 h-3" />
                               {cat.name}
@@ -197,7 +184,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
                       )}
 
                       {/* Title */}
-                      <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#00a8e8] transition-colors line-clamp-2">
                         {post.title}
                       </h2>
 
@@ -222,7 +209,7 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
 
                       {/* Read More */}
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <span className="inline-flex items-center gap-2 text-blue-600 font-medium group-hover:gap-3 transition-all">
+                        <span className="inline-flex items-center gap-2 text-[#00a8e8] font-medium group-hover:gap-3 transition-all">
                           Read More
                           <ArrowRight className="w-4 h-4" />
                         </span>
@@ -237,23 +224,23 @@ export default function BlogIndexPage({ location = 'florida' }: BlogIndexPagePro
       </section>
 
       {/* CTA Section */}
-      <section className="bg-blue-900 text-white py-16">
+      <section className="bg-[#00a8e8] text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Your Tile Project?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            {content.ctaDescription}
+          <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>Ready to Start Your Tile Project?</h2>
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            {ctaDescription}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-900 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-brand-light text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm border border-transparent hover:border-white"
             >
               <Phone className="w-5 h-5" />
               {PHONE_NUMBER}
             </a>
             <Link
-              href={`/${location}/contact`}
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
+              href="/contact"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#00a8e8] transition-colors"
             >
               Get Free Estimate
               <ArrowRight className="w-5 h-5" />

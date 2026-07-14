@@ -5,10 +5,14 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'brand-light': '#86d5f7',
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/typography'),
   ],
 };
-// Force Tailwind Rebuild
+// Force Tailwind Rebuild (2)

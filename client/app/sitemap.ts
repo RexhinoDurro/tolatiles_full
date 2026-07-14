@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { CONTENT_TYPES, CONTENT_TYPE_ROUTE_PREFIX } from '@/lib/contentTypes';
 
 const BASE_URL = 'https://tolatiles.com';
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -32,8 +33,17 @@ const galleryCategories = [
   'fireplaces',
 ];
 
-// Fetch blog posts for sitemap
-async function getBlogSitemapData(): Promise<Array<{ slug: string; location: string; last_updated: string; publish_date: string }>> {
+interface ContentSitemapPost {
+  slug: string;
+  location: string;
+  content_type: string;
+  category_slugs: string[];
+  last_updated: string;
+  publish_date: string;
+}
+
+// Fetch content engine posts (blog/guides/design-ideas/stories) for sitemap
+async function getContentSitemapData(): Promise<ContentSitemapPost[]> {
   try {
     const response = await fetch(`${API_BASE}/blog/posts/sitemap_data/`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
@@ -41,13 +51,13 @@ async function getBlogSitemapData(): Promise<Array<{ slug: string; location: str
     if (!response.ok) return [];
     return response.json();
   } catch (error) {
-    console.error('Failed to fetch blog sitemap data:', error);
+    console.error('Failed to fetch content sitemap data:', error);
     return [];
   }
 }
 
 // Fetch public projects for sitemap
-async function getProjectsSitemapData(): Promise<Array<{ id: number; updated_at: string }>> {
+async function getProjectsSitemapData(): Promise<Array<{ id: number; slug: string; updated_at: string }>> {
   try {
     const response = await fetch(`${API_BASE}/projects/public/`, {
       next: { revalidate: 3600 },
@@ -60,26 +70,10 @@ async function getProjectsSitemapData(): Promise<Array<{ id: number; updated_at:
   }
 }
 
-// Fetch blog categories for sitemap
-async function getBlogCategories(): Promise<Array<{ slug: string }>> {
-  try {
-    const response = await fetch(`${API_BASE}/blog/categories/`, {
-      next: { revalidate: 3600 },
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return Array.isArray(data) ? data : data.results || [];
-  } catch (error) {
-    console.error('Failed to fetch blog categories:', error);
-    return [];
-  }
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Fetch blog + projects data
-  const [blogPosts, blogCategories, projects] = await Promise.all([
-    getBlogSitemapData(),
-    getBlogCategories(),
+  // Fetch content engine + projects data
+  const [contentPosts, projects] = await Promise.all([
+    getContentSitemapData(),
     getProjectsSitemapData(),
   ]);
 
@@ -163,7 +157,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/about`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: `${BASE_URL}/contact`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.9 },
     { url: `${BASE_URL}/faqs`, lastModified: currentDate, changeFrequency: 'monthly' as const, priority: 0.8 },
-    { url: `${BASE_URL}/blog`, lastModified: currentDate, changeFrequency: 'daily' as const, priority: 0.9 },
+    // Content engine index pages — one per content type
+    ...CONTENT_TYPES.map((type) => ({
+      url: `${BASE_URL}/${CONTENT_TYPE_ROUTE_PREFIX[type]}`,
+      lastModified: currentDate,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    })),
   ];
   for (const loc of locations) {
     locationStaticPages.push(
@@ -173,11 +173,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
-  // Blog post pages — single canonical URL per post regardless of the
-  // post's `location` tag (blog has no per-city URLs; see next.config.js
-  // redirects for /jacksonville/blog and /st-augustine/blog).
-  const blogPostPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
+  // Content post pages — single canonical URL per post, bucketed by content
+  // type, regardless of the post's `location` tag (no per-city URLs; see
+  // next.config.js redirects for /jacksonville/blog and /st-augustine/blog).
+  const contentPostPages: MetadataRoute.Sitemap = contentPosts.map((post) => ({
+    url: `${BASE_URL}/${CONTENT_TYPE_ROUTE_PREFIX[post.content_type as keyof typeof CONTENT_TYPE_ROUTE_PREFIX] || 'blog'}/${post.slug}`,
     lastModified: post.last_updated?.split('T')[0] || post.publish_date?.split('T')[0] || currentDate,
     changeFrequency: 'weekly' as const,
     priority: 0.8,
@@ -187,20 +187,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projectPages: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/projects`, lastModified: currentDate, changeFrequency: 'weekly' as const, priority: 0.85 },
     ...projects.map((p) => ({
-      url: `${BASE_URL}/projects/${p.id}`,
+      url: `${BASE_URL}/projects/${p.slug}`,
       lastModified: p.updated_at?.split('T')[0] || currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })),
   ];
 
-  // Blog category pages — root only, no per-city variants.
-  const blogCategoryPages: MetadataRoute.Sitemap = blogCategories.map((category) => ({
-    url: `${BASE_URL}/blog/category/${category.slug}`,
-    lastModified: currentDate,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  // Category archive pages — root only, no per-city variants. Only emit a
+  // (content type, category) URL if at least one published post actually
+  // has it, derived from the posts returned above (no unconditional listing
+  // of every category, which would otherwise create empty archive pages).
+  const categoryPairs = new Set<string>();
+  for (const post of contentPosts) {
+    for (const categorySlug of post.category_slugs || []) {
+      categoryPairs.add(`${post.content_type}::${categorySlug}`);
+    }
+  }
+  const contentCategoryPages: MetadataRoute.Sitemap = Array.from(categoryPairs).map((pair) => {
+    const [contentType, categorySlug] = pair.split('::');
+    const prefix = CONTENT_TYPE_ROUTE_PREFIX[contentType as keyof typeof CONTENT_TYPE_ROUTE_PREFIX] || 'blog';
+    return {
+      url: `${BASE_URL}/${prefix}/category/${categorySlug}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    };
+  });
 
   // Global static pages (not location-specific)
   const globalStaticPages: MetadataRoute.Sitemap = [
@@ -224,8 +237,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...galleryPages,
     ...locationStaticPages,
     ...projectPages,
-    ...blogPostPages,
-    ...blogCategoryPages,
+    ...contentPostPages,
+    ...contentCategoryPages,
     ...globalStaticPages,
   ];
 }

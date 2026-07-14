@@ -2,6 +2,28 @@ from rest_framework import serializers
 from .models import BlogPost, BlogCategory
 
 
+class RelatedServicePageValidationMixin:
+    """Shared 400-level validation for the required-if-blog-and-publishing rule.
+
+    Mirrors BlogPost._validate_related_service_page() at the model layer so
+    API clients get a proper 400 instead of falling through to the model's
+    ValidationError on save().
+    """
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        instance = getattr(self, 'instance', None)
+        content_type = attrs.get('content_type', getattr(instance, 'content_type', 'blog'))
+        status_value = attrs.get('status', getattr(instance, 'status', 'draft'))
+        related_service_page = attrs.get('related_service_page', getattr(instance, 'related_service_page', ''))
+
+        if status_value == 'published' and content_type == 'blog' and not related_service_page:
+            raise serializers.ValidationError({
+                'related_service_page': 'Related Service Page is required to publish a Blog post.'
+            })
+        return attrs
+
+
 class BlogCategorySerializer(serializers.ModelSerializer):
     """Serializer for blog categories."""
     post_count = serializers.SerializerMethodField()
@@ -33,12 +55,14 @@ class BlogPostListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'slug', 'excerpt', 'author_name',
             'featured_image', 'featured_image_alt',
-            'categories', 'location', 'status', 'publish_date',
+            'categories', 'location', 'content_type',
+            'related_service_page', 'related_link_auto_appended',
+            'status', 'publish_date',
             'reading_time', 'created_at', 'last_updated'
         ]
 
 
-class BlogPostDetailSerializer(serializers.ModelSerializer):
+class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.ModelSerializer):
     """Full serializer for blog post detail views."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     category_ids = serializers.PrimaryKeyRelatedField(
@@ -59,12 +83,13 @@ class BlogPostDetailSerializer(serializers.ModelSerializer):
             'featured_image', 'featured_image_alt',
             'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'categories', 'category_ids', 'location',
+            'categories', 'category_ids', 'location', 'content_type',
+            'related_service_page', 'related_link_auto_appended',
             'status', 'publish_date', 'scheduled_publish_date',
             'reading_time', 'effective_meta_title', 'effective_meta_description',
             'created_at', 'last_updated'
         ]
-        read_only_fields = ['id', 'created_at', 'last_updated', 'reading_time']
+        read_only_fields = ['id', 'created_at', 'last_updated', 'reading_time', 'related_link_auto_appended']
 
     def validate_slug(self, value):
         """Ensure slug is unique, excluding current instance."""
@@ -87,7 +112,7 @@ class BlogPostDetailSerializer(serializers.ModelSerializer):
         return value
 
 
-class BlogPostCreateSerializer(serializers.ModelSerializer):
+class BlogPostCreateSerializer(RelatedServicePageValidationMixin, serializers.ModelSerializer):
     """Serializer for creating blog posts."""
     category_ids = serializers.PrimaryKeyRelatedField(
         queryset=BlogCategory.objects.all(),
@@ -103,10 +128,11 @@ class BlogPostCreateSerializer(serializers.ModelSerializer):
             'featured_image', 'featured_image_alt',
             'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'category_ids', 'location',
+            'category_ids', 'location', 'content_type',
+            'related_service_page', 'related_link_auto_appended',
             'status', 'scheduled_publish_date'
         ]
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'related_link_auto_appended']
 
     def validate_slug(self, value):
         """Ensure slug is unique."""
@@ -124,10 +150,14 @@ class BlogPostCreateSerializer(serializers.ModelSerializer):
 
 class BlogPostSitemapSerializer(serializers.ModelSerializer):
     """Minimal serializer for sitemap data."""
+    category_slugs = serializers.SerializerMethodField()
 
     class Meta:
         model = BlogPost
-        fields = ['slug', 'location', 'last_updated', 'publish_date']
+        fields = ['slug', 'location', 'content_type', 'category_slugs', 'last_updated', 'publish_date']
+
+    def get_category_slugs(self, obj):
+        return list(obj.categories.values_list('slug', flat=True))
 
 
 class BlogPostPublicSerializer(serializers.ModelSerializer):
@@ -145,7 +175,8 @@ class BlogPostPublicSerializer(serializers.ModelSerializer):
             'effective_meta_title', 'effective_meta_description',
             'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
-            'categories', 'location',
+            'categories', 'location', 'content_type',
+            'related_service_page', 'related_link_auto_appended',
             'publish_date', 'reading_time', 'last_updated'
         ]
 
@@ -210,7 +241,8 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogPost
         fields = [
-            'id', 'title', 'slug', 'status', 'location',
+            'id', 'title', 'slug', 'status', 'location', 'content_type',
+            'related_service_page', 'related_link_auto_appended',
             'scheduled_publish_date', 'publish_date', 'created_at',
             'categories', 'display_date'
         ]
@@ -240,8 +272,11 @@ class QuickDraftSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlogPost
-        fields = ['title', 'slug', 'category_ids', 'scheduled_publish_date', 'status']
-        read_only_fields = []
+        fields = [
+            'title', 'slug', 'category_ids', 'content_type', 'related_service_page',
+            'related_link_auto_appended', 'scheduled_publish_date', 'status'
+        ]
+        read_only_fields = ['related_link_auto_appended']
 
     def validate_slug(self, value):
         """Ensure slug is unique."""

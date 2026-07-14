@@ -1,4 +1,4 @@
-'use client';
+import { locationNames, countyNames } from '@/lib/locations';
 
 interface BreadcrumbItem {
   name: string;
@@ -7,6 +7,28 @@ interface BreadcrumbItem {
 
 interface BreadcrumbSchemaProps {
   items: BreadcrumbItem[];
+}
+
+const BASE_URL = 'https://tolatiles.com';
+
+/**
+ * Build the standard Home > Florida > County > City breadcrumb trail for a
+ * city page. County gets no URL segment (see the site's location/SEO
+ * policy) — it's a virtual crumb pointing at the city page URL since no
+ * dedicated county page exists.
+ */
+export function buildCityBreadcrumbs(
+  location: 'jacksonville' | 'st-augustine',
+  trailingItems: BreadcrumbItem[] = []
+): BreadcrumbItem[] {
+  const cityUrl = `${BASE_URL}/${location}`;
+  return [
+    { name: 'Home', url: BASE_URL },
+    { name: 'Florida', url: BASE_URL },
+    { name: countyNames[location], url: cityUrl },
+    { name: locationNames[location], url: cityUrl },
+    ...trailingItems,
+  ];
 }
 
 export default function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
@@ -30,7 +52,6 @@ export default function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
 }
 
 export function generateBreadcrumbItems(pathname: string): BreadcrumbItem[] {
-  const BASE_URL = 'https://tolatiles.com';
   const segments = pathname.split('/').filter(Boolean);
   const items: BreadcrumbItem[] = [{ name: 'Home', url: BASE_URL }];
 
@@ -48,12 +69,6 @@ export function generateBreadcrumbItems(pathname: string): BreadcrumbItem[] {
     flooring: 'Flooring',
     patios: 'Patios',
     fireplaces: 'Fireplaces',
-    'kitchen-backsplash-jacksonville': 'Kitchen Backsplash',
-    'bathroom-tile-jacksonville': 'Bathroom Tile',
-    'floor-tiling-jacksonville': 'Floor Tiling',
-    'patio-tile-jacksonville': 'Patio Tile',
-    'fireplace-tile-jacksonville': 'Fireplace Tile',
-    'shower-tile-jacksonville': 'Shower Tile',
   };
 
   segments.forEach((segment) => {

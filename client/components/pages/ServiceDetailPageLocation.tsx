@@ -9,6 +9,7 @@ import { sampleImages } from '@/data/gallery';
 import type { Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
+import { renderRichText } from '@/lib/richText';
 
 // ─── Gallery path map ─────────────────────────────────────────────────────────
 const serviceToGalleryPath: Record<string, string> = {
@@ -159,7 +160,7 @@ const ServiceDetailPageLocation = ({
             </h1>
 
             <p className="text-gray-700 text-base md:text-lg mb-4 md:mb-6 leading-relaxed max-w-xl">
-              {locationContent.localDescription}
+              {renderRichText(locationContent.localDescription)}
             </p>
 
             <ul className="flex flex-col" style={{ gap: 'clamp(0.25rem, 0.8vh, 0.5rem)' }}>
@@ -207,7 +208,7 @@ const ServiceDetailPageLocation = ({
                 : `Why Choose Tola Tiles in ${locationName}`}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {details?.whySubtitle ?? 'Local expertise for exceptional results'}
+              {renderRichText(details?.whySubtitle ?? 'Local expertise for exceptional results')}
             </p>
           </header>
 
@@ -375,7 +376,7 @@ const ServiceDetailPageLocation = ({
                   {process.step}
                 </div>
                 <h3 className="text-2xl font-bold text-[#00a8e8] mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{process.title}</h3>
-                <p className="text-gray-600 text-lg leading-relaxed">{process.description}</p>
+                <p className="text-gray-600 text-lg leading-relaxed">{renderRichText(process.description)}</p>
               </div>
             ))}
           </div>
@@ -413,7 +414,7 @@ const ServiceDetailPageLocation = ({
                     }`}
                   >
                     <div className="px-8 text-gray-600 text-lg leading-relaxed">
-                      {faq.answer}
+                      {renderRichText(faq.answer)}
                     </div>
                   </div>
                 </div>

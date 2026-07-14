@@ -51,7 +51,7 @@ export default async function ProjectsPage() {
         '@type': 'ListItem',
         position: i + 1,
         name: p.title,
-        url: `https://tolatiles.com/projects/${p.id}`,
+        url: `https://tolatiles.com/projects/${p.slug}`,
       })),
     },
   };
@@ -74,17 +74,58 @@ export default async function ProjectsPage() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Our Projects</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              Tile Installation Projects in Jacksonville &amp; St. Augustine, FL
+            </h1>
             <div className="w-12 h-1 bg-[#00a8e8] my-4 rounded-full" />
-            <p className="text-gray-600 text-lg max-w-2xl">
-              Real tile installations completed by our team — follow each project phase by phase, from
-              preparation to the finished result.
+            <p className="text-gray-600 text-lg max-w-3xl">
+              Every project here is a real job for a real homeowner — not a stock photo. Browse recent{' '}
+              <strong className="font-semibold text-gray-900">kitchen backsplash</strong>,{' '}
+              <strong className="font-semibold text-gray-900">bathroom</strong>,{' '}
+              <strong className="font-semibold text-gray-900">shower</strong>,{' '}
+              <strong className="font-semibold text-gray-900">floor</strong>,{' '}
+              <strong className="font-semibold text-gray-900">patio</strong>, and{' '}
+              <strong className="font-semibold text-gray-900">fireplace</strong> installations across
+              Jacksonville and St. Augustine, and follow each one phase by phase — from demo and prep
+              through the finished result. If you see a style or material you like, it's an easy way to
+              know exactly what to ask for when you call.
             </p>
           </div>
         </div>
 
         {/* Filters + projects grid */}
         <ProjectsIndexContent projects={projects} />
+
+        {/* Browse by service — internal links for SEO + a clear next step */}
+        <section className="bg-white border-t border-gray-200 py-14">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              Browse Projects by Service
+            </h2>
+            <p className="text-gray-600 text-center mb-8">
+              Looking for a specific kind of project? Jump straight to that service.
+            </p>
+            <div className="flex flex-col divide-y divide-gray-200 border-t border-b border-gray-200">
+              {[
+                { label: 'Kitchen Backsplash Installation', slug: 'kitchen-backsplash' },
+                { label: 'Bathroom Tile Installation', slug: 'bathroom-tile' },
+                { label: 'Shower Installation', slug: 'shower-tile' },
+                { label: 'Floor Tiling', slug: 'floor-tile' },
+                { label: 'Patio & Outdoor Tile', slug: 'patio-tile' },
+                { label: 'Fireplace Tile', slug: 'fireplace-tile' },
+              ].map((svc) => (
+                <a
+                  key={svc.slug}
+                  href={`/services/${svc.slug}`}
+                  className="group flex items-center justify-between py-4 px-2 -mx-2 hover:bg-gray-50 transition-colors font-semibold text-gray-900 hover:text-[#00a8e8]"
+                >
+                  {svc.label}
+                  <span className="text-[#00a8e8] group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );

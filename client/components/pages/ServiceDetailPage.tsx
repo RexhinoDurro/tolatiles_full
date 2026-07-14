@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { CheckCircle, Phone, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
@@ -11,6 +11,7 @@ import { sampleImages } from '@/data/gallery';
 import type { Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
+import { renderRichText } from '@/lib/richText';
 
 const serviceToGalleryPath: Record<string, string> = {
   'kitchen-backsplash': 'backsplashes',
@@ -53,7 +54,7 @@ interface ServiceDetailPageProps {
   location?: string;
 }
 
-const fadeUpVariant = {
+const fadeUpVariant: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 };
@@ -183,28 +184,22 @@ const ServiceDetailPage = ({
                   transition={{ duration: 0.7, delay: 0.1 }}
                   className="hidden md:block w-full text-gray-600 text-xl mb-8 leading-relaxed max-w-lg font-medium"
                 >
-                  {locationContent.localDescription}
+                  {renderRichText(locationContent.localDescription)}
                 </motion.p>
 
                 {/* Checkmarks */}
-                <motion.ul 
+                <motion.ul
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.7, delay: 0.2 }}
                   className="w-full flex flex-col gap-3 md:gap-4"
                 >
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Flawless, Laser-Level Installation</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Bulletproof Waterproofing</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">Clean, Efficient Job Sites</span>
-                  </li>
+                  {service.features.slice(0, 3).map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">{feature}</span>
+                    </li>
+                  ))}
                 </motion.ul>
               </div>
 
@@ -236,6 +231,59 @@ const ServiceDetailPage = ({
         </div>
       </section>
 
+      {/* ── Serving Jacksonville & St. Augustine ────────────────────────────── */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.header
+            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUpVariant}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              Serving Jacksonville &amp; St. Augustine
+            </h2>
+            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              {service.title} backed by local expertise in both of our core service areas.
+            </p>
+          </motion.header>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {(['jacksonville', 'st-augustine'] as const).map((loc) => {
+              const locData = service.locations[loc];
+              const locName = loc === 'jacksonville' ? 'Jacksonville' : 'St. Augustine';
+              const href = `/${loc}/services/${serviceIdToSlug[service.id]}`;
+              return (
+                <motion.div
+                  key={loc}
+                  initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeUpVariant}
+                  className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
+                >
+                  <h3 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                    <Link href={href} className="hover:text-[#00a8e8] transition-colors">
+                      {details?.keywordBase ?? service.title} in {locName}, FL
+                    </Link>
+                  </h3>
+                  <ul className="space-y-3 mb-6">
+                    {locData.sellingPoints.map((point) => (
+                      <li key={point} className="flex items-start gap-2.5 text-gray-600">
+                        <CheckCircle className="text-[#00a8e8] w-5 h-5 mt-0.5 flex-shrink-0" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={href}
+                    className="group inline-flex items-center gap-1.5 font-bold text-[#00a8e8] hover:text-blue-600 transition-colors"
+                  >
+                    {service.title} in {locName}
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ── Installation Expertise (Zig-Zag Layout) ────────────────────────────────────────────── */}
       {details?.expertise && details.expertise.length > 0 && (
         <section className="py-24 bg-white relative">
@@ -249,7 +297,7 @@ const ServiceDetailPage = ({
                 Our Installation Expertise
               </h2>
               <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                We don't just sell tiles—we install the tiles you love with uncompromising precision. Our master craftsmen ensure flawless execution at every step.
+                {details?.whySubtitle ?? "We don't just sell tiles—we install the tiles you love with uncompromising precision."}
               </p>
             </motion.header>
 
@@ -281,7 +329,7 @@ const ServiceDetailPage = ({
                         {item.name}
                       </h3>
                       <p className="text-gray-600 leading-relaxed text-lg md:text-xl">
-                        {item.description}
+                        {renderRichText(item.description)}
                       </p>
                     </div>
                   </motion.div>
@@ -397,7 +445,7 @@ const ServiceDetailPage = ({
                       {process.title}
                     </h3>
                     <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed pr-2 md:pr-0">
-                      {process.description}
+                      {renderRichText(process.description)}
                     </p>
                   </div>
 
@@ -450,7 +498,7 @@ const ServiceDetailPage = ({
                     }`}
                   >
                     <div className="px-8 text-gray-600 text-lg leading-relaxed">
-                      {faq.answer}
+                      {renderRichText(faq.answer)}
                     </div>
                   </div>
                 </motion.div>

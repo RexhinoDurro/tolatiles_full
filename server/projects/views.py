@@ -194,13 +194,18 @@ class PublicProjectsView(APIView):
 
 
 class PublicProjectDetailView(APIView):
+    """Looked up by slug (the canonical, SEO-friendly URL) or by the old numeric
+    id (kept working so already-indexed /projects/{id} links don't 404 — the
+    frontend issues a permanent redirect to the slug URL when the two differ)."""
     permission_classes = [AllowAny]
 
-    def get(self, request, pk):
+    def get(self, request, slug_or_id):
+        qs = Project.objects.filter(status='published').prefetch_related('phases__media', 'job_types')
         try:
-            project = Project.objects.filter(status='published').prefetch_related(
-                'phases__media', 'job_types'
-            ).get(pk=pk)
+            if slug_or_id.isdigit():
+                project = qs.get(pk=int(slug_or_id))
+            else:
+                project = qs.get(slug=slug_or_id)
         except Project.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ProjectDetailSerializer(project, context={'request': request})

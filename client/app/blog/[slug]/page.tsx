@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import BlogPostPage from '@/components/pages/BlogPostPage';
+import ContentDetailPage from '@/components/pages/ContentDetailPage';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -10,7 +10,9 @@ async function getPost(slug: string) {
       next: { revalidate: 60 },
     });
     if (!response.ok) return null;
-    return response.json();
+    const post = await response.json();
+    if (post.content_type !== 'blog') return null;
+    return post;
   } catch {
     return null;
   }
@@ -69,36 +71,5 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   const relatedPosts = await getRelatedPosts(slug);
 
-  const blogPostSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `https://tolatiles.com/blog/${post.slug}` },
-    headline: post.title,
-    description: post.effective_meta_description || post.excerpt,
-    image: post.featured_image || 'https://tolatiles.com/images/logo.webp',
-    author: { '@type': 'Person', name: post.author_name },
-    publisher: { '@type': 'Organization', name: 'Tola Tiles', logo: { '@type': 'ImageObject', url: 'https://tolatiles.com/images/logo.webp' } },
-    datePublished: post.publish_date,
-    dateModified: post.last_updated,
-  };
-
-  const faqSchema = post.has_faq_schema && post.faq_data?.length
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: post.faq_data.map((faq: any) => ({
-          '@type': 'Question',
-          name: faq.question,
-          acceptedAnswer: { '@type': 'Answer', text: faq.answer },
-        })),
-      }
-    : null;
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostSchema) }} />
-      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
-      <BlogPostPage post={post} relatedPosts={relatedPosts} location="florida" />
-    </>
-  );
+  return <ContentDetailPage post={post} relatedPosts={relatedPosts} contentType="blog" location="florida" />;
 }

@@ -36,6 +36,6 @@ urlpatterns = [
 
     # Public endpoints
     path('public/', PublicProjectsView.as_view(), name='public-projects'),
-    path('public/<int:pk>/', PublicProjectDetailView.as_view(), name='public-project-detail'),
+    path('public/<str:slug_or_id>/', PublicProjectDetailView.as_view(), name='public-project-detail'),
     path('public/service/<str:service_slug>/', PublicServiceProjectsView.as_view(), name='public-service-projects'),
 ]

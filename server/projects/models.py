@@ -1,6 +1,7 @@
 import os
 import re
 from django.db import models
+from django.utils.text import slugify
 
 
 STATUS_CHOICES = [
@@ -51,6 +52,7 @@ class Project(models.Model):
     ]
 
     title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICES, default='started')
@@ -69,6 +71,8 @@ class Project(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self._generate_unique_slug()
         if self.main_video_url:
             self.main_video_type = 'youtube'
         elif self.main_video:
@@ -76,6 +80,15 @@ class Project(models.Model):
         else:
             self.main_video_type = 'none'
         super().save(*args, **kwargs)
+
+    def _generate_unique_slug(self):
+        base_slug = slugify(self.title) or 'project'
+        slug = base_slug
+        counter = 2
+        while Project.objects.exclude(pk=self.pk).filter(slug=slug).exists():
+            slug = f'{base_slug}-{counter}'
+            counter += 1
+        return slug
 
     @property
     def main_video_embed_url(self):

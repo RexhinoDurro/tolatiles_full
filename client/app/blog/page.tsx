@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BlogIndexPage from '@/components/pages/BlogIndexPage';
+import ContentIndexPage from '@/components/pages/ContentIndexPage';
 
 export const metadata: Metadata = {
   title: 'Blog - Tile Installation Tips & Ideas Jacksonville & St. Augustine FL | Tola Tiles',
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function Blog() {
-  return <BlogIndexPage location="florida" />;
+  return <ContentIndexPage contentType="blog" location="florida" />;
 }

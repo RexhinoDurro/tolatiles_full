@@ -76,7 +76,7 @@ const ReviewCard = ({ review }: { review: GoogleReview }) => (
       {review.profilePhotoUrl ? (
         <Image src={review.profilePhotoUrl} alt={review.authorName} width={44} height={44} className="rounded-full ring-2 ring-gray-100" />
       ) : (
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center ring-2 ring-gray-100">
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-[#00a8e8] flex items-center justify-center ring-2 ring-gray-100">
           <span className="text-white font-semibold text-lg">{review.authorName.charAt(0).toUpperCase()}</span>
         </div>
       )}
@@ -195,7 +195,7 @@ export default function GoogleReviewsSlider({ location = 'florida' }: GoogleRevi
 
           <div className="flex justify-center gap-2 mt-6 md:mt-8">
             {reviews.map((_, index) => (
-              <button key={index} onClick={() => setCurrentIndex(index)} className={`transition-all duration-300 rounded-full ${index === currentIndex % totalReviews ? 'w-8 h-2 bg-blue-600' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`} aria-label={`Go to review ${index + 1}`} />
+              <button key={index} onClick={() => setCurrentIndex(index)} className={`transition-all duration-300 rounded-full ${index === currentIndex % totalReviews ? 'w-8 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`} aria-label={`Go to review ${index + 1}`} />
             ))}
           </div>
         </div>

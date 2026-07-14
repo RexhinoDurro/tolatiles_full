@@ -27,6 +27,7 @@ import { api } from '@/lib/api';
 import type { ProjectListItem, BlogPostListItem } from '@/types/api';
 import GoogleReviewsSlider, { type GoogleReviewsData } from '@/components/GoogleReviewsSlider';
 import WhatWeDoSection from '@/components/WhatWeDoSection';
+import { countyNames } from '@/lib/locations';
 
 // ─── Location content ─────────────────────────────────────────────────────────
 
@@ -34,7 +35,6 @@ interface LocationContent {
   location: 'florida' | 'st-augustine' | 'jacksonville';
   locationName: string;
   locationNameFull: string;
-  countyName: string;
   heroH1: string;
   heroTitle: string;
   heroSubtitle: string;
@@ -51,7 +51,6 @@ const floridaContent: LocationContent = {
   location: 'florida',
   locationName: 'Florida',
   locationNameFull: 'Northeast Florida',
-  countyName: 'Northeast Florida',
   heroH1: 'Tile Installer Jacksonville & St. Augustine, FL — Expert Installation',
   heroTitle: 'Transform Your Space with Premium Tiles',
   heroSubtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
@@ -70,7 +69,6 @@ const stAugustineContent: LocationContent = {
   location: 'st-augustine',
   locationName: 'St Augustine',
   locationNameFull: 'St Augustine, Florida',
-  countyName: 'St Johns County',
   heroH1: 'Tile Installer St Augustine FL - Expert Tile Installation Services',
   heroTitle: "St Augustine's Trusted Tile Installation Experts",
   heroSubtitle: 'Serving the Ancient City Since 2008 • Licensed & Insured',
@@ -89,7 +87,6 @@ const jacksonvilleContent: LocationContent = {
   location: 'jacksonville',
   locationName: 'Jacksonville',
   locationNameFull: 'Jacksonville, Florida',
-  countyName: 'Duval County',
   heroH1: 'Tile Installer Jacksonville FL - Professional Tile Installation Services',
   heroTitle: "Jacksonville's Premier Tile Installation Company",
   heroSubtitle: 'Serving Jax & the Beaches Since 2008 • Licensed & Insured',
@@ -127,8 +124,8 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
   return (
     <>
       <HeroSection />
-      <ProjectsStripSection />
-      <GoogleReviewsSlider location={location} />
+      <MissionSection />
+      <WhoWeAreSection />
 
       {location !== 'florida' && <LocalServicesSection content={content} />}
       {location === 'florida' ? (
@@ -136,6 +133,9 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
       ) : (
         <CrossCitySection content={content} />
       )}
+      <RenovateQuestionsSection basePath={content.basePath} />
+      <ProjectsStripSection />
+      <GoogleReviewsSlider location={location} />
       <BlogCarouselSection basePath={content.basePath} />
       <LocationSection content={content} />
       <FinalCTASection content={content} />
@@ -170,29 +170,16 @@ const ProjectsStripSection = () => {
     load();
   }, []);
 
-  // Duplicate for seamless loop
-  const looped = [...projects, ...projects, ...projects];
   const cardW = 320;
-  const gap = 24;
-  const totalW = projects.length * (cardW + gap);
 
   return (
     <section className="relative pt-24 pb-16 bg-gray-950 overflow-hidden" aria-labelledby="projects-strip-heading">
-      {/* Wavy top transition from Hero section */}
+      {/* Wavy top transition from Renovate Questions section */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-20">
         <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px] rotate-180" preserveAspectRatio="none">
-          <path className="fill-gray-900" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          <path className="fill-white" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
         </svg>
       </div>
-
-      <style>{`
-        @keyframes strip-scroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-${totalW}px); }
-        }
-        .projects-strip { animation: strip-scroll ${projects.length * 6}s linear infinite; }
-        .projects-strip:hover { animation-play-state: paused; }
-      `}</style>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <h2 id="projects-strip-heading" className="text-3xl md:text-4xl font-bold text-white mb-2">
@@ -201,13 +188,16 @@ const ProjectsStripSection = () => {
         <p className="text-gray-400 text-lg">Real projects from real customers across Northeast Florida</p>
       </div>
 
-      <div className="relative overflow-hidden">
-        <div className="projects-strip flex gap-6" style={{ width: 'max-content' }}>
-          {looped.map((project, i) => (
+      <div className="relative w-full max-w-7xl mx-auto">
+        <div
+          className="flex gap-6 overflow-x-auto snap-x snap-mandatory px-4 sm:px-6 lg:px-8 pb-6 [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {projects.map((project, i) => (
             <Link
               key={`${project.id}-${i}`}
-              href={project.id > 0 ? `/projects/${project.id}` : '/projects'}
-              className="group relative rounded-2xl overflow-hidden flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              href={project.id > 0 ? `/projects/${project.slug}` : '/projects'}
+              className="group relative rounded-2xl overflow-hidden flex-shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               style={{ width: cardW, height: 420 }}
               aria-label={`View project: ${project.title}`}
             >
@@ -248,10 +238,6 @@ const ProjectsStripSection = () => {
             </Link>
           ))}
         </div>
-
-        {/* Fade edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-950 to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-950 to-transparent z-10" />
       </div>
     </section>
   );
@@ -371,13 +357,113 @@ const HeroSection = () => (
   </>
 );
 
+// ─── Mission Section ────────────────────────────────────────────────────────────
+
+const MissionSection = () => (
+  <>
+    {/* Thick brand-blue rule marking the seam between Hero and Mission */}
+    <div className="w-full h-2 bg-[#00a8e8]" aria-hidden="true" />
+
+    <section className="relative overflow-hidden bg-[#e6f6fd] py-6 md:py-8" aria-labelledby="mission-heading">
+      {/* Clean geometric accents — soft glows, no icons */}
+      <div className="absolute -top-16 -right-16 w-64 h-64 bg-[#00a8e8]/20 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute -bottom-20 -left-10 w-56 h-56 bg-[#00a8e8]/10 rounded-full blur-[70px] pointer-events-none" />
+
+      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2
+          id="mission-heading"
+          className="text-gray-900 mb-2 tracking-tight"
+          style={{ fontFamily: 'var(--font-outfit), sans-serif', fontWeight: 800, fontSize: 'clamp(2rem, 6vw, 3.5rem)' }}
+        >
+          Our Mission Is Simple!
+        </h2>
+        <p className="text-gray-700 font-medium leading-snug mb-1 text-base sm:text-lg lg:text-sm lg:whitespace-nowrap">
+          Make sure every customer is happy and gets exactly what they wanted — every single time.
+        </p>
+        <p className="text-gray-500 italic text-sm">That's it. That's the whole business.</p>
+      </div>
+    </section>
+  </>
+);
+
+// ─── Who We Are Section ─────────────────────────────────────────────────────────
+
+const WhoWeAreSection = () => (
+  <section className="relative py-20 bg-[#cfeef9]" style={{ backgroundColor: '#86d5f7' }} aria-labelledby="who-we-are-heading">
+    {/* Wavy top transition from Mission section */}
+    <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0] z-20">
+      <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px] rotate-180" preserveAspectRatio="none">
+        <path fill="#e6f6fd" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+    </div>
+
+    <div className="max-w-3xl mx-auto px-6 sm:px-10 py-10 lg:p-12 bg-[#86d5f7] rounded-3xl shadow-sm">
+      <h2 id="who-we-are-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 text-center">
+        Why Homeowners in Jacksonville &amp; St. Augustine Trust Us
+      </h2>
+      <p className="text-lg text-gray-600 leading-relaxed">
+        Tola Tiles has been a family-owned tile installation company since 2008, led by founder Gazmend
+        "Meni" Tola. We run one small, dedicated crew — no subcontractors — so the people who show up at
+        your door are the same people who've built our name across Jacksonville and St. Augustine for
+        over 15 years.
+      </p>
+    </div>
+
+    {/* Wavy bottom transition into the next section */}
+    <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-[0] z-20">
+      <svg viewBox="0 0 1440 320" className="relative block w-full h-[40px] md:h-[80px]" preserveAspectRatio="none">
+        <path fill="#ffffff" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,197.3C672,192,768,160,864,154.7C960,149,1056,171,1152,181.3C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      </svg>
+    </div>
+  </section>
+);
+
+// ─── Renovate Questions Section ─────────────────────────────────────────────────
+
+const renovationQuestions = [
+  { slug: 'kitchen-backsplash', icon: ChefHat, question: 'Ready to finally renovate that outdated kitchen?' },
+  { slug: 'bathroom-tile', icon: Bath, question: 'Dreaming of a full bathroom remodel?' },
+  { slug: 'floor-tile', icon: Home, question: 'Time to replace the flooring throughout the whole house?' },
+  { slug: 'patio-tile', icon: Hammer, question: 'Want to turn your backyard into an outdoor living space?' },
+  { slug: 'fireplace-tile', icon: Palette, question: 'Ready to make your fireplace the centerpiece of the room?' },
+  { slug: 'shower-tile', icon: Wrench, question: "Ready for the custom walk-in shower you've always wanted?" },
+];
+
+const RenovateQuestionsSection = ({ basePath }: { basePath: string }) => (
+  <section className="py-20 bg-white" aria-labelledby="renovate-heading">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="text-center mb-12">
+        <h2 id="renovate-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          What Are You Ready to Renovate?
+        </h2>
+        <p className="text-lg text-gray-600">Tap the project that sounds like yours.</p>
+      </div>
+      <div className="flex flex-col divide-y divide-gray-200 border-t border-b border-gray-200">
+        {renovationQuestions.map(({ slug, icon: Icon, question }) => (
+          <Link
+            key={slug}
+            href={`${basePath}/services/${slug}`}
+            className="group flex items-center gap-4 py-5 px-2 -mx-2 hover:bg-gray-50 transition-colors"
+          >
+            <Icon className="h-6 w-6 text-[#00a8e8] flex-shrink-0" aria-hidden="true" />
+            <span className="flex-1 text-lg font-semibold text-gray-900 group-hover:text-[#00a8e8] transition-colors">
+              {question}
+            </span>
+            <ArrowRight className="h-5 w-5 text-gray-300 group-hover:text-[#00a8e8] group-hover:translate-x-1 transition-all flex-shrink-0" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 // ─── Geo Splitter (Florida only) ───────────────────────────────────────────────
 
 const GeoSplitterSection = () => {
   const cities = [
     {
       name: 'Jacksonville',
-      county: 'Duval County',
+      county: countyNames.jacksonville,
       href: '/jacksonville',
       image: '/images/flooring/1.webp',
       description: 'Expert tile installation in Jax, the Beaches, and all of Duval County.',
@@ -390,7 +476,7 @@ const GeoSplitterSection = () => {
     },
     {
       name: 'St. Augustine',
-      county: 'St Johns County',
+      county: countyNames['st-augustine'],
       href: '/st-augustine',
       image: '/images/patio/2.webp',
       description: 'Tile specialists for the Ancient City, coastal homes, and historic properties.',
@@ -441,7 +527,7 @@ const GeoSplitterSection = () => {
                     <Link
                       key={s.href}
                       href={s.href}
-                      className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-200 transition-all flex items-center gap-1.5"
+                      className="text-sm text-gray-700 hover:text-[#00a8e8] hover:bg-blue-50 px-3 py-2 rounded-lg border border-gray-100 hover:border-blue-200 transition-all flex items-center gap-1.5"
                     >
                       <ArrowRight className="h-3.5 w-3.5 text-blue-400 flex-shrink-0" />
                       {s.label}
@@ -451,7 +537,7 @@ const GeoSplitterSection = () => {
 
                 <Link
                   href={city.href}
-                  className="mt-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 group-hover:gap-3"
+                  className="mt-auto inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#0097d2] transition-all duration-300 group-hover:gap-3"
                 >
                   <MapPin className="h-5 w-5" />
                   Explore Tile Installation in {city.name}, FL
@@ -471,15 +557,15 @@ const GeoSplitterSection = () => {
 const CrossCitySection = ({ content }: { content: LocationContent }) => {
   const other =
     content.location === 'st-augustine'
-      ? { name: 'Jacksonville', href: '/jacksonville', county: 'Duval County' }
-      : { name: 'St Augustine', href: '/st-augustine', county: 'St Johns County' };
+      ? { name: 'Jacksonville', href: '/jacksonville', county: countyNames.jacksonville }
+      : { name: 'St Augustine', href: '/st-augustine', county: countyNames['st-augustine'] };
 
   return (
     <section className="py-16 bg-blue-50">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Also Serving {other.name} & {other.county}</h2>
         <p className="text-gray-600 mb-6">Looking for tile installation in {other.name}? We provide the same expert service throughout {other.county}.</p>
-        <Link href={other.href} className="inline-flex items-center gap-2 bg-blue-600 text-white px-7 py-3.5 rounded-lg font-semibold hover:bg-blue-700 transition-all">
+        <Link href={other.href} className="inline-flex items-center gap-2 bg-[#00a8e8] text-white px-7 py-3.5 rounded-lg font-semibold hover:bg-[#0097d2] transition-all">
           <MapPin className="h-5 w-5" />
           Explore Tile Installation in {other.name}, FL
           <ArrowRight className="h-5 w-5" />
@@ -541,25 +627,26 @@ const LocalServicesSection = ({ content }: { content: LocationContent }) => {
     content.location === 'jacksonville'
       ? 'from Riverside bungalows and San Marco condos to Ponte Vedra beach homes and Southside new builds'
       : 'from historic Downtown restoration projects and Anastasia Island condos to Nocatee new builds and Ponte Vedra Beach estates';
+  const countyName = countyNames[content.location as 'jacksonville' | 'st-augustine'];
 
   return (
     <section className="py-20 bg-gray-50" aria-labelledby="local-services-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-blue-600 font-semibold text-sm uppercase tracking-widest mb-3">
+          <p className="text-[#00a8e8] font-semibold text-sm uppercase tracking-widest mb-3">
             Local Expertise
           </p>
           <h2 id="local-services-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             Tile Installation Services in {content.locationNameFull}
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            We specialize in tile installation across {content.countyName} —{' '}
+            We specialize in tile installation across {countyName} —{' '}
             {neighborhoodCopy}. Our licensed crew handles{' '}
             {cityServiceCards.map((s, i) => (
               <span key={s.slug}>
                 <Link
                   href={`${content.basePath}/services/${s.slug}`}
-                  className="text-blue-600 font-medium hover:text-blue-700 underline underline-offset-2"
+                  className="text-[#00a8e8] font-medium hover:text-[#0097d2] underline underline-offset-2"
                 >
                   {i === 0 ? `${s.anchor} in ${content.locationName}` : s.anchor}
                 </Link>
@@ -579,14 +666,14 @@ const LocalServicesSection = ({ content }: { content: LocationContent }) => {
             >
               <div className="flex items-start gap-4">
                 <div className="bg-blue-50 p-3 rounded-xl flex-shrink-0 group-hover:bg-blue-100 transition-colors">
-                  <Icon className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                  <Icon className="h-6 w-6 text-[#00a8e8]" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors leading-snug">
+                  <h3 className="font-bold text-gray-900 mb-2 group-hover:text-[#00a8e8] transition-colors leading-snug">
                     {label} in {content.locationName}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
-                  <span className="inline-flex items-center gap-1 text-blue-600 text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
+                  <span className="inline-flex items-center gap-1 text-[#00a8e8] text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
                     View service
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
@@ -679,7 +766,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-blue-600 font-semibold text-sm uppercase tracking-widest mb-2">Tile Tips & Insights</p>
+            <p className="text-[#00a8e8] font-semibold text-sm uppercase tracking-widest mb-2">Tile Tips & Insights</p>
             <h2 id="blog-heading" className="text-3xl md:text-4xl font-bold text-gray-900">
               From Our Blog
             </h2>
@@ -701,7 +788,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
             >
               <ChevronRight className="h-5 w-5 text-gray-700" />
             </button>
-            <Link href={`${basePath}/blog`} className="ml-2 text-blue-600 font-semibold text-sm hover:text-blue-700 flex items-center gap-1">
+            <Link href={`${basePath}/blog`} className="ml-2 text-[#00a8e8] font-semibold text-sm hover:text-[#0097d2] flex items-center gap-1">
               View All
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -738,12 +825,12 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
 
                   <div className="p-5 flex-1 flex flex-col">
                     {post.categories?.length > 0 && (
-                      <span className="text-xs text-blue-600 font-semibold uppercase tracking-wide mb-2">
+                      <span className="text-xs text-[#00a8e8] font-semibold uppercase tracking-wide mb-2">
                         {post.categories[0].name}
                       </span>
                     )}
                     <Link href={postHref}>
-                      <h3 className="font-bold text-gray-900 text-lg leading-snug mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-bold text-gray-900 text-lg leading-snug mb-2 line-clamp-2 group-hover:text-[#00a8e8] transition-colors">
                         {post.title}
                       </h3>
                     </Link>
@@ -755,7 +842,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
                       </div>
                       <Link
                         href={postHref}
-                        className="text-blue-600 text-sm font-semibold hover:text-blue-700 flex items-center gap-1 group/link"
+                        className="text-[#00a8e8] text-sm font-semibold hover:text-[#0097d2] flex items-center gap-1 group/link"
                       >
                         Read more
                         <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
@@ -775,7 +862,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
               <button
                 key={i}
                 onClick={() => setIdx(i)}
-                className={`rounded-full transition-all duration-300 ${i === idx ? 'w-6 h-2 bg-blue-600' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`}
+                className={`rounded-full transition-all duration-300 ${i === idx ? 'w-6 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`}
                 aria-label={`Go to post group ${i + 1}`}
               />
             ))}
@@ -815,16 +902,16 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Tola Tiles — {content.locationName}</h3>
             <address className="not-italic space-y-3 text-gray-600">
               <p className="flex items-start gap-3">
-                <span className="text-blue-600 font-medium">Address:</span>
+                <span className="text-[#00a8e8] font-medium">Address:</span>
                 <span>445 Hutchinson Ln<br />St Augustine, FL 32084</span>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-blue-600 font-medium">Phone:</span>
-                <a href="tel:+1-904-866-1738" className="hover:text-blue-600 transition-colors">{PHONE_NUMBER}</a>
+                <span className="text-[#00a8e8] font-medium">Phone:</span>
+                <a href="tel:+1-904-866-1738" className="hover:text-[#00a8e8] transition-colors">{PHONE_NUMBER}</a>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-blue-600 font-medium">Email:</span>
-                <a href="mailto:menitola@tolatiles.com" className="hover:text-blue-600 transition-colors">menitola@tolatiles.com</a>
+                <span className="text-[#00a8e8] font-medium">Email:</span>
+                <a href="mailto:menitola@tolatiles.com" className="hover:text-[#00a8e8] transition-colors">menitola@tolatiles.com</a>
               </p>
             </address>
           </div>
@@ -857,7 +944,7 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
             href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300 transform hover:scale-105"
           >
             Get Directions
             <ArrowRight className="w-5 h-5" />

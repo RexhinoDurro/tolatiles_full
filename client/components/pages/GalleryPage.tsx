@@ -267,7 +267,7 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
             {selectedCategory !== 'all' && (
               <Link
                 href={`/${location}${categoryInfo.serviceLink}`}
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                className="inline-flex items-center text-[#00a8e8] hover:text-[#0097d2] font-medium transition-colors"
               >
                 Learn more about our {categoryLabel.toLowerCase()} services →
               </Link>
@@ -288,7 +288,7 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
                 key={cat.id}
                 href={cat.id === 'all' ? `/${location}/gallery` : `/${location}/gallery/${cat.id}`}
                 className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
-                  selectedCategory === cat.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
+                  selectedCategory === cat.id ? 'bg-[#00a8e8] text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
                 }`}
                 aria-current={selectedCategory === cat.id ? 'page' : undefined}
               >
@@ -305,7 +305,7 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
           {/* Loading State */}
           {isLoading && (
             <div className="flex justify-center items-center py-16">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#00a8e8]" />
               <span className="ml-3 text-gray-600">Loading gallery...</span>
             </div>
           )}
@@ -348,7 +348,7 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
                         key={page}
                         onClick={() => goToPage(page)}
                         className={`px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
-                          page === currentPage ? 'bg-blue-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          page === currentPage ? 'bg-[#00a8e8] text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                         aria-label={`Go to page ${page}`}
                         aria-current={page === currentPage ? 'page' : undefined}
@@ -393,13 +393,13 @@ const GalleryPage = ({ category, location = 'florida' }: GalleryPageProps) => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href={`/${location}/contact`}
-                className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className="bg-[#00a8e8] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Get Your Free Quote
               </Link>
               <Link
                 href={`/${location}/contact`}
-                className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105"
+                className="border-2 border-[#00a8e8] text-[#00a8e8] px-8 py-4 rounded-lg font-semibold hover:bg-[#00a8e8] hover:text-white transition-all duration-300 transform hover:scale-105"
               >
                 Schedule Consultation
               </Link>

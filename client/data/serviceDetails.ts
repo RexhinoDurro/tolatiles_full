@@ -18,6 +18,11 @@ export interface ServiceProcessStep {
   description: string;
 }
 
+export interface ServiceMaterial {
+  name: string;
+  description: string;
+}
+
 export interface ServiceDetails {
   /** Base H1 keyword phrase — location suffix appended by the component */
   keywordBase: string;
@@ -31,6 +36,8 @@ export interface ServiceDetails {
   faqs: ServiceFAQ[];
   /** Service-specific installation process steps */
   processSteps: ServiceProcessStep[];
+  /** Material/style options shown in the location-page "Materials & Styles" section */
+  materials?: ServiceMaterial[];
 }
 
 export const serviceDetailsMap: Record<string, ServiceDetails> = {
@@ -42,25 +49,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Advanced Leveling Systems',
         description:
-          'Installing large panels requires advanced mortar coverage techniques and edge-leveling systems to prevent hollow spots and uneven edges (lippage). We extensively prep the surface to achieve a seamless, perfectly flat look.',
+          'Installing large panels requires advanced mortar coverage techniques and **edge-leveling systems** to prevent hollow spots and uneven edges (lippage). We extensively prep the surface to achieve a seamless, perfectly flat look.',
         image: '/images/backsplash/5.webp',
       },
       {
         name: 'Laser-Aligned Layouts',
         description:
-          'We ensure perfect laser-aligned layouts, symmetrical corners, and flawless grout lines. From complex geometric patterns to classic subway formats, we calculate the perfect starting points to ensure symmetrical cuts around outlets and cabinetry.',
+          'We ensure perfect **laser-aligned layouts**, symmetrical corners, and flawless grout lines. From complex geometric patterns to classic subway formats, we calculate the perfect starting points to ensure symmetrical cuts around outlets and cabinetry.',
         image: '/images/backsplash/1.webp',
       },
       {
         name: 'Specialized Cutting & Handling',
         description:
-          'Delicate materials require specialized cutting tools and specific thinset techniques to prevent shadowing or edge chipping. We handle all installations with expert care for a brilliant, clean finish.',
+          'Delicate materials require **specialized cutting tools** and specific thinset techniques to prevent shadowing or edge chipping. We handle all installations with expert care for a brilliant, clean finish.',
         image: '/images/backsplash/2.webp',
       },
       {
         name: 'Premium Stone Sealing & Protection',
         description:
-          'Porous materials require expert care. We use premium non-staining adhesives and apply high-quality penetrating sealants to protect your investment from kitchen splatters and moisture.',
+          'Porous materials require expert care. We use premium non-staining adhesives and apply high-quality **penetrating sealants** to protect your investment from kitchen splatters and moisture.',
         image: '/images/backsplash/3.webp',
       },
     ],
@@ -68,12 +75,12 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the tile you love from your preferred supplier, and we provide the labor, setting materials (thinset, waterproofing), and expertise to install it flawlessly. During our consultation, we will tell you exactly how much tile to order.',
+          "**Bring your own tile** — we're installers, not tile retailers, so you're free to shop wherever you'd like, whether that's a local supplier, a big box store, or an online retailer for something more specialty like hand-painted ceramic. What we bring is the labor, the thinset, the moisture-resistant backer where needed, and the precision layout work. During your free consultation, we'll walk your kitchen, confirm the design, and give you the exact square footage to order so you're not guessing or over-buying.",
       },
       {
         question: 'How long does kitchen backsplash tile installation take?',
         answer:
-          'Most kitchen backsplash installations are completed in 1 to 3 days. A standard range surround takes about one day. Full surround installations covering all countertop walls take 2–3 days. We work efficiently to minimize disruption to your kitchen routine.',
+          'Most kitchen backsplash installations are completed in **1 to 3 days**. A standard range surround takes about one day. Full surround installations covering all countertop walls take 2–3 days. We work efficiently to minimize disruption to your kitchen routine.',
       },
       {
         question: 'What tile materials work best for kitchen backsplashes in Florida?',
@@ -127,25 +134,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Multi-Layer Waterproofing Systems',
         description:
-          'We install premium moisture barriers over all surfaces and seams. Every penetration is individually sealed, ensuring your walls and floors are 100% watertight before a single tile is laid.',
+          'We install **premium moisture barriers** over all surfaces and seams. Every penetration is individually sealed, ensuring your walls and floors are 100% watertight before a single tile is laid.',
         image: '/images/shower/1.webp',
       },
       {
         name: 'Slope & Drainage Engineering',
         description:
-          'For wet rooms and floors, we expertly grade the surface underneath the tile to ensure rapid, complete water evacuation to the drain with zero pooling, utilizing precision dry-pack mortar beds.',
+          'For wet rooms and floors, we expertly grade the surface underneath the tile to ensure rapid, complete water evacuation to the drain with zero pooling, utilizing precision **dry-pack mortar beds**.',
         image: '/images/shower/2.webp',
       },
       {
         name: 'Advanced Wall Leveling',
         description:
-          'We use specialized suction equipment and edge-leveling clips to install oversized panels on bathroom walls, ensuring a perfectly flat finish with minimal grout lines and zero lippage.',
+          'We use specialized suction equipment and **edge-leveling clips** to install oversized panels on bathroom walls, ensuring a perfectly flat finish with minimal grout lines and zero lippage.',
         image: '/images/shower/3.webp',
       },
       {
         name: 'Custom Fabrications & Integration',
         description:
-          'We frame, waterproof, and seamlessly tile custom niches and seating benches, perfectly aligning the grout lines with the surrounding walls without compromising the moisture barrier.',
+          'We frame, waterproof, and seamlessly tile **custom niches and seating benches**, perfectly aligning the grout lines with the surrounding walls without compromising the moisture barrier.',
         image: '/images/shower/4.webp',
       },
     ],
@@ -153,17 +160,17 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the tile you love from your preferred supplier, and we provide the labor, setting materials (thinset, waterproofing), and expertise to install it flawlessly. During our consultation, we will tell you exactly how much tile to order.',
+          "**We install; you choose the tile.** Most homeowners already have a look in mind or a supplier they trust, so we let you handle that part and focus entirely on the installation — waterproofing, layout, cutting, and grouting. Before work starts, we measure the full bathroom and tell you precisely how much tile, in square footage, to have on hand, including a reasonable buffer for cuts and waste.",
       },
       {
         question: 'How long does a full bathroom tile installation take?',
         answer:
-          'A complete bathroom tile installation — floor, walls, and shower — typically takes 3 to 7 days depending on the size and complexity. We provide a detailed schedule before work begins and stick to it.',
+          'A complete bathroom tile installation — floor, walls, and shower — typically takes **3 to 7 days** depending on the size and complexity. We provide a detailed schedule before work begins and stick to it.',
       },
       {
         question: 'Do you provide a waterproofing warranty for bathroom tile installations?',
         answer:
-          'Yes. Every bathroom tile installation includes our comprehensive waterproofing warranty covering the integrity of the moisture barrier and grout joints. We use industry-leading membrane systems specifically engineered to prevent moisture intrusion.',
+          'Yes. Every bathroom tile installation includes our **comprehensive waterproofing warranty** covering the integrity of the moisture barrier and grout joints. We use industry-leading membrane systems specifically engineered to prevent moisture intrusion.',
       },
       {
         question: 'Can you tile over existing bathroom floor tiles?',
@@ -207,25 +214,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Precision Slab Leveling & Preparation',
         description:
-          'Florida slabs settle and crack. We grind high spots, use self-leveling compounds, and apply crack-isolation membranes to ensure your new floor never cracks or shifts.',
+          'Florida slabs settle and crack. We grind high spots, use self-leveling compounds, and apply **crack-isolation membranes** to ensure your new floor never cracks or shifts.',
         image: '/images/flooring/1.webp',
       },
       {
         name: 'Advanced Mortar Coverage Techniques',
         description:
-          'Installing large formats requires advanced mortar coverage and edge-leveling systems to prevent hollow spots and uneven edges (lippage). We guarantee perfectly flat results.',
+          'Installing large formats requires **advanced mortar coverage and edge-leveling systems** to prevent hollow spots and uneven edges (lippage). We guarantee perfectly flat results.',
         image: '/images/flooring/2.webp',
       },
       {
         name: 'Intricate Layout Mastery',
         description:
-          'Precision laser alignment is critical. We use specialized staggered layouts (1/3 offset for planks) and calculate exact center lines so the pattern flows seamlessly from room to room.',
+          '**Precision laser alignment** is critical. We use specialized staggered layouts (1/3 offset for planks) and calculate exact center lines so the pattern flows seamlessly from room to room.',
         image: '/images/flooring/3.webp',
       },
       {
         name: 'Seamless Surface Transitions',
         description:
-          'We expertly manage the height differences where your new floor meets existing carpet, hardwood, or doorways, creating smooth, trip-free transitions throughout the home.',
+          'We expertly manage the height differences where your new floor meets existing carpet, hardwood, or doorways, creating smooth, **trip-free transitions** throughout the home.',
         image: '/images/flooring/4.webp',
       },
     ],
@@ -233,7 +240,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the tile you love from your preferred supplier, and we provide the labor, setting materials (thinset, waterproofing), and expertise to install it flawlessly. During our consultation, we will tell you exactly how much tile to order.',
+          "**You supply the tile, we handle everything else.** Whether you're ordering porcelain, natural stone, or luxury vinyl tile from a local showroom or online, our job is turning it into a finished floor — subfloor prep, leveling, layout, and installation. During the initial walkthrough, we measure the space and give you an exact quantity to order, accounting for your chosen pattern and typical cut waste.",
       },
       {
         question: 'How do you prepare a concrete slab for tile installation in Florida?',
@@ -243,7 +250,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'How long does floor tile installation take?',
         answer:
-          'Most residential floor tile installations are completed in 2 to 5 days. Full first-floor renovations covering open-plan living and kitchen areas typically take 3–5 days. We factor in tile set time and grout curing.',
+          'Most residential floor tile installations are completed in **2 to 5 days**. Full first-floor renovations covering open-plan living and kitchen areas typically take 3–5 days. We factor in tile set time and grout curing.',
       },
       {
         question: 'What tile size looks best in open-concept floor plans?',
@@ -287,25 +294,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Exterior Grade Bonding',
         description:
-          'We use specialized exterior-grade adhesives and leveling systems to securely bond heavy materials to concrete slabs, preventing any shifting over time despite the elements.',
+          'We use specialized **exterior-grade adhesives** and leveling systems to securely bond heavy materials to concrete slabs, preventing any shifting over time despite the elements.',
         image: '/images/patio/1.webp',
       },
       {
         name: 'Slope & Runoff Management',
         description:
-          'Outdoor installations must shed water away from the house. We expertly grade the mortar bed to ensure perfect runoff without creating noticeable or awkward slopes.',
+          'Outdoor installations must shed water away from the house. We expertly grade the mortar bed to ensure **perfect runoff** without creating noticeable or awkward slopes.',
         image: '/images/patio/2.webp',
       },
       {
         name: 'Thermal Expansion Engineering',
         description:
-          'Florida sun causes outdoor surfaces to expand significantly. We calculate and install flexible soft joints at correct intervals to guarantee the installation never buckles or cracks.',
+          'Florida sun causes outdoor surfaces to expand significantly. We calculate and install **flexible soft joints** at correct intervals to guarantee the installation never buckles or cracks.',
         image: '/images/patio/3.webp',
       },
       {
         name: 'Exterior Waterproofing',
         description:
-          'For second-story balconies or patios over living spaces, we install robust exterior waterproofing membranes to protect the structure below from Florida thunderstorms.',
+          'For second-story balconies or patios over living spaces, we install robust **exterior waterproofing membranes** to protect the structure below from Florida thunderstorms.',
         image: '/images/patio/4.webp',
       },
     ],
@@ -313,7 +320,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the outdoor tile or pavers you love from your preferred supplier, and we provide the labor, setting materials, and expertise to install it flawlessly. During our consultation, we will tell you exactly how much material to order.',
+          "**We install the tile or pavers; you choose the material.** Outdoor jobs often involve specialty pavers or porcelain from a specific supplier, so we leave that selection to you and focus on what we do best — layout, drainage, bonding, and expansion joints suited for outdoor conditions. We'll calculate your exact material needs during the site visit, including extra for cuts around edges and drains.",
       },
       {
         question: "How do outdoor tiles hold up in Florida's weather?",
@@ -323,7 +330,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'How long does patio tile installation take?',
         answer:
-          'A standard patio tile installation takes 3 to 6 days depending on complexity and weather conditions. Drainage slope work and surface prep are critical for handling summer rainfall and are never rushed.',
+          'A standard patio tile installation takes **3 to 6 days** depending on complexity and weather conditions. Drainage slope work and surface prep are critical for handling summer rainfall and are never rushed.',
       },
       {
         question: 'Can you install tiles on an existing concrete patio?',
@@ -367,25 +374,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Heat-Rated Installation Adherence',
         description:
-          'We strictly adhere to NFPA 211 and local Florida building codes for firebox clearances, using specialized heat-rated adhesives that won\'t fail under extreme temperature changes.',
+          'We strictly adhere to **NFPA 211** and local Florida building codes for firebox clearances, using specialized heat-rated adhesives that won\'t fail under extreme temperature changes.',
         image: '/images/fireplace/1.webp',
       },
       {
         name: 'Symmetrical Layout Planning',
         description:
-          'A fireplace is the focal point of the room. We laser-align the exact center of the firebox and calculate the layout so all cuts are perfectly symmetrical on both sides for a balanced aesthetic.',
+          'A fireplace is the focal point of the room. We laser-align the exact center of the firebox and calculate the layout so all cuts are **perfectly symmetrical** on both sides for a balanced aesthetic.',
         image: '/images/fireplace/2.webp',
       },
       {
         name: 'Mitered Corners & Artisan Edges',
         description:
-          'Instead of using cheap metal trim, we bevel (miter) the edges at 45 degrees to create flawless, professional outside corners that look like solid masonry.',
+          'Instead of using cheap metal trim, we **bevel (miter) the edges at 45 degrees** to create flawless, professional outside corners that look like solid masonry.',
         image: '/images/fireplace/3.webp',
       },
       {
         name: 'Heavy-Duty Vertical Mounting',
         description:
-          'Installing massive panels or heavy ledger stone on vertical fireplace faces requires structural expertise. We ensure the substrate can handle the weight and use heavy-duty bonding methods.',
+          'Installing massive panels or heavy ledger stone on vertical fireplace faces requires structural expertise. We ensure the substrate can handle the weight and use **heavy-duty bonding methods**.',
         image: '/images/fireplace/4.webp',
       },
     ],
@@ -393,7 +400,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the tile you love from your preferred supplier, and we provide the labor, setting materials, and expertise to install it flawlessly. During our consultation, we will tell you exactly how much tile to order.',
+          "**You pick the tile or stone, we handle the installation.** Fireplace surrounds often use specialty materials — natural stone, ledger panels, hand-painted tile — that homeowners like to source themselves. We take care of the code-compliant substrate prep, heat-rated adhesive, and precision layout. During your consultation, we'll confirm your design and tell you exactly how much material to order for the surround, hearth, and mantel area.",
       },
       {
         question: 'What tiles are safe to use on fireplace surrounds?',
@@ -403,7 +410,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'How long does fireplace tile installation take?',
         answer:
-          'Most fireplace surround installations are completed in 2 to 4 days. A standard surround takes 1–2 days. Floor-to-ceiling stacked stone installations take 3–4 days to allow proper adhesive set time before grouting.',
+          'Most fireplace surround installations are completed in **2 to 4 days**. A standard surround takes 1–2 days. Floor-to-ceiling stacked stone installations take 3–4 days to allow proper adhesive set time before grouting.',
       },
       {
         question: 'Can I tile over my existing fireplace surround?',
@@ -447,25 +454,25 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Impermeable Waterproofing Mastery',
         description:
-          'We install premium systems sealing every seam, corner, and screw penetration so your walls and floors are 100% watertight before a single piece is laid, preventing leaks permanently.',
+          'We install premium systems sealing every seam, corner, and screw penetration so your walls and floors are **100% watertight** before a single piece is laid, preventing leaks permanently.',
         image: '/images/shower/1.webp',
       },
       {
         name: 'Precision Pan Engineering',
         description:
-          'We hand-pack custom dry-pack mortar beds, engineering the exact slope (1/4" per foot) required to ensure complete water evacuation to the drain with zero pooling.',
+          'We hand-pack custom dry-pack mortar beds, engineering the exact **slope (1/4" per foot)** required to ensure complete water evacuation to the drain with zero pooling.',
         image: '/images/shower/2.webp',
       },
       {
         name: 'Curbless (Zero-Threshold) Accessibility',
         description:
-          'We specialize in lowering the subfloor or raising the bathroom floor to create stunning, accessible curbless showers using sleek linear drains with flawless barrier-free entry.',
+          'We specialize in lowering the subfloor or raising the bathroom floor to create stunning, accessible **curbless showers** using sleek linear drains with flawless barrier-free entry.',
         image: '/images/shower/3.webp',
       },
       {
         name: 'Envelope Cutting for Large Formats',
         description:
-          'If you want large formats on the shower floor, we perform expert "envelope cuts" (diagonal cuts matching the slope) to allow them to drain properly toward a center drain without sacrificing aesthetics.',
+          'If you want large formats on the shower floor, we perform expert **"envelope cuts"** (diagonal cuts matching the slope) to allow them to drain properly toward a center drain without sacrificing aesthetics.',
         image: '/images/shower/4.webp',
       },
     ],
@@ -473,7 +480,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          'We focus 100% on expert installation and craftsmanship. You purchase the tile you love from your preferred supplier, and we provide the labor, setting materials (thinset, waterproofing), and expertise to install it flawlessly. During our consultation, we will tell you exactly how much tile to order.',
+          "**We're the installers, not the tile supplier.** You purchase the tile you want from wherever you'd like — many of our shower clients special-order from a local tile shop for exactly this reason — and we handle the labor, waterproofing membrane, pan slope, and setting materials. During your consultation, we measure the shower and tell you the exact quantity to order, including extra for niches, benches, and accent details.",
       },
       {
         question: "How do you prevent shower tiles from leaking?",
@@ -483,7 +490,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'How long does custom shower tile installation take?',
         answer:
-          'Custom shower tile installations typically take 4 to 7 days. A basic tub-to-shower conversion takes 4–5 days. A large walk-in shower with custom niches and a built-in bench takes 6–7 days. We never rush the critical waterproofing stages.',
+          'Custom shower tile installations typically take **4 to 7 days**. A basic tub-to-shower conversion takes 4–5 days. A large walk-in shower with custom niches and a built-in bench takes 6–7 days. We never rush the critical waterproofing stages.',
       },
       {
         question: 'Do you install curbless (zero-threshold) walk-in showers?',

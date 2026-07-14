@@ -6,7 +6,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 export default function NewBlogPostPage() {
   return (
     <AdminLayout hideDefaultPadding>
-      <BlogEditor isNew />
+      <BlogEditor isNew contentType="blog" />
     </AdminLayout>
   );
 }

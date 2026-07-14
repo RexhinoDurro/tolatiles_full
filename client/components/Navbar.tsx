@@ -11,7 +11,7 @@ type LocationType = 'florida' | 'jacksonville' | 'st-augustine';
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
@@ -47,7 +47,7 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    if (isMobileMenuOpen) {
+    if (isMobileServicesOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -55,10 +55,10 @@ const Navbar = () => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileServicesOpen]);
 
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    setIsMobileServicesOpen(false);
     setIsServicesDropdownOpen(false);
     setIsLocationDropdownOpen(false);
   }, [pathname]);
@@ -86,9 +86,19 @@ const Navbar = () => {
     { id: 'services', label: 'Services', href: `${navPrefix}/services`, hasDropdown: true },
     { id: 'gallery', label: 'Gallery', href: `${navPrefix}/gallery` },
     { id: 'projects', label: 'Projects', href: '/projects' },
-    { id: 'about', label: 'About', href: `${navPrefix}/about` },
-    { id: 'blog', label: 'Blog', href: `${navPrefix}/blog` },
     { id: 'contact', label: 'Contact Us', href: `${navPrefix}/contact` },
+  ];
+
+  // Secondary link row — content engine sections + About, lives in the white
+  // utility bar (desktop bottom row / mobile 3rd row + hamburger drawer).
+  // Blog/Guides/Design Ideas/Stories are flat root-level routes; About stays
+  // location-prefixed since it's a per-city page.
+  const secondaryLinkItems = [
+    { id: 'blog', label: 'Blog', href: '/blog' },
+    { id: 'guides', label: 'Guides', href: '/guides' },
+    { id: 'design-ideas', label: 'Design Ideas', href: '/design-ideas' },
+    { id: 'about', label: 'About Us', href: `${navPrefix}/about` },
+    { id: 'stories', label: 'Stories', href: '/stories' },
   ];
 
   const isActiveRoute = (href: string) => {
@@ -105,136 +115,96 @@ const Navbar = () => {
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg border-b border-gray-200/50' : ''
           }`}
       >
-        {/* TOP UTILITY BAR (Desktop) */}
-        <div className="hidden md:block bg-white border-b border-gray-200/60 text-gray-600">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex justify-between items-center text-xs lg:text-sm font-medium">
-            {/* Spacer for the hanging logo */}
-            <div className="hidden md:block w-32 lg:w-64 xl:w-96 flex-shrink-0" />
+        {/* TOP UTILITY BAR (Desktop) — fixed 80px total, split into 2 rows */}
+        <div className="hidden md:flex flex-col border-b border-gray-200/60 text-gray-600 h-20 w-full bg-white">
+          {/* Row 1 (Grey Bar): contact info + phone + location dropdown */}
+          <div className="h-7 w-full bg-gray-100 flex items-center">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-[10px] lg:text-[11px] font-medium">
+              {/* Spacer for the hanging logo */}
+              <div className="w-32 lg:w-64 xl:w-96 flex-shrink-0" />
 
-            {/* Contact & Hours Info */}
-            <div className="flex items-center space-x-6">
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-[#00a8e8]" />
-                <span>Mon-Fri: 8:00 AM - 6:00 PM</span>
-              </span>
-              <a href="mailto:menitola@tolatiles.com" className="flex items-center gap-1.5 hover:text-[#00a8e8] transition-colors">
-                <Mail className="w-4 h-4 text-[#00a8e8]" />
-                <span>menitola@tolatiles.com</span>
-              </a>
-            </div>
+              {/* Contact & Hours Info */}
+              <div className="flex items-center space-x-4 lg:space-x-6">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#00a8e8]" />
+                  <span>Mon-Fri: 8:00 AM - 6:00 PM</span>
+                </span>
+                <a href="mailto:menitola@tolatiles.com" className="flex items-center gap-1.5 hover:text-[#00a8e8] transition-colors">
+                  <Mail className="w-3.5 h-3.5 text-[#00a8e8]" />
+                  <span>menitola@tolatiles.com</span>
+                </a>
+              </div>
 
-            {/* Phone & Location Selection */}
-            <div className="flex items-center space-x-4">
-              <a href="tel:+1-904-866-1738" className="flex items-center gap-1.5 font-bold text-gray-800 hover:text-[#00a8e8] transition-colors">
-                <Phone className="w-4 h-4 text-[#00a8e8]" />
-                <span>(904) 866-1738</span>
-              </a>
+              {/* Phone & Location Selection */}
+              <div className="flex items-center space-x-3 lg:space-x-4">
+                <a href="tel:+1-904-866-1738" className="flex items-center gap-1.5 font-bold text-gray-800 hover:text-[#00a8e8] transition-colors">
+                  <Phone className="w-3.5 h-3.5 text-[#00a8e8]" />
+                  <span>(904) 866-1738</span>
+                </a>
 
-              {/* Location Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                  className="bg-[#00a8e8] text-white px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider hover:bg-[#0097d2] transition-all duration-200 flex items-center gap-1"
-                  aria-expanded={isLocationDropdownOpen}
-                  aria-haspopup="true"
-                >
-                  <span>
-                    {currentLocation === 'st-augustine' ? 'St. Augustine' : currentLocation === 'jacksonville' ? 'Jacksonville' : 'Florida'}
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
+                {/* Location Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
+                    className="bg-[#00a8e8] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider hover:bg-[#0097d2] transition-all duration-200 flex items-center gap-1"
+                    aria-expanded={isLocationDropdownOpen}
+                    aria-haspopup="true"
+                  >
+                    <span>
+                      {currentLocation === 'st-augustine' ? 'St. Augustine' : currentLocation === 'jacksonville' ? 'Jacksonville' : 'Florida'}
+                    </span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
 
-                {isLocationDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 py-1">
-                    <Link
-                      href="/"
-                      className={`block w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'florida' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
-                      onClick={() => setIsLocationDropdownOpen(false)}
-                    >
-                      Florida (All Areas)
-                    </Link>
-                    <Link
-                      href="/jacksonville"
-                      className={`block w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'jacksonville' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
-                      onClick={() => setIsLocationDropdownOpen(false)}
-                    >
-                      Jacksonville
-                    </Link>
-                    <Link
-                      href="/st-augustine"
-                      className={`block w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'st-augustine' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
-                      onClick={() => setIsLocationDropdownOpen(false)}
-                    >
-                      St. Augustine
-                    </Link>
-                  </div>
-                )}
+                  {isLocationDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 py-1 text-xs">
+                      <Link
+                        href="/"
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'florida' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        onClick={() => setIsLocationDropdownOpen(false)}
+                      >
+                        Florida (All Areas)
+                      </Link>
+                      <Link
+                        href="/jacksonville"
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'jacksonville' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        onClick={() => setIsLocationDropdownOpen(false)}
+                      >
+                        Jacksonville
+                      </Link>
+                      <Link
+                        href="/st-augustine"
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'st-augustine' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        onClick={() => setIsLocationDropdownOpen(false)}
+                      >
+                        St. Augustine
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* MOBILE TOP UTILITY BAR (Mobile/Tablet) */}
-        <div className={`md:hidden bg-white border-gray-200/60 text-gray-600 text-[10px] sm:text-xs transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0 border-b-0 m-0 p-0' : 'max-h-32 opacity-100 border-b'
-          }`}>
-          {/* Row 1: Phone & Location Selection */}
-          <div className="px-4 py-2 flex justify-between items-center border-b border-gray-100/50">
-            <a href="tel:+1-904-866-1738" className="flex items-center gap-1 font-bold text-gray-800">
-              <Phone className="w-3.5 h-3.5 text-[#00a8e8]" />
-              <span>(904) 866-1738</span>
-            </a>
-
-            <div className="relative">
-              <button
-                onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                className="bg-[#00a8e8] text-white px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
-              >
-                <span>
-                  {currentLocation === 'st-augustine' ? 'St. Augustine' : currentLocation === 'jacksonville' ? 'Jacksonville' : 'Florida'}
-                </span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-
-              {isLocationDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded shadow-lg border border-gray-200 z-50 py-1">
-                  <Link
-                    href="/"
-                    className="block w-full text-left px-3 py-1.5 text-[10px] font-semibold text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsLocationDropdownOpen(false)}
-                  >
-                    Florida (All Areas)
-                  </Link>
-                  <Link
-                    href="/jacksonville"
-                    className="block w-full text-left px-3 py-1.5 text-[10px] font-semibold text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsLocationDropdownOpen(false)}
-                  >
-                    Jacksonville
-                  </Link>
-                  <Link
-                    href="/st-augustine"
-                    className="block w-full text-left px-3 py-1.5 text-[10px] font-semibold text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsLocationDropdownOpen(false)}
-                  >
-                    St. Augustine
-                  </Link>
-                </div>
-              )}
+          {/* Row 2 (White Bar): secondary content links */}
+          <div className="w-full flex-1 bg-white flex items-end border-t border-gray-100 pb-1.5">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end justify-end gap-4 lg:gap-6">
+              {secondaryLinkItems.map((item) => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-wide transition-colors ${
+                    isActiveRoute(item.href) ? 'text-[#00a8e8]' : 'text-gray-800 hover:text-[#00a8e8]'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           </div>
-
-          {/* Row 2: Hours & Email Info */}
-          <div className="px-4 py-1.5 flex flex-wrap justify-between gap-x-2 gap-y-0.5 text-gray-500 font-medium">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-[#00a8e8]" />
-              <span>Mon-Fri: 8:00 AM - 6:00 PM</span>
-            </span>
-            <a href="mailto:menitola@tolatiles.com" className="flex items-center gap-1">
-              <Mail className="w-3.5 h-3.5 text-[#00a8e8]" />
-              <span>menitola@tolatiles.com</span>
-            </a>
-          </div>
         </div>
+
+
 
         {/* MAIN HEADER BAR (Solid Blue) */}
         <div className="bg-[#00a8e8] relative h-16 shadow-md">
@@ -261,9 +231,9 @@ const Navbar = () => {
                 <Image
                   src="/images/whitelogo.svg"
                   alt="Tola Tiles Logo"
-                  width={180}
-                  height={36}
-                  className="h-9 w-auto"
+                  width={220}
+                  height={44}
+                  className="h-11 w-auto"
                   priority
                 />
               </Link>
@@ -331,24 +301,15 @@ const Navbar = () => {
             {/* MOBILE INTERACTIVE BUTTONS */}
             <div className="md:hidden flex items-center justify-between w-full absolute left-0 px-4 h-full pointer-events-none">
 
-              {/* Hamburger Button on Left */}
+              {/* Services Button on Left */}
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="pointer-events-auto p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
-                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={isMobileMenuOpen}
+                onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
+                className="pointer-events-auto flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-bold uppercase text-xs tracking-wider border border-white/20 transition-all shadow-sm"
+                aria-label={isMobileServicesOpen ? 'Close services' : 'Open services'}
+                aria-expanded={isMobileServicesOpen}
               >
-                <div className="relative w-6 h-6">
-                  <span
-                    className={`absolute top-1 left-0 w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 top-3' : ''}`}
-                  ></span>
-                  <span
-                    className={`absolute top-3 left-0 w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
-                  ></span>
-                  <span
-                    className={`absolute top-5 left-0 w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 top-3' : ''}`}
-                  ></span>
-                </div>
+                Services
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Phone Icon on Right */}
@@ -365,44 +326,47 @@ const Navbar = () => {
         </div>
       </header>
 
-      {isMobileMenuOpen && (
-        <div className="md:hidden fixed top-32 right-4 z-40 w-[50%] max-w-xs">
-          <div className="bg-white/95 backdrop-blur-md shadow-xl border border-gray-200/30 rounded-xl max-h-[60vh] overflow-y-auto">
-            <nav className="px-4 py-3 space-y-1" role="navigation" aria-label="Mobile navigation">
-              {navigationItems.map((item) => (
-                <div key={item.id}>
-                  {item.hasDropdown ? (
-                    <div className="space-y-1">
-                      <div className="text-gray-800 font-bold uppercase py-1.5 px-2 text-xs border-b border-gray-200/40">{item.label}</div>
-                      <div className="ml-2 space-y-0.5">
-                        {serviceCategories.map((category) => (
-                          <Link
-                            key={category.id}
-                            href={category.href}
-                            className="block w-full text-left py-1.5 px-2 text-xs text-gray-600 hover:text-blue-600 hover:bg-blue-50/60 transition-all duration-200 rounded-md"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {category.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className={`block w-full text-left py-2 px-2 font-bold uppercase transition-all duration-200 rounded-md text-xs ${isActiveRoute(item.href) ? 'text-[#00a8e8] bg-blue-50/60' : 'text-gray-700 hover:text-[#00a8e8] hover:bg-blue-50/60'
-                        }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
-                </div>
+      {isMobileServicesOpen && (
+        <>
+          {/* Floating Dropdown Modal */}
+          <div 
+            className="md:hidden fixed left-4 right-4 z-40 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 animate-fadeIn overflow-y-auto max-h-[80vh]"
+            style={{ top: 'calc(var(--navbar-height) + 8px)' }}
+          >
+            <nav className="flex flex-col p-3 space-y-1" role="navigation" aria-label="Mobile services navigation">
+              {serviceCategories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={category.href}
+                  className="flex items-center justify-between w-full p-3.5 text-[15px] font-bold text-gray-800 bg-transparent rounded-xl hover:bg-blue-50 hover:text-[#00a8e8] active:bg-blue-50 transition-colors"
+                  onClick={() => setIsMobileServicesOpen(false)}
+                >
+                  {category.label}
+                  <ChevronDown className="w-4 h-4 -rotate-90 text-gray-400" />
+                </Link>
               ))}
+              
+              {/* Contact CTA in modal */}
+              <div className="pt-2 mt-2 border-t border-gray-100">
+                <Link
+                  href={`${navPrefix}/contact`}
+                  onClick={() => setIsMobileServicesOpen(false)}
+                  className="w-full bg-[#00a8e8] text-white py-3 rounded-xl font-bold text-base text-center shadow-md block active:bg-[#0097d2] transition-colors"
+                >
+                  Get a Free Estimate
+                </Link>
+              </div>
             </nav>
           </div>
-          <div className="fixed inset-0 bg-black/10 -z-10" onClick={() => setIsMobileMenuOpen(false)}></div>
-        </div>
+          
+          {/* Backdrop to close the modal when clicking outside */}
+          <div 
+            className="md:hidden fixed inset-0 bg-black/10 z-30" 
+            style={{ top: 'var(--navbar-height)' }}
+            onClick={() => setIsMobileServicesOpen(false)} 
+            aria-hidden="true"
+          />
+        </>
       )}
     </>
   );

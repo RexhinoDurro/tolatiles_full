@@ -32,17 +32,17 @@ export const services: Service[] = [
       "Our expert team specializes in creating beautiful, functional kitchen backsplashes that protect your walls while adding aesthetic value to your space. We work with a wide variety of materials including ceramic, porcelain, glass, and natural stone tiles to match your unique style and budget. From modern subway tiles to intricate mosaic patterns, we bring your vision to life with precision and craftsmanship.",
     icon: 'ChefHat',
     features: [
-      'Custom design consultation and planning',
-      'Professional surface preparation and leveling',
-      'Precision tile cutting and installation',
-      'Expert grouting and sealing',
-      'Post-installation cleanup and inspection',
-      'Material selection guidance',
+      'Laser-straight layouts, every time',
+      'Symmetrical cuts around outlets and cabinets',
+      'Sealed against grease, steam, and stains',
+      'Free consultation with exact material quantities before you buy',
+      'Daily site cleanup — no dust left behind',
+      'Grout color-matched and haze-free at final walkthrough',
     ],
     timeline: '1-3 days',
     locations: {
       florida: {
-        localDescription: "Serving Northeast Florida, our kitchen backsplash installations combine stunning design with hurricane-ready durability. We specialize in precision layouts and moisture-resistant techniques that protect your walls while transforming the heart of your home.",
+        localDescription: "Trusted **kitchen backsplash tile installation** for homeowners across **Jacksonville** and **St. Augustine**, FL. We handle laser-aligned layouts, moisture-resistant setting materials, and symmetrical cuts around cabinets and outlets — the details that separate a backsplash that lasts from one that doesn't.",
         localFeatures: [
           'Humidity-resistant materials and installation methods',
           'Florida Building Code compliant installations',
@@ -57,7 +57,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville homeowners in Riverside and San Marco know that a beautiful kitchen backsplash can transform the heart of their home. Our team has installed countless backsplashes throughout Duval County, from the historic bungalows of Avondale to the modern condos of Downtown Jacksonville. We understand the unique aesthetic of Jacksonville neighborhoods—whether you prefer the eclectic charm of Five Points or the elegant style of Mandarin. Florida's humidity presents real challenges, but our moisture-resistant installation techniques ensure your backsplash stays beautiful for years. We source materials that complement Jacksonville's blend of contemporary and traditional architecture, offering everything from classic subway tiles to bold geometric patterns that make a statement.",
+        localDescription: "**Jacksonville** homeowners in Riverside and San Marco know that a beautiful **kitchen backsplash** can transform the heart of their home. Our team has installed countless backsplashes throughout **Duval County**, from the historic bungalows of Avondale to the modern condos of Downtown Jacksonville. We understand the unique aesthetic of Jacksonville neighborhoods—whether you prefer the eclectic charm of Five Points or the elegant style of Mandarin. Florida's humidity presents real challenges, but our **moisture-resistant installation techniques** ensure your backsplash stays beautiful for years. We source materials that complement Jacksonville's blend of contemporary and traditional architecture, offering everything from classic subway tiles to bold geometric patterns that make a statement.",
         localFeatures: [
           'Expertise with Jacksonville historic home renovations',
           'Same-day consultations throughout Duval County',
@@ -72,7 +72,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "In the Ancient City, kitchen backsplashes must honor the unique character of St. Augustine's architecture while standing up to our coastal climate. Our installers have worked in homes throughout St. Johns County, from the historic districts downtown to the beachside communities of Vilano Beach and Crescent Beach. We specialize in designs that complement Spanish Colonial and Mediterranean-style kitchens, popular in our area's vacation rentals and primary residences alike. Salt air and humidity require special attention—we use corrosion-resistant materials and premium sealants that protect your investment. Whether your home overlooks the Intracoastal or sits in the shaded streets of Lincolnville, we create backsplashes that capture the timeless elegance St. Augustine is known for while meeting modern durability standards.",
+        localDescription: "In the Ancient City, **kitchen backsplashes** must honor the unique character of **St. Augustine's** architecture while standing up to our coastal climate. Our installers have worked in homes throughout **St. Johns County**, from the historic districts downtown to the beachside communities of Vilano Beach and Crescent Beach. We specialize in designs that complement Spanish Colonial and Mediterranean-style kitchens, popular in our area's vacation rentals and primary residences alike. Salt air and humidity require special attention—we use corrosion-resistant materials and premium sealants that protect your investment. Whether your home overlooks the Intracoastal or sits in the shaded streets of Lincolnville, we create backsplashes that capture the timeless elegance St. Augustine is known for while meeting modern durability standards.",
         localFeatures: [
           'Historic home backsplash expertise',
           'Coastal-grade materials for salt air exposure',
@@ -96,17 +96,17 @@ export const services: Service[] = [
       "Create a spa-like retreat in your home with our comprehensive bathroom tiling services. We handle everything from floor tiles to wall installations and custom shower designs. Our waterproofing expertise ensures your bathroom not only looks beautiful but also stands the test of time. We use only the highest quality materials and proven installation techniques to prevent moisture damage and maintain the integrity of your bathroom.",
     icon: 'Bath',
     features: [
-      'Complete waterproofing solutions',
-      'Custom shower and tub surrounds',
-      'Slip-resistant flooring options',
-      'Heated floor installation available',
-      'Niche and shelf integration',
-      'Matching grout color selection',
+      "Waterproofing you'll never have to think about again",
+      'Slip-resistant floors, built to code',
+      'Heated floor options for cool mornings',
+      'Custom niches and shelving built into the wall, not bolted on',
+      'Grout and sealant matched to your exact tile',
+      'A full walkthrough before we call the job done',
     ],
     timeline: '3-7 days',
     locations: {
       florida: {
-        localDescription: "Bathroom tile installation in Northeast Florida demands uncompromising waterproofing to handle our intense humidity. We bring professional-grade moisture barriers and mold-resistant materials to every project, ensuring your new spa-like retreat is completely watertight and built to last.",
+        localDescription: "Complete **bathroom tile installation** for **Jacksonville** and **St. Augustine** homeowners, built around one priority first: waterproofing. Every project gets premium moisture barriers, mold-resistant materials, and proper drainage slope — because a beautiful bathroom that leaks isn't actually finished.",
         localFeatures: [
           'Advanced waterproofing for Florida humidity',
           'Mold and mildew resistant materials',
@@ -121,7 +121,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville bathrooms face unique challenges—from the humidity that seeps into Riverside bungalows to the salt air affecting Jacksonville Beach condos. Our bathroom tile installation team has completed hundreds of projects across Duval County, developing specialized techniques for our local climate. In Mandarin and the Southside, we've transformed dated builder-grade bathrooms into modern retreats. Along the beaches, we use marine-grade materials that resist corrosion. Our master bathroom renovations in San Marco and Ortega showcase attention to detail that matches these historic neighborhoods' character. Every installation includes premium waterproofing membranes and proper slope for drainage, critical in Jacksonville's wet climate. We offer heated floor options perfect for those surprisingly cool Florida mornings.",
+        localDescription: "**Jacksonville** bathrooms face unique challenges—from the humidity that seeps into Riverside bungalows to the salt air affecting Jacksonville Beach condos. Our **bathroom tile installation** team has completed hundreds of projects across **Duval County**, developing specialized techniques for our local climate. In Mandarin and the Southside, we've transformed dated builder-grade bathrooms into modern retreats. Along the beaches, we use marine-grade materials that resist corrosion. Our master bathroom renovations in San Marco and Ortega showcase attention to detail that matches these historic neighborhoods' character. Every installation includes **premium waterproofing membranes** and proper slope for drainage, critical in Jacksonville's wet climate. We offer heated floor options perfect for those surprisingly cool Florida mornings.",
         localFeatures: [
           'Marine-grade materials for beach communities',
           'Historic home bathroom renovation expertise',
@@ -136,7 +136,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "St. Augustine bathrooms tell a story—from the coquina-inspired designs in historic downtown homes to the bright, airy beach house bathrooms on Anastasia Island. Our team specializes in bathroom tile installations that honor the Ancient City's architectural heritage while incorporating modern waterproofing technology. Vacation rental owners throughout St. Johns County trust us for durable, easy-clean installations that handle heavy guest traffic. We've worked in World Golf Village master suites, Vilano Beach cottages, and historic bed-and-breakfasts in the downtown district. Salt air and coastal humidity require extra protection, so we use premium sealants and corrosion-resistant fixtures. Whether you're updating a century-old bathroom or building new in Nocatee, our installations blend seamlessly with St. Augustine's unique character.",
+        localDescription: "**St. Augustine** bathrooms tell a story—from the coquina-inspired designs in historic downtown homes to the bright, airy beach house bathrooms on Anastasia Island. Our team specializes in **bathroom tile installations** that honor the Ancient City's architectural heritage while incorporating modern waterproofing technology. Vacation rental owners throughout **St. Johns County** trust us for durable, easy-clean installations that handle heavy guest traffic. We've worked in World Golf Village master suites, Vilano Beach cottages, and historic bed-and-breakfasts in the downtown district. Salt air and coastal humidity require extra protection, so we use premium sealants and corrosion-resistant fixtures. Whether you're updating a century-old bathroom or building new in Nocatee, our installations blend seamlessly with St. Augustine's unique character.",
         localFeatures: [
           'Historic bathroom renovation specialists',
           'High-traffic vacation rental installations',
@@ -160,17 +160,17 @@ export const services: Service[] = [
       "Whether you're updating a single room or tiling an entire property, our flooring experts deliver exceptional results. We specialize in various flooring materials including ceramic, porcelain, natural stone, and luxury vinyl tile. Our meticulous installation process ensures proper leveling, spacing, and finishing for a floor that's both beautiful and built to last. We pay special attention to high-traffic areas and can recommend the best materials for your specific needs.",
     icon: 'Home',
     features: [
-      'Subfloor preparation and leveling',
-      'Radiant heating system installation',
-      'Large format tile expertise',
-      'Pattern design and layout',
-      'Transition strip installation',
-      'Commercial-grade options available',
+      'Cracked and uneven slabs fixed before a single tile goes down',
+      'Zero-lippage, large-format tile installation',
+      'Smooth transitions to carpet, wood, and doorways',
+      'Radiant heat installed underneath for year-round comfort',
+      'Pattern layout planned room-to-room, not tile-by-tile',
+      'Commercial-grade options for high-traffic spaces',
     ],
     timeline: '2-5 days',
     locations: {
       florida: {
-        localDescription: "Florida concrete slabs require expert preparation to ensure lasting floor tile adhesion. We specialize in precision leveling and crack-isolation techniques, delivering flawlessly flat, durable floors that can handle our subtropical environment.",
+        localDescription: "**Floor tile installation** across **Jacksonville** and **St. Augustine** starts underneath the tile, not on top of it. Florida slabs shift and crack, so we grind, level, and crack-isolate before we ever set a single piece — the reason our floors still look flat years later.",
         localFeatures: [
           'Florida slab foundation expertise',
           'Temperature fluctuation considerations',
@@ -185,7 +185,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville's diverse housing stock—from 1920s Riverside bungalows to brand-new Arlington townhomes—demands flooring expertise that adapts to every situation. Our floor tile installations have transformed living rooms in San Marco, kitchens in Mandarin, and entire first floors in Southside new construction. We excel with large format tiles that make Jacksonville's open floor plans feel even more spacious. The concrete slabs typical in Duval County construction require specific preparation techniques we've perfected over years of local work. For Jacksonville Beach and Atlantic Beach properties, we recommend porcelain tiles rated for moisture resistance. Our team handles everything from elegant marble entryways in Ortega to durable commercial flooring in Jacksonville's business districts.",
+        localDescription: "**Jacksonville's** diverse housing stock—from 1920s Riverside bungalows to brand-new Arlington townhomes—demands flooring expertise that adapts to every situation. Our **floor tile installations** have transformed living rooms in San Marco, kitchens in Mandarin, and entire first floors in Southside new construction. We excel with large format tiles that make Jacksonville's open floor plans feel even more spacious. The concrete slabs typical in **Duval County** construction require specific preparation techniques we've perfected over years of local work. For Jacksonville Beach and Atlantic Beach properties, we recommend porcelain tiles rated for moisture resistance. Our team handles everything from elegant marble entryways in Ortega to durable commercial flooring in Jacksonville's business districts.",
         localFeatures: [
           'Open floor plan design expertise',
           'Duval County concrete slab specialists',
@@ -200,7 +200,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "St. Augustine's historic homes and coastal properties present unique flooring challenges that our team has mastered through years of local experience. From the uneven subfloors in downtown's oldest buildings to the moisture concerns in Vilano Beach cottages, we know how to create beautiful, lasting tile floors throughout St. Johns County. Vacation rentals need flooring that withstands constant traffic and sandy feet—we recommend specific porcelain tiles proven in our coastal environment. In World Golf Village and Nocatee, we install elegant large format tiles that complement modern open floor plans. Historic properties often require careful leveling work before installation, and our craftsmen take pride in preserving the character of St. Augustine's architectural heritage while providing modern durability.",
+        localDescription: "**St. Augustine's** historic homes and coastal properties present unique flooring challenges that our team has mastered through years of local experience. From the uneven subfloors in downtown's oldest buildings to the moisture concerns in Vilano Beach cottages, we know how to create beautiful, lasting **tile floors** throughout **St. Johns County**. Vacation rentals need flooring that withstands constant traffic and sandy feet—we recommend specific porcelain tiles proven in our coastal environment. In World Golf Village and Nocatee, we install elegant large format tiles that complement modern open floor plans. Historic properties often require careful leveling work before installation, and our craftsmen take pride in preserving the character of St. Augustine's architectural heritage while providing modern durability.",
         localFeatures: [
           'Historic building floor leveling expertise',
           'High-traffic vacation rental durability',
@@ -224,17 +224,17 @@ export const services: Service[] = [
       'Extend your living space outdoors with our professional patio and outdoor tiling services. We use weather-resistant, slip-resistant materials designed to withstand the elements while maintaining their beauty year-round. Our outdoor installations are perfect for patios, pool decks, walkways, and outdoor entertainment areas. We ensure proper drainage and use specialized adhesives and grouts suitable for outdoor conditions and temperature fluctuations.',
     icon: 'Palette',
     features: [
-      'Freeze-thaw resistant materials',
-      'Proper drainage planning',
-      'Slip-resistant surface options',
-      'UV-resistant grout and sealant',
-      'Pool deck specialization',
-      'Outdoor kitchen backsplash',
+      'Built for Florida sun, rain, and freeze-thaw swings',
+      'Slip-resistant surfaces around pools and walkways',
+      'Drainage planned before we set a single tile',
+      "UV-stable grout that won't fade or crack",
+      'Outdoor kitchen backsplashes to match your patio',
+      "Expansion joints placed exactly where they're needed, not guessed at",
     ],
     timeline: '3-6 days',
     locations: {
       florida: {
-        localDescription: "Outdoor living is year-round in Northeast Florida, making durable patio tile essential. We create beautiful outdoor spaces using UV-resistant materials, slip-resistant finishes, and expert drainage planning to handle intense sun and afternoon thunderstorms.",
+        localDescription: "Outdoor living runs year-round for **Jacksonville** and **St. Augustine** homeowners, so we build **patio and pool deck tile installations** to match — UV-stable grout, slip-resistant surfaces, and drainage planned before a single tile goes down, built to handle sun, storms, and everything in between.",
         localFeatures: [
           'Hurricane and storm-resistant installations',
           'UV-resistant materials for Florida sun',
@@ -249,7 +249,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville's outdoor lifestyle calls for patio spaces that work as hard as you play. Our team has installed patio tiles throughout Duval County, from the poolside decks of Ponte Vedra to the cozy backyard patios of Mandarin. We understand Jacksonville's weather patterns—scorching summers, afternoon storms, and the occasional freeze—and select materials that handle it all. In Jacksonville Beach and Atlantic Beach, we use marine-grade installations that resist salt air corrosion. Outdoor kitchens have become increasingly popular in Riverside and San Marco, and we offer backsplash installations that complement your grilling setup. Every Jacksonville patio installation includes proper drainage planning to handle our summer downpours and slip-resistant surfaces for pool areas.",
+        localDescription: "**Jacksonville's** outdoor lifestyle calls for patio spaces that work as hard as you play. Our team has installed **patio tiles** throughout **Duval County**, from the poolside decks of Ponte Vedra to the cozy backyard patios of Mandarin. We understand Jacksonville's weather patterns—scorching summers, afternoon storms, and the occasional freeze—and select materials that handle it all. In Jacksonville Beach and Atlantic Beach, we use marine-grade installations that resist salt air corrosion. Outdoor kitchens have become increasingly popular in Riverside and San Marco, and we offer backsplash installations that complement your grilling setup. Every Jacksonville patio installation includes proper drainage planning to handle our summer downpours and slip-resistant surfaces for pool areas.",
         localFeatures: [
           'Duval County outdoor living specialists',
           'Marine-grade beach community installations',
@@ -264,7 +264,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "St. Augustine's Spanish Colonial architecture makes courtyard patios and outdoor living spaces essential to the local lifestyle. Our outdoor tile installations capture the Ancient City's charm while providing modern durability against salt air and coastal weather. We've created stunning courtyard patios in the historic district, pool decks overlooking the Intracoastal at Vilano Beach, and outdoor entertainment areas in World Golf Village. Vacation rental owners especially value our slip-resistant pool deck installations that keep guests safe while requiring minimal maintenance. St. Augustine's afternoon rain showers demand expert drainage planning, which we incorporate into every design. From traditional terra cotta looks to contemporary large format pavers, we help you extend your living space into St. Augustine's beautiful outdoors.",
+        localDescription: "**St. Augustine's** Spanish Colonial architecture makes courtyard patios and outdoor living spaces essential to the local lifestyle. Our **outdoor tile installations** capture the Ancient City's charm while providing modern durability against salt air and coastal weather. We've created stunning courtyard patios in the historic district, pool decks overlooking the Intracoastal at Vilano Beach, and outdoor entertainment areas in World Golf Village. Vacation rental owners especially value our slip-resistant pool deck installations that keep guests safe while requiring minimal maintenance. St. Augustine's afternoon rain showers demand expert drainage planning, which we incorporate into every design. From traditional terra cotta looks to contemporary large format pavers, we help you extend your living space into St. Augustine's beautiful outdoors.",
         localFeatures: [
           'Spanish Colonial courtyard expertise',
           'Vacation rental pool deck specialists',
@@ -288,17 +288,17 @@ export const services: Service[] = [
       "Create a focal point in your home with a beautifully tiled fireplace surround. We specialize in both traditional and contemporary fireplace designs using heat-resistant materials that are both safe and stunning. From rustic stone to sleek modern tiles, we can help you choose the perfect materials to complement your home's decor. Our installations meet all safety codes and building regulations while delivering the aesthetic impact you desire.",
     icon: 'Hammer',
     features: [
-      'Heat-resistant material selection',
-      'Custom surround design',
-      'Mantel and hearth integration',
-      'Safety code compliance',
-      'Stone and tile combinations',
-      'Accent lighting options',
+      'Code-compliant heat clearances, no exceptions',
+      'Perfectly symmetrical layouts around the firebox',
+      'Mitered corners instead of metal trim',
+      'Stone and tile combinations built to survive real heat cycles',
+      'Accent lighting integrated into the surround design',
+      'Working and decorative fireplaces both done right',
     ],
     timeline: '2-4 days',
     locations: {
       florida: {
-        localDescription: "A beautifully tiled fireplace creates a stunning focal point in any Northeast Florida home. We strictly adhere to building codes for heat clearance, delivering precise, symmetrical layouts that elevate your living space.",
+        localDescription: "**Fireplace tile installation** in **Jacksonville** and **St. Augustine** homes, working or purely decorative. We build every surround to code, laser-align the layout to the firebox center, and miter the outside corners instead of hiding them under metal trim — small details, real difference.",
         localFeatures: [
           'Gas fireplace surround specialists',
           'Florida building code compliance',
@@ -313,7 +313,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville homes increasingly feature fireplaces as design statements rather than heat sources, and our tile surrounds help make them unforgettable focal points. From the craftsman bungalows of Riverside where original fireplaces get updated surrounds, to the new construction in Nocatee where gas units need elegant framing, we bring fireplace tile expertise throughout Duval County. We've created dramatic floor-to-ceiling installations in San Marco living rooms and cozy, traditional surrounds in Mandarin family spaces. The clean lines of modern gas fireplaces offer exciting design opportunities—geometric tiles, stacked stone, or sleek porcelain panels that transform your space. Every Jacksonville fireplace installation we complete meets local building codes while achieving the visual impact you envision.",
+        localDescription: "**Jacksonville** homes increasingly feature fireplaces as design statements rather than heat sources, and our tile surrounds help make them unforgettable focal points. From the craftsman bungalows of Riverside where original fireplaces get updated surrounds, to the new construction in Nocatee where gas units need elegant framing, we bring **fireplace tile** expertise throughout **Duval County**. We've created dramatic floor-to-ceiling installations in San Marco living rooms and cozy, traditional surrounds in Mandarin family spaces. The clean lines of modern gas fireplaces offer exciting design opportunities—geometric tiles, stacked stone, or sleek porcelain panels that transform your space. Every Jacksonville fireplace installation we complete meets local building codes while achieving the visual impact you envision.",
         localFeatures: [
           'Historic fireplace restoration expertise',
           'Modern gas fireplace surrounds',
@@ -328,7 +328,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "Fireplaces in St. Augustine often serve as decorative centerpieces that honor the city's rich architectural heritage. Our fireplace tile installations complement everything from Spanish Revival homes in the historic district to Mediterranean-style estates in Ponte Vedra. We've restored original fireplace surrounds in century-old bed-and-breakfasts and created contemporary statements in World Golf Village great rooms. Even non-working fireplaces become stunning focal points with the right tile treatment—hand-painted Talavera tiles, elegant marble, or textured stone that adds depth and character. Vacation rental properties benefit from eye-catching fireplace surrounds that photograph beautifully and create memorable guest experiences. Our St. Augustine fireplace installations blend Old World charm with modern installation techniques.",
+        localDescription: "Fireplaces in **St. Augustine** often serve as decorative centerpieces that honor the city's rich architectural heritage. Our **fireplace tile installations** complement everything from Spanish Revival homes in the historic district to Mediterranean-style estates in Ponte Vedra. We've restored original fireplace surrounds in century-old bed-and-breakfasts and created contemporary statements in World Golf Village great rooms. Even non-working fireplaces become stunning focal points with the right tile treatment—hand-painted Talavera tiles, elegant marble, or textured stone that adds depth and character. Vacation rental properties benefit from eye-catching fireplace surrounds that photograph beautifully and create memorable guest experiences. Our St. Augustine fireplace installations blend Old World charm with modern installation techniques.",
         localFeatures: [
           'Historic fireplace restoration',
           'Spanish and Mediterranean design expertise',
@@ -352,17 +352,17 @@ export const services: Service[] = [
       "Transform your bathroom with a custom-tiled shower that combines functionality with luxury. Our shower installations feature complete waterproofing systems, proper slope for drainage, and expertly installed tiles that create a beautiful, water-tight enclosure. We can create everything from simple, elegant designs to elaborate multi-pattern installations with accent strips, niches, and benches. All our shower installations come with a comprehensive waterproofing warranty.",
     icon: 'Wrench',
     features: [
-      'Complete waterproofing membrane',
-      'Custom shower pan installation',
-      'Built-in niches and benches',
-      'Multiple tile pattern options',
-      'Accent strip integration',
-      'Lifetime leak warranty',
+      'A waterproofing system that actually stops leaks',
+      'Precision-sloped pans — zero standing water',
+      'Curbless, zero-threshold entries done right',
+      'Built-in niches and benches, framed and waterproofed as one system',
+      'Multiple pattern options, from classic subway to bold accent strips',
+      'Backed by a lifetime leak warranty',
     ],
     timeline: '4-7 days',
     locations: {
       florida: {
-        localDescription: "Our custom shower installations combine luxury aesthetics with bulletproof waterproofing systems. From perfectly sloped pans to elegant curbless entries, we build showers engineered to prevent leaks and mold in Florida's humid climate.",
+        localDescription: "Custom **shower tile installation** for **Jacksonville** and **St. Augustine**, engineered from the waterproofing out. Every pan is hand-packed to the correct slope, every seam and niche individually sealed, so the shower you see is backed by a system that actually stops leaks.",
         localFeatures: [
           'Advanced humidity-resistant waterproofing',
           'Curbless shower drainage expertise',
@@ -377,7 +377,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "Jacksonville homeowners expect showers that feel like personal retreats, and our installations deliver that experience with bulletproof waterproofing underneath. We've transformed master bathrooms throughout Duval County—creating spa-worthy showers in Mandarin, elegant walk-ins in San Marco, and beach-rinse ready enclosures in Jacksonville Beach. Our curbless shower installations are perfect for aging-in-place renovations popular in established neighborhoods like Ortega and Avondale. Jacksonville's humidity makes proper waterproofing critical; we use premium membrane systems and mold-resistant materials that protect your investment for decades. Every shower includes thoughtful details—properly placed niches for shampoo, solid benches for comfort, and drainage slopes that keep water moving. From modest updates to complete luxury transformations, we make Jacksonville showers shine.",
+        localDescription: "**Jacksonville** homeowners expect showers that feel like personal retreats, and our installations deliver that experience with bulletproof waterproofing underneath. We've transformed master bathrooms throughout **Duval County**—creating spa-worthy showers in Mandarin, elegant walk-ins in San Marco, and beach-rinse ready enclosures in Jacksonville Beach. Our **curbless shower installations** are perfect for aging-in-place renovations popular in established neighborhoods like Ortega and Avondale. Jacksonville's humidity makes proper waterproofing critical; we use premium membrane systems and mold-resistant materials that protect your investment for decades. Every shower includes thoughtful details—properly placed niches for shampoo, solid benches for comfort, and drainage slopes that keep water moving. From modest updates to complete luxury transformations, we make Jacksonville showers shine.",
         localFeatures: [
           'Aging-in-place accessible designs',
           'Beach house rinse-off shower expertise',
@@ -392,7 +392,7 @@ export const services: Service[] = [
         ],
       },
       'st-augustine': {
-        localDescription: "St. Augustine showers must handle everything from sandy beach feet to the Ancient City's persistent coastal humidity. Our shower installations throughout St. Johns County combine beautiful tile work with waterproofing systems built for our unique environment. Vacation rental owners particularly value our quick-drain floors and easy-clean tile selections—practical features guests appreciate without sacrificing style. In World Golf Village and Nocatee, we create luxurious walk-in showers with rain heads and body sprays. Historic district homes often require creative solutions for small bathrooms, and our space-efficient designs maximize every inch. We've installed showers in Vilano Beach cottages, Anastasia Island beach houses, and elegant homes throughout Ponte Vedra. Every St. Augustine shower installation includes our comprehensive waterproofing warranty and humidity-resistant construction.",
+        localDescription: "**St. Augustine** showers must handle everything from sandy beach feet to the Ancient City's persistent coastal humidity. Our **shower installations** throughout **St. Johns County** combine beautiful tile work with waterproofing systems built for our unique environment. Vacation rental owners particularly value our quick-drain floors and easy-clean tile selections—practical features guests appreciate without sacrificing style. In World Golf Village and Nocatee, we create luxurious walk-in showers with rain heads and body sprays. Historic district homes often require creative solutions for small bathrooms, and our space-efficient designs maximize every inch. We've installed showers in Vilano Beach cottages, Anastasia Island beach houses, and elegant homes throughout Ponte Vedra. Every St. Augustine shower installation includes our comprehensive waterproofing warranty and humidity-resistant construction.",
         localFeatures: [
           'Beach house quick-drain installations',
           'Vacation rental practical luxury',

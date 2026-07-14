@@ -51,11 +51,11 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center space-x-3 mb-6">
               <Image
-                src="/images/logo.webp"
+                src="/images/whitelogo.svg"
                 alt="Tola Tiles Logo"
                 width={40}
                 height={40}
-                className="w-10 h-10 rounded-lg"
+                className="w-10 h-10"
               />
               <h2 className="text-2xl font-bold">Tola Tiles</h2>
             </div>
@@ -69,7 +69,7 @@ const Footer = () => {
                 href={process.env.NEXT_PUBLIC_FACEBOOK_URL || 'https://www.facebook.com/TolaTiles'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+                className="w-10 h-10 bg-[#00a8e8] rounded-full flex items-center justify-center hover:bg-[#0097d2] transition-colors"
                 aria-label="Visit our Facebook page"
               >
                 <Facebook className="w-5 h-5 text-white" />
@@ -296,7 +296,7 @@ const Footer = () => {
 
             <div className="flex flex-col items-center md:items-end gap-2 text-sm text-gray-400">
               <div className="flex items-center gap-1">
-                <span>4.9/5 rating</span>
+                <span>5.0★ rating</span>
               </div>
               <a
                 href="https://montrose.agency"

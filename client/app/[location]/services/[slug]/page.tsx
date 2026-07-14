@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ServiceDetailPage from '@/components/pages/ServiceDetailPage';
 import ServiceDetailPageLocation from '@/components/pages/ServiceDetailPageLocation';
-import BreadcrumbSchema from '@/components/BreadcrumbSchema';
+import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 import { services, Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import { VALID_LOCATIONS, isValidLocation, locationNames, geoCoordinates, areaServed, type LocationType } from '@/lib/locations';
@@ -182,15 +182,15 @@ export default async function ServiceDetail({
     shower: 'shower-tile',
   };
 
-  const breadcrumbItems = [
-    { name: 'Home', url: 'https://tolatiles.com' },
-    { name: locationName, url: `https://tolatiles.com/${location}` },
-    { name: 'Services', url: `https://tolatiles.com/${location}/services` },
-    { name: service.title, url: `https://tolatiles.com/${location}/services/${resolvedParams.slug}` },
-  ];
-
   // Florida path handled by root /services/[slug] — but fall back gracefully if needed
   if (location === 'florida') {
+    const breadcrumbItems = [
+      { name: 'Home', url: 'https://tolatiles.com' },
+      { name: locationName, url: `https://tolatiles.com/${location}` },
+      { name: 'Services', url: `https://tolatiles.com/${location}/services` },
+      { name: service.title, url: `https://tolatiles.com/${location}/services/${resolvedParams.slug}` },
+    ];
+
     return (
       <>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
@@ -207,6 +207,11 @@ export default async function ServiceDetail({
       </>
     );
   }
+
+  const breadcrumbItems = buildCityBreadcrumbs(location, [
+    { name: 'Services', url: `https://tolatiles.com/${location}/services` },
+    { name: service.title, url: `https://tolatiles.com/${location}/services/${resolvedParams.slug}` },
+  ]);
 
   return (
     <>

@@ -1,5 +1,7 @@
 // API Types for Tola Tiles
 
+import type { ContentType } from '@/lib/contentTypes';
+
 // Gallery Types
 export interface Category {
   id: number;
@@ -970,6 +972,9 @@ export interface BlogPost {
   faq_data: FAQItem[];
   categories: BlogCategoryMinimal[];
   location: BlogLocation;
+  content_type: ContentType;
+  related_service_page: string;
+  related_link_auto_appended: boolean;
   status: BlogPostStatus;
   publish_date: string | null;
   scheduled_publish_date: string | null;
@@ -990,6 +995,9 @@ export interface BlogPostListItem {
   featured_image_alt: string;
   categories: BlogCategoryMinimal[];
   location: BlogLocation;
+  content_type: ContentType;
+  related_service_page: string;
+  related_link_auto_appended: boolean;
   status: BlogPostStatus;
   publish_date: string | null;
   reading_time: number;
@@ -1013,6 +1021,8 @@ export interface BlogPostCreate {
   faq_data?: FAQItem[];
   category_ids?: number[];
   location?: BlogLocation;
+  content_type?: ContentType;
+  related_service_page?: string;
   status?: BlogPostStatus;
   scheduled_publish_date?: string;
 }
@@ -1033,6 +1043,8 @@ export interface BlogPostUpdate {
   faq_data?: FAQItem[];
   category_ids?: number[];
   location?: BlogLocation;
+  content_type?: ContentType;
+  related_service_page?: string;
   status?: BlogPostStatus;
   scheduled_publish_date?: string | null;
 }
@@ -1040,6 +1052,8 @@ export interface BlogPostUpdate {
 export interface BlogPostSitemapItem {
   slug: string;
   location: BlogLocation;
+  content_type: ContentType;
+  category_slugs: string[];
   last_updated: string;
   publish_date: string;
 }
@@ -1133,6 +1147,9 @@ export interface CalendarBlogPost {
   slug: string;
   status: BlogPostStatus;
   location: BlogLocation;
+  content_type: ContentType;
+  related_service_page: string;
+  related_link_auto_appended: boolean;
   scheduled_publish_date: string | null;
   publish_date: string | null;
   created_at: string;
@@ -1144,6 +1161,8 @@ export interface QuickDraftCreate {
   title: string;
   slug: string;
   category_ids?: number[];
+  content_type?: ContentType;
+  related_service_page?: string;
   scheduled_publish_date?: string;
   status?: BlogPostStatus;
 }
@@ -1194,6 +1213,7 @@ export interface Phase {
 export interface Project {
   id: number;
   title: string;
+  slug: string;
   description: string;
   status: ProjectStatus;
   work_status: WorkStatus;
@@ -1212,6 +1232,7 @@ export interface Project {
 export interface ProjectListItem {
   id: number;
   title: string;
+  slug: string;
   status: ProjectStatus;
   work_status: WorkStatus;
   is_featured: boolean;
