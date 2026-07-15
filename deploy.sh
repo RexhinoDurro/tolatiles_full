@@ -38,7 +38,7 @@ git pull origin main
 # FILE_UPLOAD_PERMISSIONS) inherit this shell's umask. If that umask strips the
 # world-read bit, nginx (running as www-data, serving /media/ directly off disk)
 # gets 403s on anything just pulled. Normalize after every pull so this can't recur.
-chmod -R a+rX server/media
+chmod -R a+rX server/media 2>/dev/null || true
 
 echo "→ Building and starting containers..."
 sudo -E docker compose -f docker-compose.prod.yml up --build -d
