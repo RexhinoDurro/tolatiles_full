@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import HomePage from '@/components/pages/HomePage';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Tile Installer Jacksonville & St. Augustine FL | Expert Installation | Tola Tiles',
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
     url: 'https://tolatiles.com/',
     type: 'website',
     siteName: 'Tola Tiles',
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

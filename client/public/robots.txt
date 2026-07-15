@@ -2,7 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
-Disallow: /florida/
 Disallow: /.well-known/
 Disallow: /private/
 Disallow: /temp/

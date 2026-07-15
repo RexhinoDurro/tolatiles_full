@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   const locationName = locationNames[resolvedParams.location];
 
   return {
-    title: `Contact Tola Tiles ${locationName} FL - Get Free Quote | Tile Installation Services`,
+    title: `Contact Us - ${locationName} FL Tile Installation | Get Free Quote`,
     description: `Contact Tola Tiles for expert tile installation services in ${locationName}. Get a free quote, schedule consultation, or call (904) 866-1738. Licensed professionals serving ${locationName}.`,
     keywords: `contact tola tiles ${locationName.toLowerCase()}, tile installation quote ${locationName.toLowerCase()}, free estimate, tile contractor contact, schedule consultation, tile installation phone number`,
     alternates: {

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const project = await getProject(slug);
 
   if (!project) {
-    return { title: 'Project Not Found | Tola Tiles' };
+    return { title: 'Project Not Found' };
   }
 
   const description = project.description
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const ogImage = project.main_video_thumbnail ?? firstPhaseImage(project) ?? 'https://tolatiles.com/images/logo.webp';
 
   return {
-    title: `${project.title} | Tola Tiles Projects`,
+    title: project.title,
     description,
     alternates: {
       canonical: `https://tolatiles.com/projects/${project.slug}`,

@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import FAQsPage from '@/components/pages/FAQsPage';
 import { faqs as staticFaqs } from '@/data/faqs';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export const metadata: Metadata = {
-  title: 'Tile Installation FAQs | Common Questions Answered | Tola Tiles',
+  title: 'Tile Installation FAQs | Common Questions Answered',
   description:
     'Get answers to common tile installation questions in Jacksonville & St. Augustine FL. Pricing, timelines, materials, maintenance, and more — answered by local tile experts.',
   keywords:
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
     description: 'Expert answers to your tile installation questions — pricing, materials, timelines, and maintenance for Jacksonville & St. Augustine homeowners.',
     url: 'https://tolatiles.com/faqs',
     type: 'website',
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

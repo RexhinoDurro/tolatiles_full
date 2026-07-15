@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   const locationName = locationNames[resolvedParams.location];
 
   return {
-    title: `Tile Installation Gallery ${locationName} FL - Premium Tile Work | Tola Tiles`,
+    title: `Tile Installation Gallery ${locationName} FL - Premium Tile Work`,
     description: `Browse our complete gallery of tile installation projects in ${locationName}, FL including kitchen backsplashes, bathroom renovations, patio installations, and flooring work by Tola Tiles.`,
     keywords: `tile gallery ${locationName.toLowerCase()}, tile installation examples ${locationName.toLowerCase()}, kitchen backsplash gallery, bathroom tile gallery, patio tile gallery, flooring gallery`,
     alternates: {

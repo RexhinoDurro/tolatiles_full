@@ -4,7 +4,7 @@ import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 import { getContentPosts, getContentCategories } from '@/lib/contentServer';
 
 export const metadata: Metadata = {
-  title: 'Design Ideas - Tile Design Inspiration Jacksonville & St. Augustine FL | Tola Tiles',
+  title: 'Design Ideas - Tile Design Inspiration Jacksonville & St. Augustine FL',
   description: 'Browse tile design ideas from Tola Tiles for Jacksonville and St. Augustine FL — kitchen backsplashes, bathrooms, floors, and outdoor spaces.',
   keywords: 'tile design ideas florida, tile inspiration jacksonville, kitchen backsplash ideas, bathroom tile ideas, northeast florida tile design',
   alternates: {

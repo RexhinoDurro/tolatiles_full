@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   const locationName = locationNames[resolvedParams.location];
 
   return {
-    title: `About Tola Tiles ${locationName} FL - 15+ Years of Expert Tile Installation | Our Story & Team`,
+    title: `About Us - ${locationName} FL Tile Installation | 15+ Years Experience`,
     description: `Learn about Tola Tiles - family-owned tile installation company serving ${locationName} since 2008. Meet our expert team, discover our values, and see why we're the premier choice for tile installation in ${locationName}.`,
     keywords: `about tola tiles ${locationName.toLowerCase()}, tile installation company ${locationName.toLowerCase()}, tile contractor history, expert tile team, family owned business, tile installation experience`,
     alternates: {

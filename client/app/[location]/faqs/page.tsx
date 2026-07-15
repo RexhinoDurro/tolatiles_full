@@ -4,6 +4,7 @@ import FAQsPage from '@/components/pages/FAQsPage';
 import { faqs as staticFaqs } from '@/data/faqs';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   const locationName = locationNames[resolvedParams.location as LocationType];
 
   return {
-    title: `Tile Installation FAQs ${locationName} FL | Tola Tiles`,
+    title: `Tile Installation FAQs ${locationName} FL`,
     description: `Answers to common tile installation questions in ${locationName} FL — pricing, materials, timelines, and maintenance from local tile experts with 15+ years of experience.`,
     keywords: `tile installation FAQ ${locationName.toLowerCase()} FL, tile contractor questions ${locationName.toLowerCase()}, tile installation cost Florida, how long does tile installation take, grout sealing ${locationName.toLowerCase()}`,
     alternates: {
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
       description: `Expert answers to tile installation questions for ${locationName} homeowners — pricing, materials, maintenance, and more.`,
       url: `https://tolatiles.com/${resolvedParams.location}/faqs`,
       type: 'website',
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }

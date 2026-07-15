@@ -6,6 +6,8 @@ import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbS
 import { services, Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import { VALID_LOCATIONS, isValidLocation, locationNames, geoCoordinates, areaServed, type LocationType } from '@/lib/locations';
+import { stripRichTextMarkdown } from '@/lib/richText';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 // Service slug to service ID mapping
 const slugToServiceId: Record<string, string> = {
@@ -31,7 +33,7 @@ function generateServiceSchema(service: Service, slug: string, location: Locatio
     name: details
       ? `${details.keywordBase} ${locationName} FL`
       : `${service.title} ${locationName} FL`,
-    description: locationContent.localDescription,
+    description: stripRichTextMarkdown(locationContent.localDescription),
     serviceType: service.title,
     priceRange: '$$',
     provider: {
@@ -92,11 +94,12 @@ export async function generateMetadata({
   const details = serviceDetailsMap[serviceId];
 
   const metaTitle = details
-    ? `${details.keywordBase} ${locationName} FL | Tola Tiles`
-    : `${service.title} ${locationName} FL - Expert Installation | Tola Tiles`;
+    ? `${details.keywordBase} ${locationName} FL`
+    : `${service.title} ${locationName} FL - Expert Installation`;
 
   const baseDescription = `Professional ${service.title.toLowerCase()} services in ${locationName}, FL.`;
-  const truncatedLocal = locationContent.localDescription.substring(0, 155 - baseDescription.length - 1);
+  const plainLocalDescription = stripRichTextMarkdown(locationContent.localDescription);
+  const truncatedLocal = plainLocalDescription.substring(0, 155 - baseDescription.length - 1);
   const metaDescription = `${baseDescription} ${truncatedLocal}…`;
 
   const keywords = [
@@ -121,6 +124,7 @@ export async function generateMetadata({
       type: 'website',
       locale: 'en_US',
       siteName: 'Tola Tiles',
+      images: [DEFAULT_OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',

@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import HomePage from '@/components/pages/HomePage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, areaServed, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 // Location-specific metadata
 const locationMetadata: Record<LocationType, {
@@ -16,12 +17,12 @@ const locationMetadata: Record<LocationType, {
     keywords: 'tile installers jacksonville FL, tile installers Saint Augustine FL, backsplash jacksonville fl, backsplash saint augustine fl, bathroom tiles jacksonville fl, patio tiles, flooring installer, ceramic tiles, porcelain tiles, natural stone, tile contractor, tile installer jacksonville fl, tile installer saint augustine fl, home renovation',
   },
   jacksonville: {
-    title: 'Tile Installer Jacksonville FL | Tile Installation & Tile Installers Jax | Tola Tiles',
+    title: 'Tile Installer Jacksonville FL | Tile Installation & Tile Installers Jax',
     description: 'Looking for tile installers in Jacksonville FL? Expert tile installation services in Jax - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving Jacksonville, Duval County. Free estimates! Call (904) 866-1738.',
     keywords: 'tile installer jacksonville fl, tile installers jacksonville, tile installation jacksonville fl, jacksonville tile installer, jax tile installer, jax tile installation, tile contractor jacksonville, bathroom tile installer jacksonville, kitchen backsplash jacksonville fl, floor tile installation jacksonville, tile company jacksonville florida, duval county tile installer, best tile installer jacksonville, professional tile installation jacksonville fl, jax tile services',
   },
   'st-augustine': {
-    title: 'Tile Installer St Augustine FL | Tile Installation & Tile Installers | Tola Tiles',
+    title: 'Tile Installer St Augustine FL | Tile Installation & Tile Installers',
     description: 'Looking for tile installers in St Augustine FL? Expert tile installation services - kitchen backsplashes, bathroom tiles, floor tiling, patios & more. Licensed tile installer serving St Augustine, St Johns County. Free estimates! Call (904) 866-1738.',
     keywords: 'tile installer st augustine fl, tile installers st augustine, tile installation st augustine fl, st augustine tile installer, st augustine tile installation, tile contractor st augustine, bathroom tile installer st augustine, kitchen backsplash st augustine fl, floor tile installation st augustine, tile company st augustine florida, st johns county tile installer, best tile installer st augustine, professional tile installation st augustine fl',
   },
@@ -205,6 +206,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
       url: `https://tolatiles.com${canonicalPath}`,
       type: 'website',
       siteName: 'Tola Tiles',
+      images: [DEFAULT_OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',

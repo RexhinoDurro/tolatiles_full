@@ -4,7 +4,7 @@ import { Home, Search, Phone } from 'lucide-react';
 import GoBackButton from '@/components/GoBackButton';
 
 export const metadata: Metadata = {
-  title: 'Page Not Found - 404 Error | Tola Tiles',
+  title: 'Page Not Found - 404 Error',
   description: "The page you're looking for doesn't exist. Visit our homepage to find tile installation services, gallery, and contact information for Tola Tiles.",
 };
 

@@ -5,6 +5,7 @@ import './globals.css';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import Analytics from '@/components/Analytics';
 import { isLandingPageSubdomain } from '@/lib/subdomain';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -42,20 +43,13 @@ export const metadata: Metadata = {
     siteName: 'Tola Tiles',
     title: 'Tola Tiles - Tile Installer in Jacksonville FL and Saint Augustine FL',
     description: 'Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida, Tile Contractors, Flooring Installers, Tile Installers',
-    images: [
-      {
-        url: '/assets/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Tola Tiles - Premium Tile Installation Services',
-      },
-    ],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tola Tiles - Premium Tile Installation Services',
     description: 'Bath & Kitchen Remodeling Company, Tile Installation Services in Jacksonville, Ponte Vedra, and Saint Augustine Florida',
-    images: ['/assets/twitter-image.jpg'],
+    images: [DEFAULT_OG_IMAGE.url],
   },
   verification: {
     google: 'c5Y2e0u5CZDNm6w7wDqyrVcT4l-JjJscPVC-fe2piAw',

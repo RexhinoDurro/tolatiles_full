@@ -34,6 +34,12 @@ export REDIS_HOST="redis"
 echo "→ Pulling latest code..."
 git pull origin main
 
+# Files that arrive via git (as opposed to a Django upload, which sets its own
+# FILE_UPLOAD_PERMISSIONS) inherit this shell's umask. If that umask strips the
+# world-read bit, nginx (running as www-data, serving /media/ directly off disk)
+# gets 403s on anything just pulled. Normalize after every pull so this can't recur.
+chmod -R a+rX server/media
+
 echo "→ Building and starting containers..."
 sudo -E docker compose -f docker-compose.prod.yml up --build -d
 

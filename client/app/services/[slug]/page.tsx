@@ -5,6 +5,8 @@ import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 import { services, Service } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import { geoCoordinates, areaServed } from '@/lib/locations';
+import { stripRichTextMarkdown } from '@/lib/richText';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const slugToServiceId: Record<string, string> = {
   'kitchen-backsplash-installation': 'kitchen-backsplash',
@@ -43,12 +45,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   // Use keyword base for a more specific, high-intent title
   const metaTitle = details
-    ? `${details.keywordBase} Jacksonville & St. Augustine FL | Tola Tiles`
-    : `${service.title} Jacksonville & St. Augustine FL | Tola Tiles`;
+    ? `${details.keywordBase} Jacksonville & St. Augustine FL`
+    : `${service.title} Jacksonville & St. Augustine FL`;
 
   // Build a rich meta description using the service's local description
   const baseDesc = `Professional ${service.title.toLowerCase()} services in Jacksonville & St. Augustine, FL.`;
-  const remainder = locationContent.localDescription.substring(0, 155 - baseDesc.length - 1);
+  const plainLocalDescription = stripRichTextMarkdown(locationContent.localDescription);
+  const remainder = plainLocalDescription.substring(0, 155 - baseDesc.length - 1);
   const metaDescription = `${baseDesc} ${remainder}…`;
 
   const keywords = [
@@ -74,6 +77,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       type: 'website',
       locale: 'en_US',
       siteName: 'Tola Tiles',
+      images: [DEFAULT_OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',
@@ -102,7 +106,7 @@ export default async function ServiceDetail({ params }: { params: Promise<{ slug
     name: details
       ? `${details.keywordBase} Jacksonville & St. Augustine FL`
       : `${service.title} Jacksonville & St. Augustine FL`,
-    description: service.locations['florida'].localDescription,
+    description: stripRichTextMarkdown(service.locations['florida'].localDescription),
     serviceType: service.title,
     priceRange: '$$',
     provider: {

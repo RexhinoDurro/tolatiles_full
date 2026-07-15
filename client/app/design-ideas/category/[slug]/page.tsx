@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const category = await getCategory(slug);
 
-  if (!category) return { title: 'Category Not Found | Tola Tiles Design Ideas' };
+  if (!category) return { title: 'Category Not Found' };
 
   return {
-    title: `${category.name} - Tile Design Ideas Jacksonville & St. Augustine FL | Tola Tiles`,
+    title: `${category.name} - Tile Design Ideas Jacksonville & St. Augustine FL`,
     description: category.description || `Browse ${category.name} design ideas from Tola Tiles for Jacksonville and St. Augustine FL.`,
     alternates: {
       canonical: `https://tolatiles.com/design-ideas/category/${category.slug}`,

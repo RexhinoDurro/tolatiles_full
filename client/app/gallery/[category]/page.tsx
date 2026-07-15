@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import GalleryPage from '@/components/pages/GalleryPage';
 import { getGalleryData } from '@/lib/galleryServer';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const validCategories = ['backsplashes', 'patios', 'showers', 'flooring', 'fireplaces'];
 
@@ -90,6 +91,7 @@ export async function generateMetadata({
       url: `https://tolatiles.com/gallery/${category}`,
       type: 'website',
       siteName: 'Tola Tiles',
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }

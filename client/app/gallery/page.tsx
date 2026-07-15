@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import GalleryPage from '@/components/pages/GalleryPage';
 import { getGalleryData } from '@/lib/galleryServer';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'Tile Installation Gallery Jacksonville & St. Augustine FL | Tola Tiles',
+  title: 'Tile Installation Gallery Jacksonville & St. Augustine FL',
   description:
     'Browse our complete portfolio of tile installation projects across Northeast Florida — kitchen backsplashes, bathroom renovations, custom showers, patio and pool deck tile, floor tile, and fireplace surrounds by Tola Tiles.',
   keywords:
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
     url: 'https://tolatiles.com/gallery',
     type: 'website',
     siteName: 'Tola Tiles',
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 

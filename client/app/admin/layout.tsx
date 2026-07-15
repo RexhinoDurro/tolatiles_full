@@ -4,7 +4,7 @@ import { NotificationProviderWrapper } from '@/contexts/NotificationContext';
 import './admin.css';
 
 export const metadata: Metadata = {
-  title: 'Admin Portal | Tola Tiles',
+  title: 'Admin Portal',
   description: 'Tola Tiles administration portal',
   robots: 'noindex, nofollow',
   manifest: '/admin-manifest.json',

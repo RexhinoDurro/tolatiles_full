@@ -6,6 +6,12 @@ import type { ReactNode } from 'react';
 // SEO-relevant keywords and internal links without storing raw HTML.
 const RICH_TEXT_PATTERN = /\*\*(.+?)\*\*|\[([^\]]+)\]\(([^)]+)\)/g;
 
+/** Strips the same **bold** / [label](href) markdown-lite syntax down to plain text,
+ * for contexts that can't render JSX — meta tags, JSON-LD, truncated excerpts. */
+export function stripRichTextMarkdown(text: string): string {
+  return text.replace(RICH_TEXT_PATTERN, (_match, bold, linkLabel) => bold ?? linkLabel ?? '');
+}
+
 export function renderRichText(text: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;

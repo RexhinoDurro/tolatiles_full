@@ -4,6 +4,7 @@ import GalleryPage from '@/components/pages/GalleryPage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 import { getGalleryData } from '@/lib/galleryServer';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const validCategories = ['backsplashes', 'patios', 'showers', 'flooring', 'fireplaces'];
 
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
   const description = categoryDescriptions[resolvedParams.category](locationName);
 
   return {
-    title: `${categoryLabel} Tile Gallery ${locationName} FL | Tola Tiles`,
+    title: `${categoryLabel} Tile Gallery ${locationName} FL`,
     description,
     keywords: [
       `${resolvedParams.category} tile gallery ${locationName.toLowerCase()}`,
@@ -68,6 +69,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
       description,
       url: `https://tolatiles.com/${resolvedParams.location}/gallery/${resolvedParams.category}`,
       type: 'website',
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }

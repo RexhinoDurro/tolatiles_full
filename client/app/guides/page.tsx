@@ -4,7 +4,7 @@ import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 import { getContentPosts, getContentCategories } from '@/lib/contentServer';
 
 export const metadata: Metadata = {
-  title: 'Guides - Tile Installation Guides Jacksonville & St. Augustine FL | Tola Tiles',
+  title: 'Guides - Tile Installation Guides Jacksonville & St. Augustine FL',
   description: 'Step-by-step tile installation guides from Tola Tiles for Jacksonville and St. Augustine FL. Planning, materials, and what to expect from your tile project.',
   keywords: 'tile installation guide florida, tile guides jacksonville, how to tile, tile project planning, northeast florida tile guide',
   alternates: {

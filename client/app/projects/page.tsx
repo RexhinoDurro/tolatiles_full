@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import type { ProjectListItem } from '@/types/api';
 import ProjectsIndexContent from '@/components/pages/ProjectsIndexContent';
+import { DEFAULT_OG_IMAGE } from '@/lib/seo';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export const metadata: Metadata = {
-  title: 'Tile Installation Projects Jacksonville & St. Augustine FL | Tola Tiles',
+  title: 'Tile Installation Projects Jacksonville & St. Augustine FL',
   description:
     'Explore completed tile installation projects by Tola Tiles — kitchen backsplashes, custom showers, bathroom renovations, floor tile, patios, and fireplace surrounds across Northeast Florida. See each project phase by phase.',
   keywords:
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
     url: 'https://tolatiles.com/projects',
     type: 'website',
     siteName: 'Tola Tiles',
+    images: [DEFAULT_OG_IMAGE],
   },
 };
 
