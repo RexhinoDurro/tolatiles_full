@@ -105,6 +105,7 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
         # User-Agent validation
         user_agent = request.META.get('HTTP_USER_AGENT', '')
         if not user_agent or len(user_agent) < 10:
+            logger.warning('Lead rejected (user-agent): ip=%s ua=%r', client_ip, user_agent)
             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Origin/Referer validation (skip in DEBUG mode)
@@ -114,20 +115,28 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
             origin = request.META.get('HTTP_ORIGIN', '')
             referer = request.META.get('HTTP_REFERER', '')
             if origin and not self._is_allowed_tolatiles_origin(origin):
+                logger.warning('Lead rejected (origin): ip=%s origin=%r referer=%r', client_ip, origin, referer)
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
             if not origin and referer and not self._is_allowed_tolatiles_origin(referer):
+                logger.warning('Lead rejected (referer): ip=%s origin=%r referer=%r', client_ip, origin, referer)
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Cloudflare Turnstile verification (skip in DEBUG mode)
         if not settings.DEBUG:
             turnstile_token = request.data.get('cf_turnstile_response', '')
             if not turnstile_token:
+                logger.warning('Lead rejected (missing turnstile token): ip=%s', client_ip)
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
             if not self._verify_turnstile(turnstile_token, client_ip):
+                logger.warning('Lead rejected (turnstile verify failed): ip=%s', client_ip)
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            logger.warning('Lead rejected (validation): ip=%s errors=%s', client_ip, serializer.errors)
+            raise
         self.perform_create(serializer)
 
         # Increment rate limit counter
