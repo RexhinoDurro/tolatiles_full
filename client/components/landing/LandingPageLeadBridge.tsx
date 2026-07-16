@@ -41,20 +41,37 @@ export default function LandingPageLeadBridge({ landingPageId }: LandingPageLead
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
     let script: HTMLScriptElement | null = null;
 
-    const executeTurnstile = (): Promise<string> =>
+    // The Cloudflare script loads asynchronously, so the widget may not be
+    // rendered yet when a fast-filled form is submitted — wait for it instead
+    // of failing immediately, otherwise every quick submission loses its token
+    // and gets rejected server-side.
+    const waitForWidgetReady = (timeoutMs = 8000): Promise<void> =>
       new Promise((resolve, reject) => {
-        if (!window.turnstile || !widgetIdRef.current) {
-          reject(new Error('Turnstile not ready'));
-          return;
-        }
-        window.turnstile.reset(widgetIdRef.current);
+        const start = Date.now();
+        const check = () => {
+          if (window.turnstile && widgetIdRef.current) {
+            resolve();
+          } else if (Date.now() - start > timeoutMs) {
+            reject(new Error('Turnstile failed to load. Please refresh and try again.'));
+          } else {
+            setTimeout(check, 100);
+          }
+        };
+        check();
+      });
+
+    const executeTurnstile = async (): Promise<string> => {
+      await waitForWidgetReady();
+      return new Promise((resolve, reject) => {
+        window.turnstile.reset(widgetIdRef.current!);
         tokenResolverRef.current = resolve;
-        window.turnstile.execute(widgetIdRef.current);
+        window.turnstile.execute(widgetIdRef.current!);
         setTimeout(() => {
           tokenResolverRef.current = null;
           reject(new Error('Security check timed out. Please try again.'));
         }, 15000);
       });
+    };
 
     window.TolaLeads = {
       submit: async ({ name, phone, project_type }) => {

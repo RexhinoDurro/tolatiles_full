@@ -77,20 +77,37 @@ export function useLeadFormSubmit() {
     };
   }, []);
 
-  const executeTurnstile = (): Promise<string> =>
+  // The Cloudflare script loads asynchronously, so the widget may not be
+  // rendered yet when a fast-filled form is submitted — wait for it instead
+  // of failing immediately, otherwise every quick submission loses its token
+  // and gets rejected server-side.
+  const waitForWidgetReady = (timeoutMs = 8000): Promise<void> =>
     new Promise((resolve, reject) => {
-      if (!window.turnstile || !widgetIdRef.current) {
-        reject(new Error('Turnstile not ready'));
-        return;
-      }
-      window.turnstile.reset(widgetIdRef.current);
+      const start = Date.now();
+      const check = () => {
+        if (window.turnstile && widgetIdRef.current) {
+          resolve();
+        } else if (Date.now() - start > timeoutMs) {
+          reject(new Error('Turnstile failed to load. Please refresh and try again.'));
+        } else {
+          setTimeout(check, 100);
+        }
+      };
+      check();
+    });
+
+  const executeTurnstile = async (): Promise<string> => {
+    await waitForWidgetReady();
+    return new Promise((resolve, reject) => {
+      window.turnstile.reset(widgetIdRef.current!);
       tokenResolverRef.current = resolve;
-      window.turnstile.execute(widgetIdRef.current);
+      window.turnstile.execute(widgetIdRef.current!);
       setTimeout(() => {
         tokenResolverRef.current = null;
         reject(new Error('Security check timed out. Please try again.'));
       }, 15000);
     });
+  };
 
   const submit = useCallback(
     async (payload: LeadFormSubmitPayload): Promise<boolean> => {
@@ -99,11 +116,17 @@ export function useLeadFormSubmit() {
       setErrorMessage('');
 
       try {
-        let turnstileToken: string | undefined;
+        // The backend rejects any submission without a Turnstile token, so
+        // there's no point sending one — fail fast with an actionable
+        // message instead of a doomed request.
+        let turnstileToken: string;
         try {
           turnstileToken = await executeTurnstile();
-        } catch {
-          console.warn('Turnstile challenge failed or timed out');
+        } catch (turnstileErr) {
+          console.warn('Turnstile challenge failed or timed out', turnstileErr);
+          setSubmitStatus('error');
+          setErrorMessage('Security check failed to load. Please refresh the page and try again, or call us instead.');
+          return false;
         }
 
         const fillTime = Math.floor((Date.now() - mountTimeRef.current) / 1000);
