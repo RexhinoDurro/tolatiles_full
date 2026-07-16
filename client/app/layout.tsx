@@ -224,7 +224,10 @@ export default async function RootLayout({
       </head>
       <body className={`${inter.className} ${outfit.variable}`}>
         {!isLandingSite && (
-          <Analytics gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID} />
+          <Analytics
+            gtmId={process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID}
+            metaPixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID}
+          />
         )}
         <LayoutWrapper forceNoChrome={isLandingSite}>{children}</LayoutWrapper>
       </body>
