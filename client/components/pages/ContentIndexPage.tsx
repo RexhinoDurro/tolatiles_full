@@ -77,7 +77,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
   return (
     <div className="min-h-screen bg-gray-50 pt-[var(--navbar-height)]">
       {/* Hero Section */}
-      <section className="bg-brand-light text-white py-16 md:py-24">
+      <section className="bg-brand-ink text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{hero.heroH1}</h1>
@@ -104,7 +104,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
                 onClick={() => setSelectedCategory('')}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   !selectedCategory
-                    ? 'bg-[#00a8e8] text-white'
+                    ? 'bg-brand-ink text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -116,7 +116,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
                   onClick={() => setSelectedCategory(category.slug)}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     selectedCategory === category.slug
-                      ? 'bg-[#00a8e8] text-white'
+                      ? 'bg-brand-ink text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -150,7 +150,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
               {selectedCategory && (
                 <button
                   onClick={() => setSelectedCategory('')}
-                  className="mt-4 text-[#00a8e8] hover:underline"
+                  className="mt-4 text-brand-ink hover:underline"
                 >
                   View all posts
                 </button>
@@ -220,7 +220,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
 
                       {/* Read More */}
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <span className="inline-flex items-center gap-2 text-[#00a8e8] font-medium group-hover:gap-3 transition-all">
+                        <span className="inline-flex items-center gap-2 text-brand-ink font-medium group-hover:gap-3 transition-all">
                           Read More
                           <ArrowRight className="w-4 h-4" />
                         </span>
@@ -235,7 +235,7 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
       </section>
 
       {/* CTA Section */}
-      <section className="bg-[#00a8e8] text-white py-16">
+      <section className="bg-brand-ink text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>Ready to Start Your Tile Project?</h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
@@ -244,14 +244,14 @@ export default function ContentIndexPage({ contentType, location = 'florida', in
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-brand-light text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm border border-transparent hover:border-white"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-brand-ink text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm border border-transparent hover:border-white"
             >
               <Phone className="w-5 h-5" />
               {PHONE_NUMBER}
             </a>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#00a8e8] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-brand-ink transition-colors"
             >
               Get Free Estimate
               <ArrowRight className="w-5 h-5" />

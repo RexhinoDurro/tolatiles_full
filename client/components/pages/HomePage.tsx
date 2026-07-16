@@ -28,6 +28,8 @@ import type { ProjectListItem, BlogPostListItem } from '@/types/api';
 import GoogleReviewsSlider, { type GoogleReviewsData } from '@/components/GoogleReviewsSlider';
 import WhatWeDoSection from '@/components/WhatWeDoSection';
 import { countyNames } from '@/lib/locations';
+import ServiceLeadForm from '@/components/leadforms/ServiceLeadForm';
+import ServiceLeadFormModal from '@/components/leadforms/ServiceLeadFormModal';
 
 // ─── Location content ─────────────────────────────────────────────────────────
 
@@ -39,12 +41,17 @@ interface LocationContent {
   heroTitle: string;
   heroSubtitle: string;
   heroDescription: string;
+  heroChecklist: string[];
+  heroLine1: string;
+  heroLine2: string;
   locationHeading: string;
   locationDescription: string;
   serviceAreas: string[];
   neighborhoods: string[];
   localLandmarks: string[];
   basePath: string;
+  heroDesktopBg: string;
+  heroMobileBg: string;
 }
 
 const floridaContent: LocationContent = {
@@ -56,6 +63,9 @@ const floridaContent: LocationContent = {
   heroSubtitle: 'Professional Installation • Quality Materials • Lifetime Warranty',
   heroDescription:
     'Expert tile installation for kitchens, bathrooms, patios, and more. Creating beautiful spaces that last a lifetime across Northeast Florida.',
+  heroChecklist: [' Bathrooms, Kitchens, Floors & Backsplashes', 'Honest Pricing With No Surprises', 'Craftsmanship You Can Count On'],
+  heroLine1: 'Professional Tile Installers',
+  heroLine2: 'in Jacksonville FL',
   locationHeading: 'Serving Northeast Florida',
   locationDescription:
     'Proudly serving Jacksonville, St Augustine, and the greater Northeast Florida area',
@@ -63,6 +73,8 @@ const floridaContent: LocationContent = {
   neighborhoods: [],
   localLandmarks: [],
   basePath: '',
+  heroDesktopBg: '/images/tolatiles-team-background-jacksonville-tile-installers.webp',
+  heroMobileBg: '/images/tolatiles-team-background-jacksonville-tile-installers.webp',
 };
 
 const stAugustineContent: LocationContent = {
@@ -74,6 +86,13 @@ const stAugustineContent: LocationContent = {
   heroSubtitle: 'Serving the Ancient City Since 2008 • Licensed & Insured',
   heroDescription:
     "From historic downtown renovations to beachfront condos, we specialize in tile installation that withstands St Augustine's coastal climate.",
+  heroChecklist: [
+    'From the Historic District to Vilano Beach',
+    'Coastal-Grade Materials for Salt Air & Humidity',
+    'Licensed, Insured & Local Since 2008',
+  ],
+  heroLine1: "St Augustine's Trusted",
+  heroLine2: 'Tile Installation Experts',
   locationHeading: 'Proudly Serving St Augustine & St Johns County',
   locationDescription:
     'Based in St Augustine, we serve homeowners throughout St Johns County and surrounding communities',
@@ -81,6 +100,8 @@ const stAugustineContent: LocationContent = {
   neighborhoods: ['Historic District', 'Davis Shores', 'Lighthouse Park', 'St Augustine Shores', 'Hastings', 'Elkton'],
   localLandmarks: ['near Flagler College', 'by the St Augustine Lighthouse', 'close to the Castillo de San Marcos'],
   basePath: '/st-augustine',
+  heroDesktopBg: '/images/home/ST-augustine_TolaTiles.webp',
+  heroMobileBg: '/images/home/ST-augustine_vertical_TolaTiles.webp',
 };
 
 const jacksonvilleContent: LocationContent = {
@@ -92,6 +113,13 @@ const jacksonvilleContent: LocationContent = {
   heroSubtitle: 'Serving Jax & the Beaches Since 2008 • Licensed & Insured',
   heroDescription:
     'From Riverside bungalows to San Marco condos and Ponte Vedra beach homes, we deliver expert tile installation across Jacksonville.',
+  heroChecklist: [
+    'From Riverside Bungalows to Ponte Vedra Estates',
+    'Humidity-Rated Waterproofing for Duval County Homes',
+    'Licensed, Insured & Local Since 2008',
+  ],
+  heroLine1: "Jacksonville's Premier",
+  heroLine2: 'Tile Installation Company',
   locationHeading: 'Serving Jacksonville & Duval County',
   locationDescription:
     'Based in Northeast Florida, we serve homeowners throughout Jacksonville, the Beaches, and surrounding Duval County communities',
@@ -99,6 +127,8 @@ const jacksonvilleContent: LocationContent = {
   neighborhoods: ['Ortega', 'Murray Hill', 'Springfield', 'Southside', 'Baymeadows', 'Intracoastal West', 'Deerwood', 'Town Center'],
   localLandmarks: ['near the Jacksonville Landing', 'by TIAA Bank Field', 'close to the St. Johns River'],
   basePath: '/jacksonville',
+  heroDesktopBg: '/images/home/horizontal_jacksonville_hero_background_TolaTiles.webp',
+  heroMobileBg: '/images/home/vertical_jacksonville_TolaTiles.webp',
 };
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -123,7 +153,7 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
 
   return (
     <>
-      <HeroSection />
+      <HeroSection content={content} />
       <MissionSection />
       <WhoWeAreSection />
 
@@ -134,6 +164,7 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
         <CrossCitySection content={content} />
       )}
       <RenovateQuestionsSection basePath={content.basePath} />
+      <LeadFormSection />
       <ProjectsStripSection />
       <GoogleReviewsSlider location={location} />
       <BlogCarouselSection basePath={content.basePath} />
@@ -204,6 +235,7 @@ const ProjectsStripSection = () => {
               {project.cover_media_type === 'video' ? (
                 <video
                   src={project.cover_image!}
+                  preload="none"
                   muted
                   loop
                   playsInline
@@ -245,7 +277,7 @@ const ProjectsStripSection = () => {
 
 // ─── Hero Section ──────────────────────────────────────────────────────────────
 
-const HeroSection = () => (
+const HeroSection = ({ content }: { content: LocationContent }) => (
   <>
     {/* Reserves space for the fixed navbar so the hero image below starts right where the navbar ends, instead of the image being covered up by it */}
     <div style={{ height: 'var(--navbar-height)' }} aria-hidden="true" />
@@ -257,11 +289,19 @@ const HeroSection = () => (
       {/* Background Layer — stretches to fill */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/tolatiles-team-background-jacksonville-tile-installers.webp"
-          alt="Tola Tiles tile installation project in Jacksonville and St. Augustine, FL"
+          src={content.heroDesktopBg}
+          alt={`Tile installation project in ${content.locationNameFull}`}
           fill
           sizes="100vw"
-          className="object-cover object-center opacity-90"
+          className="hidden md:block object-cover object-center opacity-90"
+          priority
+        />
+        <Image
+          src={content.heroMobileBg}
+          alt={`Tile installation project in ${content.locationNameFull}`}
+          fill
+          sizes="100vw"
+          className="md:hidden object-cover object-center opacity-90"
           priority
         />
       </div>
@@ -270,11 +310,10 @@ const HeroSection = () => (
       <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-20">
         <Image
           src="/images/tolatiles-installation-team-group-photo.webp"
-          alt="Tola Tiles team — expert tile installers in Jacksonville FL"
+          alt={`Tola Tiles team — expert tile installers serving ${content.locationNameFull}`}
           fill
           sizes="(max-width: 768px) 95vw, 60vw"
           className="object-contain object-bottom md:object-right-bottom drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]"
-          priority
         />
       </div>
 
@@ -283,7 +322,7 @@ const HeroSection = () => (
 
       {/* Text Overlay — pinned to top-left */}
       <div className="relative z-30 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 flex items-start pt-8 md:pt-12">
-        <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-start text-left">
+        <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col items-center md:items-start text-center md:text-left">
           <h1
             id="hero-heading"
             className="leading-[1.05] tracking-tight text-white"
@@ -294,19 +333,19 @@ const HeroSection = () => (
               marginBottom: 'clamp(0.75rem, 2vh, 1.25rem)',
             }}
           >
-            Professional Tile Installers<br />
-            <span className="text-[#00a8e8]">in Jacksonville FL</span>
+            {content.heroLine1}<br />
+            <span className="text-[#00a8e8]">{content.heroLine2}</span>
           </h1>
 
-          <ul className="flex flex-col" style={{ gap: 'clamp(0.4rem, 1vh, 0.75rem)' }}>
-            {[' Bathrooms, Kitchens, Floors & Backsplashes', 'Honest Pricing With No Surprises', 'Craftsmanship You Can Count On'].map((item) => (
-              <li key={item} className="flex items-center justify-start gap-2.5">
+          <ul className="flex flex-col w-full" style={{ gap: 'clamp(0.4rem, 1vh, 0.75rem)' }}>
+            {content.heroChecklist.map((item) => (
+              <li key={item} className="flex items-center justify-center md:justify-start gap-2.5">
                 <CheckCircle
                   className="text-green-400 flex-shrink-0"
                   style={{ width: 'clamp(1.1rem, 1.5vw, 1.5rem)', height: 'clamp(1.1rem, 1.5vw, 1.5rem)' }}
                 />
                 <span
-                  className="text-white/90 font-semibold uppercase"
+                  className="text-white/90 font-semibold uppercase text-left"
                   style={{
                     fontFamily: 'var(--font-outfit), sans-serif',
                     fontSize: 'clamp(0.8rem, 1.3vw, 1rem)',
@@ -319,23 +358,30 @@ const HeroSection = () => (
             ))}
           </ul>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
-            >
-              Get a Free Estimate
-              <ArrowRight className="h-5 w-5" />
-            </Link>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 w-full">
+            <ServiceLeadFormModal>
+              {(open) => (
+                <button
+                  type="button"
+                  onClick={open}
+                  className="inline-flex items-center justify-center gap-2 bg-brand-ink text-white px-6 py-3.5 rounded-lg font-bold hover:bg-blue-500 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  Get a Free Estimate
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              )}
+            </ServiceLeadFormModal>
             <a
               href={GOOGLE_BUSINESS_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5 rounded-full hover:bg-white/20 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-2.5 rounded-full hover:bg-white/20 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <img
                 src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
                 alt="Google"
+                width={92}
+                height={30}
                 className="h-5 w-auto flex-shrink-0"
               />
               <div className="flex items-center gap-1.5 min-w-0 border-l border-white/20 pl-3 ml-1">
@@ -378,9 +424,9 @@ const MissionSection = () => (
           Our Mission Is Simple!
         </h2>
         <p className="text-gray-700 font-medium leading-snug mb-1 text-base sm:text-lg lg:text-sm lg:whitespace-nowrap">
-          Make sure every customer is happy and gets exactly what they wanted — every single time.
+          Make sure every customer is happy and gets exactly what they wanted, every single time.
         </p>
-        <p className="text-gray-500 italic text-sm">That's it. That's the whole business.</p>
+        <p className="text-gray-600 italic text-sm">That's it. That's the whole business.</p>
       </div>
     </section>
   </>
@@ -403,7 +449,7 @@ const WhoWeAreSection = () => (
       </h2>
       <p className="text-lg text-gray-600 leading-relaxed">
         Tola Tiles has been a family-owned tile installation company since 2008, led by founder Gazmend
-        "Meni" Tola. We run one small, dedicated crew — no subcontractors — so the people who show up at
+        "Meni" Tola. We run one small, dedicated crew (no subcontractors) so the people who show up at
         your door are the same people who've built our name across Jacksonville and St. Augustine for
         over 15 years.
       </p>
@@ -453,6 +499,18 @@ const RenovateQuestionsSection = ({ basePath }: { basePath: string }) => (
           </Link>
         ))}
       </div>
+    </div>
+  </section>
+);
+
+// ─── Lead Form Section ──────────────────────────────────────────────────────────
+// bg-white to match RenovateQuestionsSection above it — ProjectsStripSection's wavy
+// top divider is filled white on the assumption the section directly above it is white.
+
+const LeadFormSection = () => (
+  <section className="py-16 sm:py-20 bg-white">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ServiceLeadForm />
     </div>
   </section>
 );
@@ -537,7 +595,7 @@ const GeoSplitterSection = () => {
 
                 <Link
                   href={city.href}
-                  className="mt-auto inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#0097d2] transition-all duration-300 group-hover:gap-3"
+                  className="mt-auto inline-flex items-center justify-center gap-2 bg-brand-ink text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#0097d2] transition-all duration-300 group-hover:gap-3"
                 >
                   <MapPin className="h-5 w-5" />
                   Explore Tile Installation in {city.name}, FL
@@ -565,7 +623,7 @@ const CrossCitySection = ({ content }: { content: LocationContent }) => {
       <div className="max-w-2xl mx-auto px-4 text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Also Serving {other.name} & {other.county}</h2>
         <p className="text-gray-600 mb-6">Looking for tile installation in {other.name}? We provide the same expert service throughout {other.county}.</p>
-        <Link href={other.href} className="inline-flex items-center gap-2 bg-[#00a8e8] text-white px-7 py-3.5 rounded-lg font-semibold hover:bg-[#0097d2] transition-all">
+        <Link href={other.href} className="inline-flex items-center gap-2 bg-brand-ink text-white px-7 py-3.5 rounded-lg font-semibold hover:bg-[#0097d2] transition-all">
           <MapPin className="h-5 w-5" />
           Explore Tile Installation in {other.name}, FL
           <ArrowRight className="h-5 w-5" />
@@ -581,79 +639,98 @@ const cityServiceCards = [
   {
     slug: 'kitchen-backsplash-installation',
     label: 'Kitchen Backsplash Installation',
-    description: 'Custom subway, mosaic, and large-format backsplashes — precision-set with waterproof grout for lasting beauty.',
+    description: {
+      jacksonville: 'Custom subway, mosaic, and large-format backsplashes for Riverside bungalows and San Marco kitchens, precision-set with waterproof grout.',
+      'st-augustine': 'Custom subway, mosaic, and large-format backsplashes for historic Downtown kitchens and Vilano Beach cottages, precision-set with waterproof grout.',
+    },
     icon: ChefHat,
     anchor: 'kitchen backsplash installation',
   },
   {
     slug: 'bathroom-tile-installation',
     label: 'Bathroom Tile Installation',
-    description: 'Full bathroom tile transformations — walls, floors, and shower surrounds — from elegant marble to modern porcelain.',
+    description: {
+      jacksonville: 'Full bathroom tile transformations across Duval County (walls, floors, and shower surrounds), from elegant marble to modern porcelain.',
+      'st-augustine': 'Full bathroom tile transformations across St. Johns County (walls, floors, and shower surrounds), built to handle heavy vacation-rental traffic.',
+    },
     icon: Bath,
     anchor: 'bathroom tile installation',
   },
   {
     slug: 'floor-tile-installation',
     label: 'Floor Tile Installation',
-    description: 'Durable, level floor tile for every room using porcelain, ceramic, and natural stone options.',
+    description: {
+      jacksonville: "Durable, level floor tile for Jacksonville's concrete slab homes, from historic Avondale bungalows to new Southside construction.",
+      'st-augustine': "Durable, level floor tile for St. Augustine's historic downtown properties and Anastasia Island beach homes alike.",
+    },
     icon: Home,
     anchor: 'floor tile installation',
   },
   {
     slug: 'shower-tile-installation',
     label: 'Shower Tile Installation',
-    description: "Fully waterproofed shower systems using Schluter or mud-bed methods — built for Florida's humid climate.",
+    description: {
+      jacksonville: "Fully waterproofed shower systems using Schluter or mud-bed methods, built for Duval County's humid subtropical climate.",
+      'st-augustine': "Fully waterproofed shower systems using Schluter or mud-bed methods, engineered for St. Augustine's coastal salt air and humidity.",
+    },
     icon: Wrench,
     anchor: 'shower tile installation',
   },
   {
     slug: 'patio-tile-installation',
     label: 'Patio Tile Installation',
-    description: "Slip-resistant outdoor porcelain and stone tile rated for Florida's heat, UV exposure, and heavy rainfall.",
+    description: {
+      jacksonville: "Slip-resistant outdoor porcelain and stone tile rated for Jacksonville's heat, UV exposure, and summer storms.",
+      'st-augustine': "Slip-resistant outdoor porcelain and stone tile for St. Augustine's courtyard patios and pool decks near the Intracoastal.",
+    },
     icon: Hammer,
     anchor: 'patio tile installation',
   },
   {
     slug: 'fireplace-tile-installation',
     label: 'Fireplace Tile Surround',
-    description: 'Heat-rated stone, porcelain, or mosaic tile surrounds that make your fireplace the focal point of any room.',
+    description: {
+      jacksonville: 'Heat-rated stone, porcelain, or mosaic surrounds that make your fireplace the centerpiece of Jacksonville living rooms from Mandarin to Ortega.',
+      'st-augustine': 'Heat-rated stone, porcelain, or mosaic surrounds honoring Spanish Colonial and historic St. Augustine architectural character.',
+    },
     icon: Palette,
     anchor: 'fireplace tile installation',
   },
 ];
 
 const LocalServicesSection = ({ content }: { content: LocationContent }) => {
+  const cityKey = content.location as 'jacksonville' | 'st-augustine';
   const neighborhoodCopy =
     content.location === 'jacksonville'
       ? 'from Riverside bungalows and San Marco condos to Ponte Vedra beach homes and Southside new builds'
       : 'from historic Downtown restoration projects and Anastasia Island condos to Nocatee new builds and Ponte Vedra Beach estates';
-  const countyName = countyNames[content.location as 'jacksonville' | 'st-augustine'];
+  const countyName = countyNames[cityKey];
 
   return (
     <section className="py-20 bg-gray-50" aria-labelledby="local-services-heading">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-[#00a8e8] font-semibold text-sm uppercase tracking-widest mb-3">
+          <p className="text-brand-ink font-semibold text-sm uppercase tracking-widest mb-3">
             Local Expertise
           </p>
           <h2 id="local-services-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             Tile Installation Services in {content.locationNameFull}
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            We specialize in tile installation across {countyName} —{' '}
+            We specialize in tile installation across {countyName},{' '}
             {neighborhoodCopy}. Our licensed crew handles{' '}
             {cityServiceCards.map((s, i) => (
               <span key={s.slug}>
                 <Link
                   href={`${content.basePath}/services/${s.slug}`}
-                  className="text-[#00a8e8] font-medium hover:text-[#0097d2] underline underline-offset-2"
+                  className="text-brand-ink font-medium hover:text-[#0097d2] underline underline-offset-2"
                 >
                   {i === 0 ? `${s.anchor} in ${content.locationName}` : s.anchor}
                 </Link>
                 {i < cityServiceCards.length - 2 ? ', ' : i === cityServiceCards.length - 2 ? ', and ' : ''}
               </span>
             ))}
-            {' '}— with free estimates and a 2-year workmanship warranty on every project.
+            {', '}with free estimates and a 2-year workmanship warranty on every project.
           </p>
         </div>
 
@@ -672,8 +749,8 @@ const LocalServicesSection = ({ content }: { content: LocationContent }) => {
                   <h3 className="font-bold text-gray-900 mb-2 group-hover:text-[#00a8e8] transition-colors leading-snug">
                     {label} in {content.locationName}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
-                  <span className="inline-flex items-center gap-1 text-[#00a8e8] text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
+                  <p className="text-gray-600 text-sm leading-relaxed">{description[cityKey]}</p>
+                  <span className="inline-flex items-center gap-1 text-brand-ink text-sm font-semibold mt-3 group-hover:gap-2 transition-all">
                     View service
                     <ArrowRight className="h-3.5 w-3.5" />
                   </span>
@@ -692,14 +769,14 @@ const LocalServicesSection = ({ content }: { content: LocationContent }) => {
 const PLACEHOLDER_POSTS: BlogPostListItem[] = [
   {
     id: -1, title: 'How to Choose the Right Tile for Your Kitchen Backsplash',
-    slug: '#', excerpt: 'From subway tiles to mosaic glass, we break down the best backsplash options for Florida kitchens — and what to avoid.',
+    slug: '#', excerpt: 'From subway tiles to mosaic glass, we break down the best backsplash options for Florida kitchens, and what to avoid.',
     featured_image: '/images/backsplash/2.webp', featured_image_alt: 'Kitchen backsplash tile options',
     categories: [{ id: 1, name: 'Kitchen', slug: 'kitchen' }],
     location: 'florida', publish_date: '2025-03-15', reading_time: 5,
   },
   {
     id: -2, title: '5 Bathroom Tile Trends Taking Over Northeast Florida Homes',
-    slug: '#', excerpt: 'Large-format tiles, bold patterns, and wet-room showers — here are the looks our customers love most this year.',
+    slug: '#', excerpt: 'Large-format tiles, bold patterns, and wet-room showers: here are the looks our customers love most this year.',
     featured_image: '/images/shower/3.webp', featured_image_alt: 'Modern bathroom tile trends',
     categories: [{ id: 2, name: 'Bathroom', slug: 'bathroom' }],
     location: 'florida', publish_date: '2025-02-28', reading_time: 4,
@@ -727,7 +804,7 @@ const PLACEHOLDER_POSTS: BlogPostListItem[] = [
   },
   {
     id: -6, title: 'Porcelain vs. Ceramic Tile: What\'s the Difference?',
-    slug: '#', excerpt: 'The two most popular tile types explained — density, water absorption, durability, and which one to pick for each room.',
+    slug: '#', excerpt: 'The two most popular tile types explained: density, water absorption, durability, and which one to pick for each room.',
     featured_image: '/images/backsplash/6.webp', featured_image_alt: 'Porcelain vs ceramic tile comparison',
     categories: [{ id: 5, name: 'Tips', slug: 'tips' }],
     location: 'florida', publish_date: '2024-10-22', reading_time: 5,
@@ -766,7 +843,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-[#00a8e8] font-semibold text-sm uppercase tracking-widest mb-2">Tile Tips & Insights</p>
+            <p className="text-brand-ink font-semibold text-sm uppercase tracking-widest mb-2">Tile Tips & Insights</p>
             <h2 id="blog-heading" className="text-3xl md:text-4xl font-bold text-gray-900">
               From Our Blog
             </h2>
@@ -788,7 +865,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
             >
               <ChevronRight className="h-5 w-5 text-gray-700" />
             </button>
-            <Link href={`${basePath}/blog`} className="ml-2 text-[#00a8e8] font-semibold text-sm hover:text-[#0097d2] flex items-center gap-1">
+            <Link href={`${basePath}/blog`} className="ml-2 text-brand-ink font-semibold text-sm hover:text-[#0097d2] flex items-center gap-1">
               View All
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -825,7 +902,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
 
                   <div className="p-5 flex-1 flex flex-col">
                     {post.categories?.length > 0 && (
-                      <span className="text-xs text-[#00a8e8] font-semibold uppercase tracking-wide mb-2">
+                      <span className="text-xs text-brand-ink font-semibold uppercase tracking-wide mb-2">
                         {post.categories[0].name}
                       </span>
                     )}
@@ -836,13 +913,13 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
                     </Link>
                     <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">{post.excerpt}</p>
                     <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-1.5 text-gray-400 text-xs">
+                      <div className="flex items-center gap-1.5 text-gray-500 text-xs">
                         <Calendar className="h-3.5 w-3.5" />
                         {formatDate(post.publish_date)}
                       </div>
                       <Link
                         href={postHref}
-                        className="text-[#00a8e8] text-sm font-semibold hover:text-[#0097d2] flex items-center gap-1 group/link"
+                        className="text-brand-ink text-sm font-semibold hover:text-[#0097d2] flex items-center gap-1 group/link"
                       >
                         Read more
                         <ArrowRight className="h-3.5 w-3.5 group-hover/link:translate-x-0.5 transition-transform" />
@@ -902,15 +979,15 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Tola Tiles — {content.locationName}</h3>
             <address className="not-italic space-y-3 text-gray-600">
               <p className="flex items-start gap-3">
-                <span className="text-[#00a8e8] font-medium">Address:</span>
+                <span className="text-brand-ink font-medium">Address:</span>
                 <span>445 Hutchinson Ln<br />St Augustine, FL 32084</span>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-[#00a8e8] font-medium">Phone:</span>
+                <span className="text-brand-ink font-medium">Phone:</span>
                 <a href="tel:+1-904-866-1738" className="hover:text-[#00a8e8] transition-colors">{PHONE_NUMBER}</a>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-[#00a8e8] font-medium">Email:</span>
+                <span className="text-brand-ink font-medium">Email:</span>
                 <a href="mailto:menitola@tolatiles.com" className="hover:text-[#00a8e8] transition-colors">menitola@tolatiles.com</a>
               </p>
             </address>
@@ -944,7 +1021,7 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
             href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center gap-2 bg-brand-ink text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300 transform hover:scale-105"
           >
             Get Directions
             <ArrowRight className="w-5 h-5" />

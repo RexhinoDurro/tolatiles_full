@@ -76,6 +76,10 @@ export interface ContactFormData {
   cf_turnstile_response?: string;
   landing_page_id?: number;
   event_id?: string;
+  /** Folded into the lead's `notes` server-side — not a ContactLead column. */
+  zip_code?: string;
+  /** Folded into the lead's `notes` server-side — not a ContactLead column. */
+  service_subtype?: string;
 }
 
 export interface LeadStats {

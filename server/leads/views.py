@@ -181,6 +181,9 @@ Source: {lead.lead_source or 'Website'}
 Message:
 {lead.message}
 
+Notes:
+{lead.notes or '(none)'}
+
 ---
 View all leads in the admin dashboard.''',
                 from_email=settings.DEFAULT_FROM_EMAIL,

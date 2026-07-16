@@ -32,7 +32,7 @@ export function renderRichText(text: string): ReactNode[] {
         </strong>
       );
     } else if (linkLabel !== undefined && linkHref !== undefined) {
-      const linkClassName = 'font-semibold text-[#00a8e8] underline underline-offset-2 hover:text-blue-600 transition-colors';
+      const linkClassName = 'font-semibold text-brand-ink underline underline-offset-2 hover:text-blue-600 transition-colors';
       nodes.push(
         linkHref.startsWith('/') ? (
           <Link key={key++} href={linkHref} className={linkClassName}>

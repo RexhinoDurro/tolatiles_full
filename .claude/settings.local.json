@@ -56,7 +56,8 @@
       "Bash(pgrep:*)",
       "mcp__rag__search_codebase",
       "mcp__obsidian__search_simple",
-      "mcp__obsidian__vault_read"
+      "mcp__obsidian__vault_read",
+      "mcp__obsidian__vault_list"
     ]
   }
 }

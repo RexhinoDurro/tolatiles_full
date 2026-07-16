@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 const WHAT_WE_DO_DATA = [
   {
@@ -158,7 +159,7 @@ export default function WhatWeDoSection() {
               key={cat.category}
               onClick={() => handleCategoryChange(cat.category)}
               className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border ${activeCategory === cat.category
-                  ? 'bg-[#00a8e8] text-white border-[#00a8e8] shadow-md scale-105'
+                  ? 'bg-brand-ink text-white border-brand-ink shadow-md scale-105'
                   : 'bg-white text-gray-600 border-gray-200 hover:border-[#00a8e8] hover:text-[#00a8e8] hover:shadow-sm'
                 }`}
             >
@@ -194,10 +195,12 @@ export default function WhatWeDoSection() {
                   <div
                     className="relative w-full rounded-2xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 bg-gray-200 h-48 md:h-80 lg:h-96"
                   >
-                    <img
+                    <Image
                       src={service.image}
                       alt={service.title}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      fill
+                      sizes="(max-width: 768px) 50vw, 340px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors duration-300"></div>
                   </div>

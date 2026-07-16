@@ -3,13 +3,17 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, type Variants } from 'framer-motion';
+import { CheckCircle, Phone, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
-import type { Service } from '@/data/services';
+import type { Service, ServiceId } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 import { renderRichText } from '@/lib/richText';
+import ServiceTypeForm from '@/components/leadforms/ServiceTypeForm';
+import ServiceTypeFormModal from '@/components/leadforms/ServiceTypeFormModal';
 
 // ─── Gallery path map ─────────────────────────────────────────────────────────
 const serviceToGalleryPath: Record<string, string> = {
@@ -54,6 +58,21 @@ interface ServiceDetailPageLocationProps {
   serviceIdToSlug: Record<string, string>;
   location: 'jacksonville' | 'st-augustine';
 }
+
+const fadeUpVariant: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15
+    }
+  }
+};
 
 // ─── Main component ───────────────────────────────────────────────────────────
 const ServiceDetailPageLocation = ({
@@ -121,80 +140,121 @@ const ServiceDetailPageLocation = ({
   return (
     <div>
       {/* Reserves space for the fixed navbar so the hero image below starts right where the navbar ends */}
-      <div style={{ height: 'var(--navbar-height)' }} aria-hidden="true" />
-      {/* ── Hero Section (Light Theme for JPG Cutouts) ─────────────────────────────── */}
+      <div style={{ height: 'var(--navbar-height)' }} aria-hidden="true" className="bg-white" />
+      
+      {/* ── Hero Section ─────────────────────────────── */}
       <section
-        className="relative w-full flex overflow-hidden bg-white"
-        style={{ height: 'calc(100vh - var(--navbar-height))' }}
+        className="relative w-full flex flex-col bg-white"
+        style={{ minHeight: 'calc(100vh - var(--navbar-height))' }}
       >
-        {/* Background Layer — soft blue to white gradient */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-r from-blue-50 to-white" />
+        {/* Subtle Background Elements */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-blue-50/50 via-white to-gray-50/80" />
+        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-blue-100/30 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3" />
 
-        {/* Service Photo Layer — pinned to right side. White background of JPG blends into the white side of the gradient */}
-        <div className="absolute bottom-0 right-0 w-[95%] sm:w-[85%] md:w-[65%] lg:w-[60%] xl:w-[50%] h-[60%] sm:h-[75%] md:h-[90%] pointer-events-none z-20">
-          <Image
-            src={serviceHeroImageMap[service.id] || '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp'}
-            alt={`${service.title} Installation`}
-            fill
-            sizes="(max-width: 768px) 95vw, 60vw"
-            className="object-contain object-bottom md:object-right-bottom"
-            style={{ mixBlendMode: 'darken' }}
-            priority
-          />
-        </div>
-
-        {/* Text Overlay — pinned to top-left */}
-        <div className="relative z-30 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 flex items-start pt-6 md:pt-10">
-          <div className="w-full md:w-[55%] lg:w-[50%] flex flex-col items-start text-left">
-            <h1
-              className="leading-[1.05] tracking-tight text-gray-900"
-              style={{
-                fontFamily: 'var(--font-outfit), sans-serif',
-                fontWeight: 800,
-                fontSize: 'clamp(2rem, 4vw, 4rem)',
-                marginBottom: 'clamp(0.5rem, 1.5vh, 1rem)',
-              }}
-            >
+        {/* Hero Content Container */}
+        <div className="relative z-30 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col pt-8 md:pt-16 pb-8">
+          
+          {/* H1 Title - Takes full width on both mobile and desktop */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            className="w-full flex flex-col items-start text-left mb-6 md:mb-8"
+          >
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
               {h1Text}<br />
-              <span className="text-[#00a8e8]">in {locationName} FL</span>
+              <span className="text-brand-ink">in {locationName} FL</span>
             </h1>
+          </motion.div>
 
-            <p className="text-gray-700 text-base md:text-lg mb-4 md:mb-6 leading-relaxed max-w-xl">
-              {renderRichText(locationContent.localDescription)}
-            </p>
-
-            <ul className="flex flex-col" style={{ gap: 'clamp(0.25rem, 0.8vh, 0.5rem)' }}>
-              {service.features.slice(0, 3).map((item) => (
-                <li key={item} className="flex items-center justify-start gap-2">
-                  <span
-                    className="text-[#00a8e8] font-bold uppercase"
-                    style={{
-                      fontFamily: 'var(--font-outfit), sans-serif',
-                      fontSize: 'clamp(0.8rem, 1.2vw, 1rem)',
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    ✓ {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center gap-3 w-full">
-              <Link
-                href={`${locationPath}/contact`}
-                className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-none font-bold hover:bg-blue-500 transition-all w-full sm:w-auto text-sm md:text-base"
-              >
-                Get a Free Estimate
-              </Link>
-              <a
-                href="tel:+1-904-866-1738"
-                className="inline-flex items-center justify-center gap-2 bg-white text-gray-900 px-8 py-4 rounded-none font-bold hover:bg-gray-100 transition-all w-full sm:w-auto"
-              >
-                (904) 866-1738
-              </a>
+          {/* Container for Image & Text */}
+          <div className="w-full flex flex-col md:flex-row gap-6 md:gap-0 mt-2 md:mt-0">
+            
+            {/* Image Container: Order 1 on mobile, Order 2 on desktop */}
+            <div className="w-full md:w-[40%] flex items-center justify-center md:justify-end order-1 md:order-2 px-4 md:px-0 mb-2 md:mb-0">
+              <Image
+                src={serviceHeroImageMap[service.id] || '/images/services/service_hero/tolatiles-shower-tile-installation-hero.webp'}
+                alt={`${service.title} Installation in ${locationName}`}
+                width={600}
+                height={800}
+                className="w-[70%] sm:w-[60%] md:w-full max-h-[220px] sm:max-h-[300px] md:max-h-[500px] object-contain object-center md:object-right drop-shadow-2xl"
+                priority
+              />
             </div>
+
+            {/* Text & CTAs Container: Order 2 on mobile, Order 1 on desktop */}
+            <div className="w-full md:w-[60%] flex flex-col order-2 md:order-1 z-30 pb-6 md:pb-12 md:pr-8">
+              
+              {/* Description & Checkmarks Container */}
+              <div className="flex flex-col items-start w-full mb-6 md:mb-10">
+                {/* Description removed from here and moved below lead form */}
+
+                {/* Checkmarks */}
+                <motion.ul
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.7, delay: 0.2 }}
+                  className="w-full flex flex-col gap-3 md:gap-4"
+                >
+                  {service.features.slice(0, 3).map((feature) => (
+                    <li key={feature} className="flex items-start gap-3">
+                      <CheckCircle className="text-[#00a8e8] w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-800 font-bold text-sm sm:text-base md:text-lg leading-tight">{feature}</span>
+                    </li>
+                  ))}
+                </motion.ul>
+              </div>
+
+              {/* CTAs */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="flex flex-col md:flex-row items-center gap-3 sm:gap-4 w-full"
+              >
+                <a
+                  href="#lead-form"
+                  className="group flex w-full md:flex-1 items-center justify-center gap-2 bg-brand-ink text-white px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-blue-500 transition-all text-sm sm:text-base shadow-lg shadow-blue-500/20 text-center"
+                >
+                  Get a Free Estimate
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </a>
+                <a
+                  href="tel:+1-904-866-1738"
+                  className="flex w-full md:flex-1 items-center justify-center gap-2 bg-white border-2 border-gray-100 text-gray-900 px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-gray-50 hover:border-gray-200 transition-all text-sm sm:text-base shadow-sm text-center"
+                >
+                  <Phone className="w-4 h-4 text-[#00a8e8]" />
+                  (904) 866-1738
+                </a>
+              </motion.div>
+            </div>
+            
           </div>
+        </div>
+      </section>
+
+      {/* ── Lead Form ─────────────────────────────────────────────────────── */}
+      <section id="lead-form" className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ServiceTypeForm serviceId={service.id as ServiceId} />
+        </div>
+      </section>
+
+      {/* ── SEO Description (Mobile Friendly) ─────────────────────────────── */}
+      <section className="py-12 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="prose prose-lg prose-blue max-w-none text-gray-600 leading-relaxed text-lg"
+          >
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight not-prose" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              {details?.seoHeadings?.[location] || `Expert ${service.title} in ${locationName}`}
+            </h2>
+            {renderRichText(locationContent.localDescription)}
+          </motion.div>
         </div>
       </section>
 
@@ -215,7 +275,7 @@ const ServiceDetailPageLocation = ({
           <div className="grid md:grid-cols-3 gap-12">
             {locationContent.sellingPoints.map((point, index) => (
               <div key={index} className="flex flex-col text-left">
-                <h3 className="text-2xl font-bold text-[#00a8e8] mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>0{index + 1}</h3>
+                <h3 className="text-2xl font-bold text-brand-ink mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>0{index + 1}</h3>
                 <p className="text-gray-600 leading-relaxed text-lg">{point}</p>
               </div>
             ))}
@@ -237,7 +297,7 @@ const ServiceDetailPageLocation = ({
             {locationContent.localFeatures.map((feature, index) => (
               <div key={`local-${index}`} className="flex flex-col">
                 <p className="text-gray-900 font-bold mb-1 text-lg">{feature}</p>
-                <span className="text-sm text-[#00a8e8] font-bold uppercase tracking-wider">{locationName} Specialty</span>
+                <span className="text-sm text-brand-ink font-bold uppercase tracking-wider">{locationName} Specialty</span>
               </div>
             ))}
             {service.features.map((feature, index) => (
@@ -265,7 +325,7 @@ const ServiceDetailPageLocation = ({
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
               {details.materials.map((material, index) => (
                 <div key={index} className="flex flex-col text-left">
-                  <h3 className="text-2xl font-bold text-[#00a8e8] mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{material.name}</h3>
+                  <h3 className="text-2xl font-bold text-brand-ink mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{material.name}</h3>
                   <p className="text-gray-600 leading-relaxed text-lg">{material.description}</p>
                 </div>
               ))}
@@ -273,7 +333,7 @@ const ServiceDetailPageLocation = ({
 
             <p className="text-center text-gray-500 mt-16 text-base">
               Not sure which material is right for your {locationName} home?{' '}
-              <Link href={`${locationPath}/contact`} className="text-[#00a8e8] font-bold hover:underline transition-all">
+              <Link href={`${locationPath}/contact`} className="text-brand-ink font-bold hover:underline transition-all">
                 Schedule a free consultation →
               </Link>
             </p>
@@ -326,7 +386,7 @@ const ServiceDetailPageLocation = ({
             </div>
             <Link
               href={`/${location}/gallery/${galleryKey}`}
-              className="text-[#00a8e8] font-bold hover:underline transition-colors whitespace-nowrap text-lg"
+              className="text-brand-ink font-bold hover:underline transition-colors whitespace-nowrap text-lg"
             >
               View Full Portfolio
             </Link>
@@ -375,7 +435,7 @@ const ServiceDetailPageLocation = ({
                 <div className="text-5xl font-extrabold text-gray-200 mb-4 tracking-tighter" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
                   {process.step}
                 </div>
-                <h3 className="text-2xl font-bold text-[#00a8e8] mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{process.title}</h3>
+                <h3 className="text-2xl font-bold text-brand-ink mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>{process.title}</h3>
                 <p className="text-gray-600 text-lg leading-relaxed">{renderRichText(process.description)}</p>
               </div>
             ))}
@@ -406,7 +466,7 @@ const ServiceDetailPageLocation = ({
                     aria-expanded={openFaqIndex === index}
                   >
                     <span className="font-bold text-gray-900 text-lg">{faq.question}</span>
-                    <span className="text-[#00a8e8] font-bold text-xl">{openFaqIndex === index ? '−' : '+'}</span>
+                    <span className="text-brand-ink font-bold text-xl">{openFaqIndex === index ? '−' : '+'}</span>
                   </button>
                   <div 
                     className={`transition-all duration-300 ease-in-out overflow-hidden ${
@@ -423,7 +483,7 @@ const ServiceDetailPageLocation = ({
             
             <p className="text-center text-gray-500 mt-10 text-base">
               Still have questions about {locationName} tile installation?{' '}
-              <Link href={`${locationPath}/contact`} className="text-[#00a8e8] font-bold hover:underline transition-all">
+              <Link href={`${locationPath}/contact`} className="text-brand-ink font-bold hover:underline transition-all">
                 Contact our local team →
               </Link>
             </p>
@@ -439,13 +499,13 @@ const ServiceDetailPageLocation = ({
             <div className="flex justify-center gap-8 flex-wrap">
               <Link
                 href={`/${otherLocation}/services/${serviceIdToSlug[service.id]}`}
-                className="text-[#00a8e8] font-bold text-lg hover:underline"
+                className="text-brand-ink font-bold text-lg hover:underline"
               >
                 {otherLocationName}
               </Link>
               <Link
                 href={`/services/${serviceIdToSlug[service.id]}`}
-                className="text-[#00a8e8] font-bold text-lg hover:underline"
+                className="text-brand-ink font-bold text-lg hover:underline"
               >
                 All Northeast Florida
               </Link>
@@ -473,7 +533,7 @@ const ServiceDetailPageLocation = ({
                 <p className="text-gray-600 mb-6 leading-relaxed text-lg">{relatedService.description}</p>
                 <Link
                   href={`/${location}/services/${serviceIdToSlug[relatedService.id]}`}
-                  className="text-[#00a8e8] font-bold text-lg hover:underline"
+                  className="text-brand-ink font-bold text-lg hover:underline"
                 >
                   Learn More
                 </Link>
@@ -484,7 +544,7 @@ const ServiceDetailPageLocation = ({
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[#00a8e8]">
+      <section className="py-24 bg-brand-ink">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
             Ready to Start Your {service.title} Project in {locationName}?
@@ -494,12 +554,17 @@ const ServiceDetailPageLocation = ({
             Licensed, insured, and backed by our 2-year installation warranty.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href={`/${location}/contact`}
-              className="bg-white text-gray-900 px-8 py-4 rounded-none font-bold hover:bg-gray-100 transition-all text-lg"
-            >
-              Schedule Free {locationName} Consultation
-            </Link>
+            <ServiceTypeFormModal serviceId={service.id as ServiceId}>
+              {(open) => (
+                <button
+                  type="button"
+                  onClick={open}
+                  className="bg-white text-gray-900 px-8 py-4 rounded-none font-bold hover:bg-gray-100 transition-all text-lg"
+                >
+                  Schedule Free {locationName} Consultation
+                </button>
+              )}
+            </ServiceTypeFormModal>
             <a
               href="tel:+1-904-866-1738"
               className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-none font-bold hover:bg-white hover:text-gray-900 transition-all text-lg"

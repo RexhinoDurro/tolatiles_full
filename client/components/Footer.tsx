@@ -50,11 +50,11 @@ const Footer = () => {
           <div className="md:col-span-1">
             <div className="flex items-center space-x-3 mb-6">
               <Image
-                src="/images/whitelogo.svg"
+                src="/images/tolatiles-logo.png"
                 alt="Tola Tiles Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10"
+                width={700}
+                height={191}
+                className="w-10 h-10 object-contain"
               />
               <h2 className="text-2xl font-bold">Tola Tiles</h2>
             </div>

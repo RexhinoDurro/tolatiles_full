@@ -68,7 +68,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
       {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
       <article className="min-h-screen bg-white pt-[var(--navbar-height)]">
         {/* Hero Section */}
-        <header className="bg-brand-light text-white py-12 md:py-20">
+        <header className="bg-brand-ink text-white py-12 md:py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               {/* Breadcrumbs */}
@@ -147,7 +147,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
               <div className="lg:col-span-3">
                 {/* Article Content */}
                 <div
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-[#00a8e8] prose-img:rounded-lg"
+                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-brand-ink prose-img:rounded-lg"
                   dangerouslySetInnerHTML={{ __html: post.content }}
                 />
 
@@ -165,7 +165,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
                         >
                           <summary className="flex items-center justify-between px-6 py-4 cursor-pointer font-medium text-gray-900 hover:bg-gray-100">
                             {faq.question}
-                            <span className="text-[#00a8e8] group-open:rotate-180 transition-transform">
+                            <span className="text-brand-ink group-open:rotate-180 transition-transform">
                               ▼
                             </span>
                           </summary>
@@ -188,14 +188,14 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
                   <div className="flex flex-wrap gap-4">
                     <a
                       href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-brand-light text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-brand-ink text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm"
                     >
                       <Phone className="w-5 h-5" />
                       {PHONE_NUMBER}
                     </a>
                     <Link
                       href="/contact"
-                      className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#00a8e8] text-[#00a8e8] font-semibold rounded-lg hover:bg-[#00a8e8] hover:text-white transition-colors"
+                      className="inline-flex items-center gap-2 px-6 py-3 border-2 border-[#00a8e8] text-brand-ink font-semibold rounded-lg hover:bg-[#00a8e8] hover:text-white transition-colors"
                     >
                       Get Free Estimate
                       <ArrowRight className="w-5 h-5" />
@@ -212,7 +212,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
                         href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-[#00a8e8] text-white rounded-lg hover:bg-[#0097d2] transition-colors"
+                        className="p-2 bg-brand-ink text-white rounded-lg hover:bg-[#0097d2] transition-colors"
                         aria-label="Share on Facebook"
                       >
                         <Facebook className="w-5 h-5" />
@@ -251,7 +251,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
                     </p>
                     <a
                       href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-                      className="flex items-center gap-2 text-[#00a8e8] font-semibold hover:underline"
+                      className="flex items-center gap-2 text-brand-ink font-semibold hover:underline"
                     >
                       <Phone className="w-4 h-4" />
                       {PHONE_NUMBER}
@@ -318,7 +318,7 @@ export default function ContentDetailPage({ post, relatedPosts, contentType, loc
           <div className="max-w-4xl mx-auto">
             <Link
               href={`/${prefix}`}
-              className="inline-flex items-center gap-2 text-[#00a8e8] font-medium hover:underline"
+              className="inline-flex items-center gap-2 text-brand-ink font-medium hover:underline"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to {indexLabel}

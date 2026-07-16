@@ -32,7 +32,7 @@ export const services: Service[] = [
       "Our expert team specializes in creating beautiful, functional kitchen backsplashes that protect your walls while adding aesthetic value to your space. We work with a wide variety of materials including ceramic, porcelain, glass, and natural stone tiles to match your unique style and budget. From modern subway tiles to intricate mosaic patterns, we bring your vision to life with precision and craftsmanship.",
     icon: 'ChefHat',
     features: [
-      'Laser-straight layouts, every time',
+      'Perfectly straight layouts, every time',
       'Symmetrical cuts around outlets and cabinets',
       'Sealed against grease, steam, and stains',
       'Free consultation with exact material quantities before you buy',
@@ -42,7 +42,7 @@ export const services: Service[] = [
     timeline: '1-3 days',
     locations: {
       florida: {
-        localDescription: "Trusted **kitchen backsplash tile installation** for homeowners across **Jacksonville** and **St. Augustine**, FL. We handle laser-aligned layouts, moisture-resistant setting materials, and symmetrical cuts around cabinets and outlets — the details that separate a backsplash that lasts from one that doesn't.",
+        localDescription: "Trusted **kitchen backsplash tile installation** for homeowners across **Jacksonville** and **St. Augustine**, FL. We handle precisely aligned layouts, moisture-resistant setting materials, and symmetrical cuts around cabinets and outlets. Those details are what separate a backsplash that lasts from one that doesn't.",
         localFeatures: [
           'Humidity-resistant materials and installation methods',
           'Florida Building Code compliant installations',
@@ -106,7 +106,7 @@ export const services: Service[] = [
     timeline: '3-7 days',
     locations: {
       florida: {
-        localDescription: "Complete **bathroom tile installation** for **Jacksonville** and **St. Augustine** homeowners, built around one priority first: waterproofing. Every project gets premium moisture barriers, mold-resistant materials, and proper drainage slope — because a beautiful bathroom that leaks isn't actually finished.",
+        localDescription: "Complete **bathroom tile installation** for **Jacksonville** and **St. Augustine** homeowners, built around one priority first: waterproofing. Every project gets premium moisture barriers, mold-resistant materials, and proper drainage slope. A beautiful bathroom that leaks isn't actually finished.",
         localFeatures: [
           'Advanced waterproofing for Florida humidity',
           'Mold and mildew resistant materials',
@@ -170,7 +170,7 @@ export const services: Service[] = [
     timeline: '2-5 days',
     locations: {
       florida: {
-        localDescription: "**Floor tile installation** across **Jacksonville** and **St. Augustine** starts underneath the tile, not on top of it. Florida slabs shift and crack, so we grind, level, and crack-isolate before we ever set a single piece — the reason our floors still look flat years later.",
+        localDescription: "**Floor tile installation** across **Jacksonville** and **St. Augustine** starts underneath the tile, not on top of it. Florida slabs shift and crack, so we grind, level, and crack-isolate before we ever set a single piece. That's why our floors still look flat years later.",
         localFeatures: [
           'Florida slab foundation expertise',
           'Temperature fluctuation considerations',
@@ -185,7 +185,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "**Jacksonville's** diverse housing stock—from 1920s Riverside bungalows to brand-new Arlington townhomes—demands flooring expertise that adapts to every situation. Our **floor tile installations** have transformed living rooms in San Marco, kitchens in Mandarin, and entire first floors in Southside new construction. We excel with large format tiles that make Jacksonville's open floor plans feel even more spacious. The concrete slabs typical in **Duval County** construction require specific preparation techniques we've perfected over years of local work. For Jacksonville Beach and Atlantic Beach properties, we recommend porcelain tiles rated for moisture resistance. Our team handles everything from elegant marble entryways in Ortega to durable commercial flooring in Jacksonville's business districts.",
+        localDescription: "**Jacksonville's** diverse housing stock, from 1920s Riverside bungalows to brand-new Arlington townhomes, demands flooring expertise that adapts to every situation. Our **floor tile installations** have transformed living rooms in San Marco, kitchens in Mandarin, and entire first floors in Southside new construction. We excel with large format tiles that make Jacksonville's open floor plans feel even more spacious. The concrete slabs typical in **Duval County** construction require specific preparation techniques we've perfected over years of local work. For Jacksonville Beach and Atlantic Beach properties, we recommend porcelain tiles rated for moisture resistance. Our team handles everything from elegant marble entryways in Ortega to durable commercial flooring in Jacksonville's business districts.",
         localFeatures: [
           'Open floor plan design expertise',
           'Duval County concrete slab specialists',
@@ -234,7 +234,7 @@ export const services: Service[] = [
     timeline: '3-6 days',
     locations: {
       florida: {
-        localDescription: "Outdoor living runs year-round for **Jacksonville** and **St. Augustine** homeowners, so we build **patio and pool deck tile installations** to match — UV-stable grout, slip-resistant surfaces, and drainage planned before a single tile goes down, built to handle sun, storms, and everything in between.",
+        localDescription: "Outdoor living runs year-round for **Jacksonville** and **St. Augustine** homeowners, so we build **patio and pool deck tile installations** to match: UV-stable grout, slip-resistant surfaces, and drainage planned before a single tile goes down. Built to handle sun, storms, and everything in between.",
         localFeatures: [
           'Hurricane and storm-resistant installations',
           'UV-resistant materials for Florida sun',
@@ -249,7 +249,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "**Jacksonville's** outdoor lifestyle calls for patio spaces that work as hard as you play. Our team has installed **patio tiles** throughout **Duval County**, from the poolside decks of Ponte Vedra to the cozy backyard patios of Mandarin. We understand Jacksonville's weather patterns—scorching summers, afternoon storms, and the occasional freeze—and select materials that handle it all. In Jacksonville Beach and Atlantic Beach, we use marine-grade installations that resist salt air corrosion. Outdoor kitchens have become increasingly popular in Riverside and San Marco, and we offer backsplash installations that complement your grilling setup. Every Jacksonville patio installation includes proper drainage planning to handle our summer downpours and slip-resistant surfaces for pool areas.",
+        localDescription: "**Jacksonville's** outdoor lifestyle calls for patio spaces that work as hard as you play. Our team has installed **patio tiles** throughout **Duval County**, from the poolside decks of Ponte Vedra to the cozy backyard patios of Mandarin. We understand Jacksonville's weather patterns (scorching summers, afternoon storms, and the occasional freeze) and select materials that handle it all. In Jacksonville Beach and Atlantic Beach, we use marine-grade installations that resist salt air corrosion. Outdoor kitchens have become increasingly popular in Riverside and San Marco, and we offer backsplash installations that complement your grilling setup. Every Jacksonville patio installation includes proper drainage planning to handle our summer downpours and slip-resistant surfaces for pool areas.",
         localFeatures: [
           'Duval County outdoor living specialists',
           'Marine-grade beach community installations',
@@ -298,7 +298,7 @@ export const services: Service[] = [
     timeline: '2-4 days',
     locations: {
       florida: {
-        localDescription: "**Fireplace tile installation** in **Jacksonville** and **St. Augustine** homes, working or purely decorative. We build every surround to code, laser-align the layout to the firebox center, and miter the outside corners instead of hiding them under metal trim — small details, real difference.",
+        localDescription: "**Fireplace tile installation** in **Jacksonville** and **St. Augustine** homes, working or purely decorative. We build every surround to code, precisely align the layout to the firebox center, and miter the outside corners instead of hiding them under metal trim. Small details, real difference.",
         localFeatures: [
           'Gas fireplace surround specialists',
           'Florida building code compliance',
@@ -377,7 +377,7 @@ export const services: Service[] = [
         ],
       },
       jacksonville: {
-        localDescription: "**Jacksonville** homeowners expect showers that feel like personal retreats, and our installations deliver that experience with bulletproof waterproofing underneath. We've transformed master bathrooms throughout **Duval County**—creating spa-worthy showers in Mandarin, elegant walk-ins in San Marco, and beach-rinse ready enclosures in Jacksonville Beach. Our **curbless shower installations** are perfect for aging-in-place renovations popular in established neighborhoods like Ortega and Avondale. Jacksonville's humidity makes proper waterproofing critical; we use premium membrane systems and mold-resistant materials that protect your investment for decades. Every shower includes thoughtful details—properly placed niches for shampoo, solid benches for comfort, and drainage slopes that keep water moving. From modest updates to complete luxury transformations, we make Jacksonville showers shine.",
+        localDescription: "**Jacksonville** homeowners expect showers that feel like personal retreats, and our installations deliver that experience with bulletproof waterproofing underneath. We've transformed master bathrooms throughout **Duval County**, creating spa-worthy showers in Mandarin, elegant walk-ins in San Marco, and beach-rinse ready enclosures in Jacksonville Beach. Our **curbless shower installations** are perfect for aging-in-place renovations popular in established neighborhoods like Ortega and Avondale. Jacksonville's humidity makes proper waterproofing critical; we use premium membrane systems and mold-resistant materials that protect your investment for decades. Every shower includes thoughtful details: properly placed niches for shampoo, solid benches for comfort, and drainage slopes that keep water moving. From modest updates to complete luxury transformations, we make Jacksonville showers shine.",
         localFeatures: [
           'Aging-in-place accessible designs',
           'Beach house rinse-off shower expertise',

@@ -75,19 +75,19 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
           {/* Key Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 animate-slideInUp">
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
-              <div className="text-4xl font-bold text-[#00a8e8] mb-2">1,500+</div>
+              <div className="text-4xl font-bold text-brand-ink mb-2">1,500+</div>
               <div className="text-gray-600 font-medium">Projects Completed</div>
             </div>
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
-              <div className="text-4xl font-bold text-[#00a8e8] mb-2">15+</div>
+              <div className="text-4xl font-bold text-brand-ink mb-2">15+</div>
               <div className="text-gray-600 font-medium">Years of Excellence</div>
             </div>
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
-              <div className="text-4xl font-bold text-[#00a8e8] mb-2">98%</div>
+              <div className="text-4xl font-bold text-brand-ink mb-2">98%</div>
               <div className="text-gray-600 font-medium">Customer Satisfaction</div>
             </div>
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
-              <div className="text-4xl font-bold text-[#00a8e8] mb-2">2-Year</div>
+              <div className="text-4xl font-bold text-brand-ink mb-2">2-Year</div>
               <div className="text-gray-600 font-medium">Quality Warranty</div>
             </div>
           </div>
@@ -310,11 +310,11 @@ const TeamSlider = () => {
               height={128}
               className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-blue-100"
             />
-            <div className="absolute -bottom-2 -right-2 bg-[#00a8e8] text-white text-xs px-2 py-1 rounded-full">{currentMember.experience}</div>
+            <div className="absolute -bottom-2 -right-2 bg-brand-ink text-white text-xs px-2 py-1 rounded-full">{currentMember.experience}</div>
           </div>
 
           <h3 className="text-2xl font-bold text-gray-900 mb-1">{currentMember.name}</h3>
-          <p className="text-[#00a8e8] font-semibold mb-4">{currentMember.position}</p>
+          <p className="text-brand-ink font-semibold mb-4">{currentMember.position}</p>
 
           <blockquote className="text-gray-600 italic mb-6 text-sm leading-relaxed">&quot;{currentMember.quote}&quot;</blockquote>
         </div>

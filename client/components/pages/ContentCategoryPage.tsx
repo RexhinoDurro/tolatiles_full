@@ -41,7 +41,7 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
   return (
     <div className="min-h-screen bg-gray-50 pt-[var(--navbar-height)]">
       {/* Hero Section */}
-      <section className="bg-brand-light text-white py-16">
+      <section className="bg-brand-ink text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             {/* Breadcrumbs */}
@@ -79,7 +79,7 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
           {posts.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg mb-4">No articles in this category yet</p>
-              <Link href={`/${prefix}`} className="text-[#00a8e8] hover:underline">
+              <Link href={`/${prefix}`} className="text-brand-ink hover:underline">
                 Browse all {indexLabel.toLowerCase()}
               </Link>
             </div>
@@ -130,7 +130,7 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
 
                       {/* Read More */}
                       <div className="mt-4 pt-4 border-t border-gray-100">
-                        <span className="inline-flex items-center gap-2 text-[#00a8e8] font-medium group-hover:gap-3 transition-all">
+                        <span className="inline-flex items-center gap-2 text-brand-ink font-medium group-hover:gap-3 transition-all">
                           Read More
                           <ArrowRight className="w-4 h-4" />
                         </span>
@@ -148,7 +148,7 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
       <div className="container mx-auto px-4 py-8">
         <Link
           href={`/${prefix}`}
-          className="inline-flex items-center gap-2 text-[#00a8e8] font-medium hover:underline"
+          className="inline-flex items-center gap-2 text-brand-ink font-medium hover:underline"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to {indexLabel}
@@ -156,7 +156,7 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
       </div>
 
       {/* CTA Section */}
-      <section className="bg-[#00a8e8] text-white py-16">
+      <section className="bg-brand-ink text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>Ready to Start Your Tile Project?</h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
@@ -165,14 +165,14 @@ export default function ContentCategoryPage({ category, posts, contentType, loca
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href={`tel:${PHONE_NUMBER.replace(/[^0-9]/g, '')}`}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-brand-light text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm border border-transparent hover:border-white"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-brand-ink text-white font-semibold rounded-lg hover:bg-opacity-90 transition-colors shadow-sm border border-transparent hover:border-white"
             >
               <Phone className="w-5 h-5" />
               {PHONE_NUMBER}
             </a>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#00a8e8] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-brand-ink transition-colors"
             >
               Get Free Estimate
               <ArrowRight className="w-5 h-5" />

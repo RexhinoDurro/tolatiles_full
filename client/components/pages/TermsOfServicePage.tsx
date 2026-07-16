@@ -180,7 +180,7 @@ const TermsOfServicePage = () => {
 
         {/* Back Link */}
         <div className="text-center mt-8">
-          <Link href="/" className="text-[#00a8e8] hover:text-[#0097d2] font-medium transition-colors">
+          <Link href="/" className="text-brand-ink hover:text-[#0097d2] font-medium transition-colors">
             &larr; Back to Home
           </Link>
         </div>

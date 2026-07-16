@@ -408,7 +408,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   </label>
                   <div className="relative flex">
                     {formData.phone && (
-                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-[#00a8e8] font-bold text-sm select-none">
+                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-brand-ink font-bold text-sm select-none">
                         +1
                       </span>
                     )}
@@ -471,7 +471,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#00a8e8] text-white py-4 px-6 rounded-lg hover:bg-[#0097d2] disabled:bg-blue-400 transition-all duration-300 font-semibold transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-brand-ink text-white py-4 px-6 rounded-lg hover:bg-[#0097d2] disabled:bg-blue-400 transition-all duration-300 font-semibold transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -492,7 +492,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   * Required fields. We&apos;ll respond within 24 hours.
                   <br />
                   For immediate assistance, call{' '}
-                  <a href="tel:+1-904-866-1738" className="text-[#00a8e8] hover:underline">
+                  <a href="tel:+1-904-866-1738" className="text-brand-ink hover:underline">
                     +1 (904) 866-1738
                   </a>
                 </p>
@@ -536,7 +536,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   href="https://maps.app.goo.gl/YwPC3vTSgi4eRTvK7"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 bg-[#00a8e8] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300"
+                  className="inline-flex items-center justify-center gap-2 bg-brand-ink text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0097d2] transition-all duration-300"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Get Directions

@@ -30,6 +30,12 @@ export interface ServiceDetails {
   whyHeading: string;
   /** Short intro for the Why section subtitle */
   whySubtitle: string;
+  /** Catchy SEO headings for the description section */
+  seoHeadings: {
+    florida: string;
+    jacksonville: string;
+    'st-augustine': string;
+  };
   /** Expertise specific to this service */
   expertise: ServiceExpertise[];
   /** Service-specific FAQs (renders accordion UI + FAQPage schema) */
@@ -45,6 +51,11 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
     keywordBase: 'Expert Kitchen Backsplash Tile Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Kitchen Backsplash',
     whySubtitle: 'Flawless layout planning and precision craftsmanship for the heart of your home',
+    seoHeadings: {
+      florida: "Transform Your Kitchen with Northeast Florida's Premier Backsplash Artists",
+      jacksonville: "Elevate Your Jacksonville Kitchen with Flawless Backsplash Tile",
+      'st-augustine': "St. Augustine's Choice for Stunning, Hand-Crafted Kitchen Backsplashes",
+    },
     expertise: [
       {
         name: 'Advanced Leveling Systems',
@@ -53,9 +64,9 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         image: '/images/backsplash/5.webp',
       },
       {
-        name: 'Laser-Aligned Layouts',
+        name: 'Precision-Aligned Layouts',
         description:
-          'We ensure perfect **laser-aligned layouts**, symmetrical corners, and flawless grout lines. From complex geometric patterns to classic subway formats, we calculate the perfect starting points to ensure symmetrical cuts around outlets and cabinetry.',
+          'We ensure perfectly **aligned layouts**, symmetrical corners, and flawless grout lines. From complex geometric patterns to classic subway formats, we calculate the perfect starting points to ensure symmetrical cuts around outlets and cabinetry.',
         image: '/images/backsplash/1.webp',
       },
       {
@@ -75,7 +86,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**Bring your own tile** — we're installers, not tile retailers, so you're free to shop wherever you'd like, whether that's a local supplier, a big box store, or an online retailer for something more specialty like hand-painted ceramic. What we bring is the labor, the thinset, the moisture-resistant backer where needed, and the precision layout work. During your free consultation, we'll walk your kitchen, confirm the design, and give you the exact square footage to order so you're not guessing or over-buying.",
+          "**Bring your own tile.** We're installers, not tile retailers, so you're free to shop wherever you'd like, whether that's a local supplier, a big box store, or an online retailer for something more specialty like hand-painted ceramic. What we bring is the labor, the thinset, the moisture-resistant backer where needed, and the precision layout work. During your free consultation, we'll walk your kitchen, confirm the design, and give you the exact square footage to order so you're not guessing or over-buying.",
       },
       {
         question: 'How long does kitchen backsplash tile installation take?',
@@ -115,7 +126,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         step: '03',
         title: 'Expert Installation',
         description:
-          'Laser-level precision cutting, layout planning, and professional setting using premium adhesive suited for Florida kitchens and your specific tile.',
+          'Precision cutting, layout planning, and professional setting using premium adhesive suited for Florida kitchens and your specific tile.',
       },
       {
         step: '04',
@@ -130,6 +141,11 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
     keywordBase: 'Professional Bathroom Tile Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Bathroom Renovation',
     whySubtitle: 'Bulletproof waterproofing systems and spa-quality craftsmanship in every bathroom we build',
+    seoHeadings: {
+      florida: "Breathe New Life into Your Northeast Florida Bathroom with Luxury Tile",
+      jacksonville: "Jacksonville's Trusted Experts for Complete Bathroom Tile Transformations",
+      'st-augustine': "Create Your St. Augustine Spa Oasis with Masterful Bathroom Tiling",
+    },
     expertise: [
       {
         name: 'Multi-Layer Waterproofing Systems',
@@ -140,7 +156,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Slope & Drainage Engineering',
         description:
-          'For wet rooms and floors, we expertly grade the surface underneath the tile to ensure rapid, complete water evacuation to the drain with zero pooling, utilizing precision **dry-pack mortar beds**.',
+          'For wet rooms and floors, we expertly grade the surface underneath the tile using precision **dry-pack mortar beds**, ensuring rapid, complete water evacuation to the drain with zero pooling.',
         image: '/images/shower/2.webp',
       },
       {
@@ -160,12 +176,12 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**We install; you choose the tile.** Most homeowners already have a look in mind or a supplier they trust, so we let you handle that part and focus entirely on the installation — waterproofing, layout, cutting, and grouting. Before work starts, we measure the full bathroom and tell you precisely how much tile, in square footage, to have on hand, including a reasonable buffer for cuts and waste.",
+          "**We install; you choose the tile.** Most homeowners already have a look in mind or a supplier they trust, so we let you handle that part and focus entirely on the installation: waterproofing, layout, cutting, and grouting. Before work starts, we measure the full bathroom and tell you precisely how much tile, in square footage, to have on hand, including a reasonable buffer for cuts and waste.",
       },
       {
         question: 'How long does a full bathroom tile installation take?',
         answer:
-          'A complete bathroom tile installation — floor, walls, and shower — typically takes **3 to 7 days** depending on the size and complexity. We provide a detailed schedule before work begins and stick to it.',
+          'A complete bathroom tile installation (floor, walls, and shower) typically takes **3 to 7 days** depending on the size and complexity. We provide a detailed schedule before work begins and stick to it.',
       },
       {
         question: 'Do you provide a waterproofing warranty for bathroom tile installations?',
@@ -189,7 +205,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         step: '02',
         title: 'Waterproofing System',
         description:
-          'Professional moisture barrier and waterproofing membrane installation — the critical foundation that prevents leaks for decades.',
+          'Professional moisture barrier and waterproofing membrane installation. This is the critical foundation that prevents leaks for decades.',
       },
       {
         step: '03',
@@ -210,6 +226,11 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
     keywordBase: 'Durable Floor Tile Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Floor Tile Project',
     whySubtitle: 'Florida slab expertise and precision leveling for floors that last decades',
+    seoHeadings: {
+      florida: "Beautiful, Florida-Tough Tile Flooring Built to Last a Lifetime",
+      jacksonville: "Upgrading Jacksonville Homes with Flawless, Crack-Free Tile Floors",
+      'st-augustine': "Timeless Tile Flooring Installation for Historic & Modern St. Augustine Homes",
+    },
     expertise: [
       {
         name: 'Precision Slab Leveling & Preparation',
@@ -226,7 +247,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Intricate Layout Mastery',
         description:
-          '**Precision laser alignment** is critical. We use specialized staggered layouts (1/3 offset for planks) and calculate exact center lines so the pattern flows seamlessly from room to room.',
+          '**Precision alignment** is critical. We use specialized staggered layouts (1/3 offset for planks) and calculate exact center lines so the pattern flows seamlessly from room to room.',
         image: '/images/flooring/3.webp',
       },
       {
@@ -240,7 +261,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**You supply the tile, we handle everything else.** Whether you're ordering porcelain, natural stone, or luxury vinyl tile from a local showroom or online, our job is turning it into a finished floor — subfloor prep, leveling, layout, and installation. During the initial walkthrough, we measure the space and give you an exact quantity to order, accounting for your chosen pattern and typical cut waste.",
+          "**You supply the tile, we handle everything else.** Whether you're ordering porcelain, natural stone, or luxury vinyl tile from a local showroom or online, our job is turning it into a finished floor: subfloor prep, leveling, layout, and installation. During the initial walkthrough, we measure the space and give you an exact quantity to order, accounting for your chosen pattern and typical cut waste.",
       },
       {
         question: 'How do you prepare a concrete slab for tile installation in Florida?',
@@ -289,7 +310,12 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
   patio: {
     keywordBase: 'Outdoor Patio & Pool Deck Tile Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Outdoor Space',
-    whySubtitle: 'Florida outdoor living expertise — built for sun, rain, and thermal expansion',
+    whySubtitle: 'Florida outdoor living expertise, built for sun, rain, and thermal expansion',
+    seoHeadings: {
+      florida: "Maximize Your Florida Outdoor Living with Weather-Defying Patio Tile",
+      jacksonville: "Jacksonville's Premier Installers for Stunning Pool Decks & Patios",
+      'st-augustine': "Enhance Your St. Augustine Outdoor Space with Master-Crafted Patio Tile",
+    },
     expertise: [
       {
         name: 'Exterior Grade Bonding',
@@ -320,7 +346,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**We install the tile or pavers; you choose the material.** Outdoor jobs often involve specialty pavers or porcelain from a specific supplier, so we leave that selection to you and focus on what we do best — layout, drainage, bonding, and expansion joints suited for outdoor conditions. We'll calculate your exact material needs during the site visit, including extra for cuts around edges and drains.",
+          "**We install the tile or pavers; you choose the material.** Outdoor jobs often involve specialty pavers or porcelain from a specific supplier, so we leave that selection to you and focus on what we do best: layout, drainage, bonding, and expansion joints suited for outdoor conditions. We'll calculate your exact material needs during the site visit, including extra for cuts around edges and drains.",
       },
       {
         question: "How do outdoor tiles hold up in Florida's weather?",
@@ -370,6 +396,11 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
     keywordBase: 'Fireplace Tile Surround Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Fireplace Surround',
     whySubtitle: 'Creating stunning focal points with heat-safe installation and artisan precision',
+    seoHeadings: {
+      florida: "Turn Your Northeast Florida Fireplace into a Show-Stopping Centerpiece",
+      jacksonville: "Custom Fireplace Tile Surrounds Crafted for Jacksonville Homes",
+      'st-augustine': "Artisan Fireplace Makeovers Bringing Warmth to St. Augustine Interiors",
+    },
     expertise: [
       {
         name: 'Heat-Rated Installation Adherence',
@@ -380,7 +411,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         name: 'Symmetrical Layout Planning',
         description:
-          'A fireplace is the focal point of the room. We laser-align the exact center of the firebox and calculate the layout so all cuts are **perfectly symmetrical** on both sides for a balanced aesthetic.',
+          'A fireplace is the focal point of the room. We precisely align the exact center of the firebox and calculate the layout so all cuts are **perfectly symmetrical** on both sides for a balanced aesthetic.',
         image: '/images/fireplace/2.webp',
       },
       {
@@ -400,7 +431,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**You pick the tile or stone, we handle the installation.** Fireplace surrounds often use specialty materials — natural stone, ledger panels, hand-painted tile — that homeowners like to source themselves. We take care of the code-compliant substrate prep, heat-rated adhesive, and precision layout. During your consultation, we'll confirm your design and tell you exactly how much material to order for the surround, hearth, and mantel area.",
+          "**You pick the tile or stone, we handle the installation.** Fireplace surrounds often use specialty materials (natural stone, ledger panels, hand-painted tile) that homeowners like to source themselves. We take care of the code-compliant substrate prep, heat-rated adhesive, and precision layout. During your consultation, we'll confirm your design and tell you exactly how much material to order for the surround, hearth, and mantel area.",
       },
       {
         question: 'What tiles are safe to use on fireplace surrounds?',
@@ -415,7 +446,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Can I tile over my existing fireplace surround?',
         answer:
-          'Often yes — particularly over existing ceramic or brick, provided it is solidly bonded. We verify clearances from the firebox remain compliant after adding tile thickness. We assess this during your free consultation.',
+          'Often yes, particularly over existing ceramic or brick, provided it is solidly bonded. We verify clearances from the firebox remain compliant after adding tile thickness. We assess this during your free consultation.',
       },
     ],
     processSteps: [
@@ -450,6 +481,11 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
     keywordBase: 'Custom Shower Tile Installation',
     whyHeading: 'Why Choose Tola Tiles for Your Custom Shower',
     whySubtitle: 'Bulletproof waterproofing systems and precise slope engineering for Northeast Florida showers',
+    seoHeadings: {
+      florida: "Experience the Ultimate Custom Shower Built for Northeast Florida Homes",
+      jacksonville: "Jacksonville's Specialists for Leak-Proof, Curbless Custom Showers",
+      'st-augustine': "St. Augustine's Premier Installers for Waterproof, Spa-Quality Showers",
+    },
     expertise: [
       {
         name: 'Impermeable Waterproofing Mastery',
@@ -480,12 +516,12 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you provide the tile, or do I need to buy it?',
         answer:
-          "**We're the installers, not the tile supplier.** You purchase the tile you want from wherever you'd like — many of our shower clients special-order from a local tile shop for exactly this reason — and we handle the labor, waterproofing membrane, pan slope, and setting materials. During your consultation, we measure the shower and tell you the exact quantity to order, including extra for niches, benches, and accent details.",
+          "**We're the installers, not the tile supplier.** You purchase the tile you want from wherever you'd like (many of our shower clients special-order from a local tile shop for exactly this reason), and we handle the labor, waterproofing membrane, pan slope, and setting materials. During your consultation, we measure the shower and tell you the exact quantity to order, including extra for niches, benches, and accent details.",
       },
       {
         question: "How do you prevent shower tiles from leaking?",
         answer:
-          "Preventing leaks requires a multi-layer waterproofing system. We apply a waterproofing membrane (Schluter KERDI or similar) over all surfaces and seams. Every penetration — drain, niche corners, bench screws — is individually sealed. This protects your home regardless of Florida's humidity.",
+          "Preventing leaks requires a multi-layer waterproofing system. We apply a waterproofing membrane (Schluter KERDI or similar) over all surfaces and seams. Every penetration, including the drain, niche corners, and bench screws, is individually sealed. This protects your home regardless of Florida's humidity.",
       },
       {
         question: 'How long does custom shower tile installation take?',
@@ -495,7 +531,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
       {
         question: 'Do you install curbless (zero-threshold) walk-in showers?',
         answer:
-          "Yes — curbless showers are among our most-requested designs. The critical element is engineering the slope before any tile is set to ensure water flows entirely to the drain without escaping into the main bathroom.",
+          "Yes. Curbless showers are among our most-requested designs. The critical element is engineering the slope before any tile is set to ensure water flows entirely to the drain without escaping into the main bathroom.",
       },
     ],
     processSteps: [
@@ -509,13 +545,13 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         step: '02',
         title: 'Waterproofing & Pan Engineering',
         description:
-          'Custom shower pan slope creation and full waterproofing membrane application — the most critical stage of any shower project.',
+          'Custom shower pan slope creation and full waterproofing membrane application. This is the most critical stage of any shower project.',
       },
       {
         step: '03',
         title: 'Tile Installation',
         description:
-          'Wall tiles, floor tiles, built-in niches, and bench tiling installed with laser precision and proper grout joint alignment.',
+          'Wall tiles, floor tiles, built-in niches, and bench tiling installed with exacting precision and proper grout joint alignment.',
       },
       {
         step: '04',

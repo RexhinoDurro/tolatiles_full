@@ -82,7 +82,7 @@ const ReviewCard = ({ review }: { review: GoogleReview }) => (
       )}
       <div>
         <h4 className="font-semibold text-gray-900 text-sm">{review.authorName}</h4>
-        <p className="text-xs text-gray-400">{review.relativeTimeDescription}</p>
+        <p className="text-xs text-gray-500">{review.relativeTimeDescription}</p>
       </div>
     </div>
   </article>

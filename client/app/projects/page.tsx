@@ -122,7 +122,7 @@ export default async function ProjectsPage() {
                   className="group flex items-center justify-between py-4 px-2 -mx-2 hover:bg-gray-50 transition-colors font-semibold text-gray-900 hover:text-[#00a8e8]"
                 >
                   {svc.label}
-                  <span className="text-[#00a8e8] group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
+                  <span className="text-brand-ink group-hover:translate-x-1 transition-transform" aria-hidden="true">→</span>
                 </a>
               ))}
             </div>

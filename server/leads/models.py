@@ -28,6 +28,7 @@ class ContactLead(models.Model):
         ('flooring', 'Flooring'),
         ('patio', 'Patio/Outdoor'),
         ('fireplace', 'Fireplace'),
+        ('shower', 'Shower Installation'),
         ('commercial', 'Commercial Project'),
         ('other', 'Other'),
     ]

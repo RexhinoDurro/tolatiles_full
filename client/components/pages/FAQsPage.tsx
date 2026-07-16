@@ -127,7 +127,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
             <button
               onClick={() => setSelectedCategory('all')}
               className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
-                selectedCategory === 'all' ? 'bg-[#00a8e8] text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
+                selectedCategory === 'all' ? 'bg-brand-ink text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
               }`}
               aria-pressed={selectedCategory === 'all'}
             >
@@ -147,7 +147,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
                     selectedCategory === category.id
-                      ? 'bg-[#00a8e8] text-white shadow-lg'
+                      ? 'bg-brand-ink text-white shadow-lg'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
                   }`}
                   aria-pressed={selectedCategory === category.id}
@@ -221,7 +221,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
               </p>
               <button
                 onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
-                className="text-[#00a8e8] hover:text-[#0097d2] font-medium"
+                className="text-brand-ink hover:text-[#0097d2] font-medium"
               >
                 View all questions
               </button>
@@ -280,7 +280,7 @@ const FAQsPage = ({ location = 'florida', initialFAQs }: FAQsPageProps) => {
                 <p className="text-blue-100 text-sm mb-3">Schedule an in-home visit</p>
                 <Link
                   href={`${locPrefix}/contact`}
-                  className="bg-white text-[#00a8e8] px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+                  className="bg-white text-brand-ink px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
                 >
                   Book Now
                 </Link>

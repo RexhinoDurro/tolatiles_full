@@ -8,10 +8,12 @@ import { CheckCircle, Phone, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 import { serviceToCategoryMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
-import type { Service } from '@/data/services';
+import type { Service, ServiceId } from '@/data/services';
 import { serviceDetailsMap } from '@/data/serviceDetails';
 import ServiceProjectsSection from '@/components/projects/ServiceProjectsSection';
 import { renderRichText } from '@/lib/richText';
+import ServiceTypeForm from '@/components/leadforms/ServiceTypeForm';
+import ServiceTypeFormModal from '@/components/leadforms/ServiceTypeFormModal';
 
 const serviceToGalleryPath: Record<string, string> = {
   'kitchen-backsplash': 'backsplashes',
@@ -152,7 +154,7 @@ const ServiceDetailPage = ({
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
               {service.title}<br />
-              <span className="text-[#00a8e8]">in Northeast FL</span>
+              <span className="text-brand-ink">in Northeast FL</span>
             </h1>
           </motion.div>
 
@@ -177,15 +179,7 @@ const ServiceDetailPage = ({
               {/* Description & Checkmarks Container */}
               <div className="flex flex-col items-start w-full mb-6 md:mb-10">
                 
-                {/* Description (Hidden on mobile, Top on desktop) */}
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                  className="hidden md:block w-full text-gray-600 text-xl mb-8 leading-relaxed max-w-lg font-medium"
-                >
-                  {renderRichText(locationContent.localDescription)}
-                </motion.p>
+                {/* Description removed from here and moved below lead form */}
 
                 {/* Checkmarks */}
                 <motion.ul
@@ -210,13 +204,13 @@ const ServiceDetailPage = ({
                 transition={{ duration: 0.7, delay: 0.3 }}
                 className="flex flex-col md:flex-row items-center gap-3 sm:gap-4 w-full"
               >
-                <Link
-                  href="/contact"
-                  className="group flex w-full md:flex-1 items-center justify-center gap-2 bg-[#00a8e8] text-white px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-blue-500 transition-all text-sm sm:text-base shadow-lg shadow-blue-500/20 text-center"
+                <a
+                  href="#lead-form"
+                  className="group flex w-full md:flex-1 items-center justify-center gap-2 bg-brand-ink text-white px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-blue-500 transition-all text-sm sm:text-base shadow-lg shadow-blue-500/20 text-center"
                 >
                   Get a Free Estimate
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
+                </a>
                 <a
                   href="tel:+1-904-866-1738"
                   className="flex w-full md:flex-1 items-center justify-center gap-2 bg-white border-2 border-gray-100 text-gray-900 px-4 md:px-8 py-3.5 md:py-4 rounded-none font-bold hover:bg-gray-50 hover:border-gray-200 transition-all text-sm sm:text-base shadow-sm text-center"
@@ -228,6 +222,31 @@ const ServiceDetailPage = ({
             </div>
             
           </div>
+        </div>
+      </section>
+
+      {/* ── Lead Form ─────────────────────────────────────────────────────── */}
+      <section id="lead-form" className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ServiceTypeForm serviceId={service.id as ServiceId} />
+        </div>
+      </section>
+
+      {/* ── SEO Description (Mobile Friendly) ─────────────────────────────── */}
+      <section className="py-12 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="prose prose-lg prose-blue max-w-none text-gray-600 leading-relaxed text-lg"
+          >
+            <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight not-prose" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+              {details?.seoHeadings?.florida || `Expert ${service.title} in Northeast FL`}
+            </h2>
+            {renderRichText(locationContent.localDescription)}
+          </motion.div>
         </div>
       </section>
 
@@ -272,7 +291,7 @@ const ServiceDetailPage = ({
                   </ul>
                   <Link
                     href={href}
-                    className="group inline-flex items-center gap-1.5 font-bold text-[#00a8e8] hover:text-blue-600 transition-colors"
+                    className="group inline-flex items-center gap-1.5 font-bold text-brand-ink hover:text-blue-600 transition-colors"
                   >
                     {service.title} in {locName}
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -297,7 +316,7 @@ const ServiceDetailPage = ({
                 Our Installation Expertise
               </h2>
               <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                {details?.whySubtitle ?? "We don't just sell tiles—we install the tiles you love with uncompromising precision."}
+                {details?.whySubtitle ?? "Precision installation for the tile you already love, from layout to final grout line."}
               </p>
             </motion.header>
 
@@ -441,7 +460,7 @@ const ServiceDetailPage = ({
                     <div className="text-4xl md:text-5xl font-extrabold text-gray-100 mb-2 md:mb-4 tracking-tighter" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
                       {process.step}
                     </div>
-                    <h3 className="text-xl md:text-2xl font-bold text-[#00a8e8] mb-2 md:mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                    <h3 className="text-xl md:text-2xl font-bold text-brand-ink mb-2 md:mb-4" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
                       {process.title}
                     </h3>
                     <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed pr-2 md:pr-0">
@@ -492,7 +511,7 @@ const ServiceDetailPage = ({
                     aria-expanded={openFaqIndex === index}
                   >
                     <span className="font-bold text-gray-900 text-lg">{faq.question}</span>
-                    <span className="text-[#00a8e8] font-bold text-xl">{openFaqIndex === index ? '−' : '+'}</span>
+                    <span className="text-brand-ink font-bold text-xl">{openFaqIndex === index ? '−' : '+'}</span>
                   </button>
                   <div 
                     className={`transition-all duration-300 ease-in-out overflow-hidden ${
@@ -511,7 +530,7 @@ const ServiceDetailPage = ({
       )}
 
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="py-24 bg-[#00a8e8] relative overflow-hidden">
+      <section className="py-24 bg-brand-ink relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
         
@@ -533,15 +552,20 @@ const ServiceDetailPage = ({
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUpVariant}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <Link
-              href={`${locPrefix}/contact`}
-              className="bg-white text-gray-900 px-8 py-4 md:py-5 rounded-none font-bold hover:bg-gray-100 hover:scale-105 transition-all text-lg shadow-xl"
-            >
-              Get a Free Estimate
-            </Link>
+            <ServiceTypeFormModal serviceId={service.id as ServiceId}>
+              {(open) => (
+                <button
+                  type="button"
+                  onClick={open}
+                  className="bg-white text-gray-900 px-8 py-4 md:py-5 rounded-none font-bold hover:bg-gray-100 hover:scale-105 transition-all text-lg shadow-xl"
+                >
+                  Get a Free Estimate
+                </button>
+              )}
+            </ServiceTypeFormModal>
             <a
               href="tel:+1-904-866-1738"
-              className="bg-transparent border-2 border-white text-white px-8 py-4 md:py-5 rounded-none font-bold hover:bg-white hover:text-[#00a8e8] transition-all text-lg"
+              className="bg-transparent border-2 border-white text-white px-8 py-4 md:py-5 rounded-none font-bold hover:bg-white hover:text-brand-ink transition-all text-lg"
             >
               Call (904) 866-1738
             </a>

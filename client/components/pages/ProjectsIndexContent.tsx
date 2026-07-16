@@ -25,7 +25,7 @@ export default function ProjectsIndexContent({ projects }: ProjectsIndexContentP
           onClick={() => setActiveFilter('all')}
           className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border ${
             activeFilter === 'all'
-              ? 'bg-[#00a8e8] text-white border-[#00a8e8] shadow-md scale-105'
+              ? 'bg-brand-ink text-white border-brand-ink shadow-md scale-105'
               : 'bg-white text-gray-600 border-gray-200 hover:border-[#00a8e8] hover:text-[#00a8e8] hover:shadow-sm'
           }`}
         >
@@ -37,7 +37,7 @@ export default function ProjectsIndexContent({ projects }: ProjectsIndexContentP
             onClick={() => setActiveFilter(s.slug)}
             className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border ${
               activeFilter === s.slug
-                ? 'bg-[#00a8e8] text-white border-[#00a8e8] shadow-md scale-105'
+                ? 'bg-brand-ink text-white border-brand-ink shadow-md scale-105'
                 : 'bg-white text-gray-600 border-gray-200 hover:border-[#00a8e8] hover:text-[#00a8e8] hover:shadow-sm'
             }`}
           >

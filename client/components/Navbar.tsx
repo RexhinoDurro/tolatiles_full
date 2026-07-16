@@ -146,7 +146,7 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                    className="bg-[#00a8e8] text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider hover:bg-[#0097d2] transition-all duration-200 flex items-center gap-1"
+                    className="bg-brand-ink text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider hover:bg-[#0097d2] transition-all duration-200 flex items-center gap-1"
                     aria-expanded={isLocationDropdownOpen}
                     aria-haspopup="true"
                   >
@@ -160,21 +160,21 @@ const Navbar = () => {
                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 py-1 text-xs">
                       <Link
                         href="/"
-                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'florida' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'florida' ? 'text-brand-ink bg-gray-50' : ''}`}
                         onClick={() => setIsLocationDropdownOpen(false)}
                       >
                         Florida (All Areas)
                       </Link>
                       <Link
                         href="/jacksonville"
-                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'jacksonville' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'jacksonville' ? 'text-brand-ink bg-gray-50' : ''}`}
                         onClick={() => setIsLocationDropdownOpen(false)}
                       >
                         Jacksonville
                       </Link>
                       <Link
                         href="/st-augustine"
-                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'st-augustine' ? 'text-[#00a8e8] bg-gray-50' : ''}`}
+                        className={`block w-full text-left px-4 py-2 font-semibold text-gray-700 hover:bg-gray-100 hover:text-[#00a8e8] ${currentLocation === 'st-augustine' ? 'text-brand-ink bg-gray-50' : ''}`}
                         onClick={() => setIsLocationDropdownOpen(false)}
                       >
                         St. Augustine
@@ -194,7 +194,7 @@ const Navbar = () => {
                   key={item.id}
                   href={item.href}
                   className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-wide transition-colors ${
-                    isActiveRoute(item.href) ? 'text-[#00a8e8]' : 'text-gray-800 hover:text-[#00a8e8]'
+                    isActiveRoute(item.href) ? 'text-brand-ink' : 'text-gray-800 hover:text-[#00a8e8]'
                   }`}
                 >
                   {item.label}
@@ -207,17 +207,17 @@ const Navbar = () => {
 
 
         {/* MAIN HEADER BAR (Solid Blue) */}
-        <div className="bg-[#00a8e8] relative h-16 shadow-md">
+        <div className="bg-brand-ink relative h-16 shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
 
             {/* OVERLAPPING LOGO CONTAINER (Desktop) - Overlays both white and cyan lines */}
             <div className="hidden md:block absolute -top-20 left-4 lg:left-12 xl:left-32 z-50">
               <Link href={homeLink} className="block group" aria-label="Tola Tiles - Go to homepage">
                 <Image
-                  src="/images/whitelogo.svg"
+                  src="/images/tolatiles-logo.png"
                   alt="Tola Tiles Logo"
-                  width={140}
-                  height={53}
+                  width={700}
+                  height={191}
                   className="w-[12vw] max-w-[140px] h-auto transition-transform duration-300 group-hover:scale-105 drop-shadow-md"
                   style={{ height: 'auto' }}
                   priority
@@ -229,10 +229,10 @@ const Navbar = () => {
             <div className="md:hidden flex-1 flex justify-center">
               <Link href={homeLink} aria-label="Tola Tiles - Go to homepage">
                 <Image
-                  src="/images/whitelogo.svg"
+                  src="/images/tolatiles-logo.png"
                   alt="Tola Tiles Logo"
-                  width={220}
-                  height={44}
+                  width={700}
+                  height={191}
                   className="h-11 w-auto"
                   priority
                 />
@@ -304,7 +304,7 @@ const Navbar = () => {
               {/* Services Button on Left */}
               <button
                 onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
-                className="pointer-events-auto flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-bold uppercase text-xs tracking-wider border border-white/20 transition-all shadow-sm"
+                className="pointer-events-auto flex items-center gap-1.5 bg-white/5 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-bold uppercase text-xs tracking-wider border border-white/20 transition-all shadow-sm"
                 aria-label={isMobileServicesOpen ? 'Close services' : 'Open services'}
                 aria-expanded={isMobileServicesOpen}
               >
@@ -351,7 +351,7 @@ const Navbar = () => {
                 <Link
                   href={`${navPrefix}/contact`}
                   onClick={() => setIsMobileServicesOpen(false)}
-                  className="w-full bg-[#00a8e8] text-white py-3 rounded-xl font-bold text-base text-center shadow-md block active:bg-[#0097d2] transition-colors"
+                  className="w-full bg-brand-ink text-white py-3 rounded-xl font-bold text-base text-center shadow-md block active:bg-[#0097d2] transition-colors"
                 >
                   Get a Free Estimate
                 </Link>

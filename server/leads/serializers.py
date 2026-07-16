@@ -43,6 +43,11 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    # Not model fields — folded into `notes` server-side in create() below, since the
+    # multi-step service lead forms (ServiceLeadForm/ServiceTypeForm) collect these but
+    # ContactLead has no dedicated columns for them.
+    zip_code = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=10)
+    service_subtype = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=100)
 
     class Meta:
         model = ContactLead
@@ -54,6 +59,8 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
             'project_type',
             'message',
             'landing_page_id',
+            'zip_code',
+            'service_subtype',
         ]
 
     def validate_email(self, value):
@@ -80,9 +87,27 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        zip_code = validated_data.pop('zip_code', '').strip()
+        service_subtype = validated_data.pop('service_subtype', '').strip()
+
+        notes_lines = []
+        if service_subtype:
+            notes_lines.append(f'Project Focus: {service_subtype}')
+        if zip_code:
+            notes_lines.append(f'Zip Code: {zip_code}')
+        if notes_lines:
+            validated_data['notes'] = '\n'.join(notes_lines)
+
         landing_page = validated_data.get('landing_page')
         if landing_page:
             validated_data['lead_source'] = f'Landing Page: {landing_page.name}'
+        elif notes_lines:
+            # Submitted via ServiceLeadForm/ServiceTypeForm rather than the plain /contact page.
+            project_type_label = dict(ContactLead.PROJECT_TYPE_CHOICES).get(
+                validated_data.get('project_type', ''), validated_data.get('project_type', '')
+            )
+            validated_data['lead_source'] = f'Service Page: {project_type_label}'
+
         return super().create(validated_data)
 
 

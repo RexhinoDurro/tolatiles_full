@@ -63,19 +63,19 @@ export default function MobileBottomNav() {
   return (
     <>
       {/* Spacer so content doesn't hide behind the bottom nav */}
-      <div className="md:hidden h-[90px] safe-area-bottom w-full" aria-hidden="true" />
+      <div className="md:hidden h-[60px] safe-area-bottom w-full" aria-hidden="true" />
 
       {/* The Bottom Nav Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-brand-light border-t-2 border-[#00a8e8] shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-50 safe-area-bottom"  style={{ backgroundColor: '#86d5f7' }} >
-        <div className="flex justify-around items-center h-[90px] px-2 pb-2">
+        <div className="flex justify-around items-center h-[60px] px-2">
           {primaryTabs.map((tab) => {
             const isActive = isActiveRoute(tab.href);
             return (
               <Link
                 key={tab.id}
                 href={tab.href}
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-                  isActive ? 'text-[#003d5c]' : 'text-white/90 hover:text-white'
+                className={`flex flex-col items-center justify-end w-full h-full pb-1 space-y-1 transition-colors ${
+                  isActive ? 'text-[#003d5c]' : 'text-[#0d5578] hover:text-[#003d5c]'
                 }`}
                 onClick={() => setIsMoreModalOpen(false)}
               >
@@ -90,8 +90,8 @@ export default function MobileBottomNav() {
           {/* More Button */}
           <button
             onClick={() => setIsMoreModalOpen(!isMoreModalOpen)}
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-              isMoreModalOpen ? 'text-[#003d5c]' : 'text-white/90 hover:text-white'
+            className={`flex flex-col items-center justify-end w-full h-full pb-1 space-y-1 transition-colors ${
+              isMoreModalOpen ? 'text-[#003d5c]' : 'text-[#0d5578] hover:text-[#003d5c]'
             }`}
           >
             <Plus className={`w-7 h-7 ${isMoreModalOpen ? 'stroke-[2.5px] rotate-45' : 'stroke-2'} transition-transform duration-300`} />
@@ -131,21 +131,21 @@ export default function MobileBottomNav() {
                 <div className="bg-gray-50 rounded-xl p-1 border border-gray-100 flex flex-col">
                   <Link
                     href="/"
-                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'florida' ? 'bg-white text-[#00a8e8] shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'florida' ? 'bg-white text-brand-ink shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
                     onClick={() => setIsMoreModalOpen(false)}
                   >
                     Florida (All Areas)
                   </Link>
                   <Link
                     href="/jacksonville"
-                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'jacksonville' ? 'bg-white text-[#00a8e8] shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'jacksonville' ? 'bg-white text-brand-ink shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
                     onClick={() => setIsMoreModalOpen(false)}
                   >
                     Jacksonville
                   </Link>
                   <Link
                     href="/st-augustine"
-                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'st-augustine' ? 'bg-white text-[#00a8e8] shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`px-4 py-3 text-sm font-semibold rounded-lg transition-colors ${currentLocation === 'st-augustine' ? 'bg-white text-brand-ink shadow-sm' : 'text-gray-700 hover:bg-gray-100'}`}
                     onClick={() => setIsMoreModalOpen(false)}
                   >
                     St. Augustine
@@ -164,7 +164,7 @@ export default function MobileBottomNav() {
                       onClick={() => setIsMoreModalOpen(false)}
                       className={`flex items-center justify-between p-4 rounded-xl font-bold text-sm tracking-wide transition-colors ${
                         isActiveRoute(link.href)
-                          ? 'bg-blue-50 text-[#00a8e8]'
+                          ? 'bg-blue-50 text-brand-ink'
                           : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-100 shadow-sm'
                       }`}
                     >
