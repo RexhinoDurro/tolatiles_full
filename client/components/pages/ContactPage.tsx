@@ -95,7 +95,8 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
       if (turnstileContainerRef.current && window.turnstile) {
         widgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
           sitekey: siteKey,
-          size: 'invisible',
+          appearance: 'interaction-only',
+          execution: 'execute',
           callback: (token: string) => {
             if (tokenResolverRef.current) {
               tokenResolverRef.current(token);

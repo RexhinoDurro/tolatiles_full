@@ -96,7 +96,8 @@ export default function LandingPageLeadBridge({ landingPageId }: LandingPageLead
         if (containerRef.current && window.turnstile) {
           widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: siteKey,
-            size: 'invisible',
+            appearance: 'interaction-only',
+            execution: 'execute',
             callback: (token: string) => {
               if (tokenResolverRef.current) {
                 tokenResolverRef.current(token);
