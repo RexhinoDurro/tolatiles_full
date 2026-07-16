@@ -81,7 +81,7 @@ const ReviewCard = ({ review }: { review: GoogleReview }) => (
         </div>
       )}
       <div>
-        <h4 className="font-semibold text-gray-900 text-sm">{review.authorName}</h4>
+        <p className="font-semibold text-gray-900 text-sm">{review.authorName}</p>
         <p className="text-xs text-gray-500">{review.relativeTimeDescription}</p>
       </div>
     </div>
@@ -195,7 +195,9 @@ export default function GoogleReviewsSlider({ location = 'florida' }: GoogleRevi
 
           <div className="flex justify-center gap-2 mt-6 md:mt-8">
             {reviews.map((_, index) => (
-              <button key={index} onClick={() => setCurrentIndex(index)} className={`transition-all duration-300 rounded-full ${index === currentIndex % totalReviews ? 'w-8 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`} aria-label={`Go to review ${index + 1}`} />
+              <button key={index} onClick={() => setCurrentIndex(index)} className="group p-2 -m-2" aria-label={`Go to review ${index + 1}`}>
+                <span className={`block transition-all duration-300 rounded-full ${index === currentIndex % totalReviews ? 'w-8 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 group-hover:bg-gray-400'}`} />
+              </button>
             ))}
           </div>
         </div>

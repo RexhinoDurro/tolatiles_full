@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import {
   ChevronLeft,
   ChevronRight,
@@ -277,6 +277,27 @@ const ProjectsStripSection = () => {
 
 // ─── Hero Section ──────────────────────────────────────────────────────────────
 
+// Renders one <picture> with a media-query <source> per breakpoint so the browser
+// only ever fetches the image for the viewport it's actually rendering — using two
+// separate priority <Image> components here previously made every visit preload
+// BOTH the desktop and mobile hero backgrounds, doubling LCP-critical bytes.
+const HeroBackground = ({ desktopSrc, mobileSrc, alt }: { desktopSrc: string; mobileSrc: string; alt: string }) => {
+  // getImageProps() is a lower-level API than <Image> — it does NOT derive
+  // fetchPriority/loading from `priority`, so they must be set explicitly here
+  // for this to actually behave like a priority image.
+  const common = { alt, fill: true, sizes: '100vw', priority: true, loading: 'eager' as const, fetchPriority: 'high' as const, className: 'object-cover object-center opacity-90' };
+  const { props: desktopProps } = getImageProps({ ...common, src: desktopSrc });
+  const { props: mobileProps } = getImageProps({ ...common, src: mobileSrc });
+
+  return (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktopProps.srcSet} />
+      <source media="(max-width: 767px)" srcSet={mobileProps.srcSet} />
+      <img {...mobileProps} alt={alt} />
+    </picture>
+  );
+};
+
 const HeroSection = ({ content }: { content: LocationContent }) => (
   <>
     {/* Reserves space for the fixed navbar so the hero image below starts right where the navbar ends, instead of the image being covered up by it */}
@@ -288,21 +309,10 @@ const HeroSection = ({ content }: { content: LocationContent }) => (
     >
       {/* Background Layer — stretches to fill */}
       <div className="absolute inset-0 z-0">
-        <Image
-          src={content.heroDesktopBg}
+        <HeroBackground
+          desktopSrc={content.heroDesktopBg}
+          mobileSrc={content.heroMobileBg}
           alt={`Tile installation project in ${content.locationNameFull}`}
-          fill
-          sizes="100vw"
-          className="hidden md:block object-cover object-center opacity-90"
-          priority
-        />
-        <Image
-          src={content.heroMobileBg}
-          alt={`Tile installation project in ${content.locationNameFull}`}
-          fill
-          sizes="100vw"
-          className="md:hidden object-cover object-center opacity-90"
-          priority
         />
       </div>
 
@@ -939,9 +949,11 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
               <button
                 key={i}
                 onClick={() => setIdx(i)}
-                className={`rounded-full transition-all duration-300 ${i === idx ? 'w-6 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'}`}
+                className="group p-2 -m-2"
                 aria-label={`Go to post group ${i + 1}`}
-              />
+              >
+                <span className={`block rounded-full transition-all duration-300 ${i === idx ? 'w-6 h-2 bg-[#00a8e8]' : 'w-2 h-2 bg-gray-300 group-hover:bg-gray-400'}`} />
+              </button>
             ))}
           </div>
         )}

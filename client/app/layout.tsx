@@ -207,8 +207,12 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* next/font self-hosts Google Fonts at build time, so no runtime request ever
+            goes to fonts.googleapis.com/fonts.gstatic.com — preconnecting those is dead
+            weight. Clickio (our GTM-injected consent banner) is requested on every visit,
+            so it gets the preconnect budget instead. */}
+        <link rel="preconnect" href="https://clickiocmp.com" />
+        <link rel="preconnect" href="https://up.clickiocdn.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
