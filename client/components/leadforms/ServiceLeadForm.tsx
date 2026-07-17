@@ -49,7 +49,7 @@ export default function ServiceLeadForm({
   const [name, setName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
 
-  const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, turnstileContainerRef, submit } =
+  const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, submit } =
     useLeadFormSubmit();
 
   const handleServiceSelect = (value: string) => {
@@ -95,7 +95,6 @@ export default function ServiceLeadForm({
           successMessage="Thank you! We'll call you shortly to discuss your project."
           honeypot={honeypot}
           setHoneypot={setHoneypot}
-          turnstileContainerRef={turnstileContainerRef}
         />
       )}
     </div>

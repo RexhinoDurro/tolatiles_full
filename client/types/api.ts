@@ -73,7 +73,6 @@ export interface ContactFormData {
   message?: string;
   honeypot?: string;
   form_fill_time?: number;
-  cf_turnstile_response?: string;
   landing_page_id?: number;
   event_id?: string;
   /** Folded into the lead's `notes` server-side — not a ContactLead column. */

@@ -1,6 +1,5 @@
 'use client';
 
-import type { RefObject } from 'react';
 import { CheckCircle, AlertCircle, ArrowLeft, MessageCircle } from 'lucide-react';
 import { formatPhoneNumber, extractPhoneDigits } from '@/lib/phoneUtils';
 
@@ -17,7 +16,6 @@ interface ContactInfoStepProps {
   successMessage: string;
   honeypot: string;
   setHoneypot: (value: string) => void;
-  turnstileContainerRef: RefObject<HTMLDivElement>;
   submitButtonLabel?: string;
 }
 
@@ -34,7 +32,6 @@ export default function ContactInfoStep({
   successMessage,
   honeypot,
   setHoneypot,
-  turnstileContainerRef,
   submitButtonLabel = 'Get My Free Quote',
 }: ContactInfoStepProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -121,8 +118,6 @@ export default function ContactInfoStep({
             />
           </div>
         </div>
-
-        <div ref={turnstileContainerRef} aria-hidden="true" />
 
         <div className="flex items-center gap-3">
           <button

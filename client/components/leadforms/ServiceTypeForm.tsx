@@ -38,7 +38,7 @@ export default function ServiceTypeForm({ serviceId, heading, id, landingPageId,
   const [name, setName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
 
-  const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, turnstileContainerRef, submit } =
+  const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, submit } =
     useLeadFormSubmit();
 
   const serviceTitle = services.find((s) => s.id === serviceId)?.title ?? 'Your Project';
@@ -101,7 +101,6 @@ export default function ServiceTypeForm({ serviceId, heading, id, landingPageId,
           successMessage="Thank you! We'll call you shortly to discuss your project."
           honeypot={honeypot}
           setHoneypot={setHoneypot}
-          turnstileContainerRef={turnstileContainerRef}
         />
       )}
     </div>

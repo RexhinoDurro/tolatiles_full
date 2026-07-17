@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
-import { loadTurnstileScript } from '@/lib/turnstile';
 
 interface LeadCaptureFormConfig {
   heading?: string;
@@ -31,10 +30,6 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
   const [honeypot, setHoneypot] = useState('');
   const mountTimeRef = useRef<number>(Date.now());
 
-  const turnstileContainerRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
-  const tokenResolverRef = useRef<((token: string) => void) | null>(null);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -42,69 +37,6 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
   useEffect(() => {
     mountTimeRef.current = Date.now();
   }, []);
-
-  useEffect(() => {
-    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    if (!siteKey) return;
-    let cancelled = false;
-
-    loadTurnstileScript()
-      .then(() => {
-        if (cancelled || !turnstileContainerRef.current || !window.turnstile) return;
-        widgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
-          sitekey: siteKey,
-          appearance: 'interaction-only',
-          execution: 'execute',
-          callback: (token: string) => {
-            if (tokenResolverRef.current) {
-              tokenResolverRef.current(token);
-              tokenResolverRef.current = null;
-            }
-          },
-        });
-      })
-      .catch((err) => console.warn('Turnstile script failed to load', err));
-
-    return () => {
-      cancelled = true;
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, []);
-
-  // The Cloudflare script loads asynchronously, so the widget may not be
-  // rendered yet when a fast-filled form is submitted — wait for it instead
-  // of failing immediately, otherwise every quick submission loses its token
-  // and gets rejected server-side.
-  const waitForWidgetReady = (timeoutMs = 8000): Promise<void> =>
-    new Promise((resolve, reject) => {
-      const start = Date.now();
-      const check = () => {
-        if (window.turnstile && widgetIdRef.current) {
-          resolve();
-        } else if (Date.now() - start > timeoutMs) {
-          reject(new Error('Turnstile failed to load. Please refresh and try again.'));
-        } else {
-          setTimeout(check, 100);
-        }
-      };
-      check();
-    });
-
-  const executeTurnstile = async (): Promise<string> => {
-    await waitForWidgetReady();
-    return new Promise((resolve, reject) => {
-      window.turnstile.reset(widgetIdRef.current!);
-      tokenResolverRef.current = resolve;
-      window.turnstile.execute(widgetIdRef.current!);
-      setTimeout(() => {
-        tokenResolverRef.current = null;
-        reject(new Error('Security check timed out. Please try again.'));
-      }, 15000);
-    });
-  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPhoneDigits(extractPhoneDigits(e.target.value));
@@ -117,19 +49,6 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
     setErrorMessage('');
 
     try {
-      // The backend rejects any submission without a Turnstile token, so
-      // there's no point sending one — fail fast with an actionable
-      // message instead of a doomed request.
-      let turnstileToken: string;
-      try {
-        turnstileToken = await executeTurnstile();
-      } catch (turnstileErr) {
-        console.warn('Turnstile challenge failed or timed out', turnstileErr);
-        setSubmitStatus('error');
-        setErrorMessage('Security check failed to load. Please refresh the page and try again, or call us instead.');
-        return;
-      }
-
       const [firstName, ...rest] = name.trim().split(/\s+/);
       const lastName = rest.join(' ') || firstName;
       const fillTime = Math.floor((Date.now() - mountTimeRef.current) / 1000);
@@ -144,7 +63,6 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
         project_type: projectType,
         honeypot,
         form_fill_time: fillTime,
-        cf_turnstile_response: turnstileToken,
         landing_page_id: landingPageId,
         event_id: eventId,
       });
@@ -240,8 +158,6 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
                 />
               </div>
             </div>
-
-            <div ref={turnstileContainerRef} aria-hidden="true" />
 
             <button
               type="submit"

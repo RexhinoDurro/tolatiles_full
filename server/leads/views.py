@@ -1,8 +1,5 @@
 import hashlib
-import json
 import logging
-import urllib.parse
-import urllib.request
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -62,32 +59,6 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
         import re
         return bool(re.match(r'^https://([\w-]+\.)?tolatiles\.com(/|$)', value))
 
-    def _verify_turnstile(self, token: str, ip: str) -> bool:
-        """Verify a Cloudflare Turnstile token via the siteverify API."""
-        secret_key = getattr(settings, 'CLOUDFLARE_TURNSTILE_SECRET_KEY', '')
-        if not secret_key:
-            logger.warning('CLOUDFLARE_TURNSTILE_SECRET_KEY not set — skipping Turnstile check')
-            return True  # Fail open in dev when key is absent
-
-        payload = urllib.parse.urlencode({
-            'secret': secret_key,
-            'response': token,
-            'remoteip': ip,
-        }).encode('utf-8')
-
-        req = urllib.request.Request(
-            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-            data=payload,
-            method='POST',
-        )
-        try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                result = json.loads(resp.read())
-                return bool(result.get('success', False))
-        except Exception as exc:
-            logger.error('Turnstile siteverify request failed: %s', exc)
-            return False
-
     def create(self, request, *args, **kwargs):
         """Handle public contact form submission."""
         # IP-based rate limiting: max 3 submissions per IP per hour
@@ -121,15 +92,6 @@ class ContactLeadViewSet(viewsets.ModelViewSet):
                 logger.warning('Lead rejected (referer): ip=%s origin=%r referer=%r', client_ip, origin, referer)
                 return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Cloudflare Turnstile verification (skip in DEBUG mode)
-        if not settings.DEBUG:
-            turnstile_token = request.data.get('cf_turnstile_response', '')
-            if not turnstile_token:
-                logger.warning('Lead rejected (missing turnstile token): ip=%s', client_ip)
-                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
-            if not self._verify_turnstile(turnstile_token, client_ip):
-                logger.warning('Lead rejected (turnstile verify failed): ip=%s', client_ip)
-                return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
         try:

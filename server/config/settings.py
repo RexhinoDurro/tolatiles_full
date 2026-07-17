@@ -352,6 +352,3 @@ VAPID_CLAIMS_EMAIL = os.environ.get('VAPID_CLAIMS_EMAIL', 'menitola@tolatiles.co
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 GEMINI_IMAGE_API_KEY = os.environ.get('GEMINI_IMAGE_API_KEY', '')
 
-
-# Cloudflare Turnstile
-CLOUDFLARE_TURNSTILE_SECRET_KEY = os.environ.get('CLOUDFLARE_TURNSTILE_SECRET_KEY', '')
