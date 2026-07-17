@@ -79,7 +79,12 @@ export default function HeroSection({ config, phoneNumber, landingPageId }: Hero
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 text-center text-white">
         {headline && (
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-4">{headline}</h1>
+          <h1
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-4"
+            style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+          >
+            {headline}
+          </h1>
         )}
         {subheadline && (
           <p className="text-xl sm:text-2xl text-white/90 mb-6">{subheadline}</p>
@@ -104,7 +109,7 @@ export default function HeroSection({ config, phoneNumber, landingPageId }: Hero
             )}
             <a
               href={`tel:${phoneNumber}`}
-              className="inline-flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white text-xl sm:text-2xl font-bold px-8 py-4 rounded-2xl shadow-2xl transition-all duration-200 hover:scale-105"
+              className="inline-flex items-center justify-center gap-3 bg-brand-ink hover:bg-[#0097d2] text-white text-xl sm:text-2xl font-bold px-8 py-4 rounded-2xl shadow-2xl transition-all duration-200 hover:scale-105"
             >
               <Phone className="w-6 h-6 sm:w-7 sm:h-7" />
               Call {displayPhoneNumber(phoneNumber)}
