@@ -5,18 +5,8 @@ import Image from 'next/image';
 import { Phone, Mail, MapPin, Clock, CheckCircle, Send, AlertCircle, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
+import { loadTurnstileScript } from '@/lib/turnstile';
 import type { ContactFormData } from '@/types/api';
-
-declare global {
-  interface Window {
-    turnstile: {
-      render: (container: HTMLElement, options: Record<string, unknown>) => string;
-      execute: (widgetId: string) => void;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
 
 interface ContactLocationContent {
   heroH1: string;
@@ -86,13 +76,11 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
     if (!siteKey) return;
+    let cancelled = false;
 
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (turnstileContainerRef.current && window.turnstile) {
+    loadTurnstileScript()
+      .then(() => {
+        if (cancelled || !turnstileContainerRef.current || !window.turnstile) return;
         widgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
           sitekey: siteKey,
           appearance: 'interaction-only',
@@ -104,17 +92,14 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
             }
           },
         });
-      }
-    };
-    document.head.appendChild(script);
+      })
+      .catch((err) => console.warn('Turnstile script failed to load', err));
 
     return () => {
+      cancelled = true;
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
-      }
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
       }
     };
   }, []);

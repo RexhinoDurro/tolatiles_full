@@ -3,15 +3,10 @@
 import { useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits } from '@/lib/phoneUtils';
+import { loadTurnstileScript } from '@/lib/turnstile';
 
 declare global {
   interface Window {
-    turnstile: {
-      render: (container: HTMLElement, options: Record<string, unknown>) => string;
-      execute: (widgetId: string) => void;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
     TolaLeads?: {
       submit: (data: { name: string; phone: string; project_type?: string }) => Promise<void>;
     };
@@ -39,7 +34,7 @@ export default function LandingPageLeadBridge({ landingPageId }: LandingPageLead
     mountTimeRef.current = Date.now();
 
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    let script: HTMLScriptElement | null = null;
+    let cancelled = false;
 
     // The Cloudflare script loads asynchronously, so the widget may not be
     // rendered yet when a fast-filled form is submitted — wait for it instead
@@ -105,12 +100,9 @@ export default function LandingPageLeadBridge({ landingPageId }: LandingPageLead
     };
 
     if (siteKey) {
-      script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        if (containerRef.current && window.turnstile) {
+      loadTurnstileScript()
+        .then(() => {
+          if (cancelled || !containerRef.current || !window.turnstile) return;
           widgetIdRef.current = window.turnstile.render(containerRef.current, {
             sitekey: siteKey,
             appearance: 'interaction-only',
@@ -122,19 +114,16 @@ export default function LandingPageLeadBridge({ landingPageId }: LandingPageLead
               }
             },
           });
-        }
-      };
-      document.head.appendChild(script);
+        })
+        .catch((err) => console.warn('Turnstile script failed to load', err));
     }
 
     return () => {
+      cancelled = true;
       delete window.TolaLeads;
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
-      }
-      if (script && document.head.contains(script)) {
-        document.head.removeChild(script);
       }
     };
   }, [landingPageId]);

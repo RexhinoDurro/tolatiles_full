@@ -4,17 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { extractPhoneDigits, formatPhoneNumber } from '@/lib/phoneUtils';
-
-declare global {
-  interface Window {
-    turnstile: {
-      render: (container: HTMLElement, options: Record<string, unknown>) => string;
-      execute: (widgetId: string) => void;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
+import { loadTurnstileScript } from '@/lib/turnstile';
 
 interface LeadCaptureFormConfig {
   heading?: string;
@@ -56,13 +46,11 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
   useEffect(() => {
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
     if (!siteKey) return;
+    let cancelled = false;
 
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (turnstileContainerRef.current && window.turnstile) {
+    loadTurnstileScript()
+      .then(() => {
+        if (cancelled || !turnstileContainerRef.current || !window.turnstile) return;
         widgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
           sitekey: siteKey,
           appearance: 'interaction-only',
@@ -74,17 +62,14 @@ export default function LeadCaptureForm({ config, landingPageId, id }: LeadCaptu
             }
           },
         });
-      }
-    };
-    document.head.appendChild(script);
+      })
+      .catch((err) => console.warn('Turnstile script failed to load', err));
 
     return () => {
+      cancelled = true;
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
-      }
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
       }
     };
   }, []);
