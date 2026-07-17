@@ -85,6 +85,26 @@ services:
     ports:
       - "127.0.0.1:3000:3000"
 
+  # Tagging server — receives live traffic at metrics.tolatiles.com
+  gtm-server:
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
+    restart: unless-stopped
+    environment:
+      CONTAINER_CONFIG: ${GTM_CONTAINER_CONFIG}
+      PREVIEW_SERVER_URL: ${PREVIEW_SERVER_URL}
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  # Preview server — serves the GTM debug/preview UI at sgtm-preview.metrics.tolatiles.com
+  gtm-preview-server:
+    image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
+    restart: unless-stopped
+    environment:
+      CONTAINER_CONFIG: ${GTM_CONTAINER_CONFIG}
+      RUN_AS_PREVIEW_SERVER: "true"
+    ports:
+      - "127.0.0.1:8081:8080"
+
 networks:
   tolatiles_full_default:
     external: true
