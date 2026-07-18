@@ -48,6 +48,7 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
     # ContactLead has no dedicated columns for them.
     zip_code = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=10)
     service_subtype = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=100)
+    custom_details = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=2000)
 
     class Meta:
         model = ContactLead
@@ -61,6 +62,7 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
             'landing_page_id',
             'zip_code',
             'service_subtype',
+            'custom_details',
         ]
 
     def validate_email(self, value):
@@ -89,12 +91,15 @@ class ContactLeadCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         zip_code = validated_data.pop('zip_code', '').strip()
         service_subtype = validated_data.pop('service_subtype', '').strip()
+        custom_details = validated_data.pop('custom_details', '').strip()
 
         notes_lines = []
         if service_subtype:
             notes_lines.append(f'Project Focus: {service_subtype}')
         if zip_code:
             notes_lines.append(f'Zip Code: {zip_code}')
+        if custom_details:
+            notes_lines.append(f'Project Details: {custom_details}')
         if notes_lines:
             validated_data['notes'] = '\n'.join(notes_lines)
 

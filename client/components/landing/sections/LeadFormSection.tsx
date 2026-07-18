@@ -26,6 +26,7 @@ export default function LeadFormSection({ config, landingPageId }: LeadFormSecti
           id="lead-form"
           serviceId={config.service_id}
           heading={config.heading}
+          successMessage={config.success_message}
           landingPageId={landingPageId}
         />
       ) : (

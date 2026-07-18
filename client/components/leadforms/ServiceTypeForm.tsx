@@ -14,6 +14,7 @@ interface ServiceTypeFormProps {
   heading?: string;
   id?: string;
   landingPageId?: number;
+  successMessage?: string;
   /** 'modal' skips the outer card chrome — LeadFormModal already supplies it. */
   variant?: 'inline' | 'modal';
 }
@@ -25,7 +26,7 @@ interface ServiceTypeFormProps {
  * Falls back to a 2-step (zip -> contact) flow for any service without a
  * configured sub-type list.
  */
-export default function ServiceTypeForm({ serviceId, heading, id, landingPageId, variant = 'inline' }: ServiceTypeFormProps) {
+export default function ServiceTypeForm({ serviceId, heading, id, landingPageId, successMessage, variant = 'inline' }: ServiceTypeFormProps) {
   const subtypeOptions = serviceSubtypes[serviceId] ?? [];
   const hasSubtypeStep = subtypeOptions.length > 0;
   const totalSteps = hasSubtypeStep ? 3 : 2;
@@ -37,6 +38,7 @@ export default function ServiceTypeForm({ serviceId, heading, id, landingPageId,
   const [zipCode, setZipCode] = useState('');
   const [name, setName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
+  const [customDetails, setCustomDetails] = useState('');
 
   const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, submit } =
     useLeadFormSubmit();
@@ -60,6 +62,7 @@ export default function ServiceTypeForm({ serviceId, heading, id, landingPageId,
       project_type: serviceId,
       service_subtype: subtype || undefined,
       zip_code: zipCode,
+      custom_details: customDetails || undefined,
       landing_page_id: landingPageId,
     });
   };
@@ -93,12 +96,14 @@ export default function ServiceTypeForm({ serviceId, heading, id, landingPageId,
           onNameChange={setName}
           phoneDigits={phoneDigits}
           onPhoneChange={setPhoneDigits}
+          customDetails={customDetails}
+          onCustomDetailsChange={setCustomDetails}
           onBack={() => setStep(zipStepNumber)}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           submitStatus={submitStatus}
           errorMessage={errorMessage}
-          successMessage="Thank you! We'll call you shortly to discuss your project."
+          successMessage={successMessage ?? "Thank you! We'll call you shortly to discuss your project."}
           honeypot={honeypot}
           setHoneypot={setHoneypot}
         />

@@ -28,6 +28,7 @@ interface ServiceLeadFormProps {
   heading?: string;
   id?: string;
   landingPageId?: number;
+  successMessage?: string;
   /** 'modal' skips the outer card chrome — LeadFormModal already supplies it. */
   variant?: 'inline' | 'modal';
 }
@@ -41,6 +42,7 @@ export default function ServiceLeadForm({
   heading = 'Get Your Free Quote',
   id,
   landingPageId,
+  successMessage,
   variant = 'inline',
 }: ServiceLeadFormProps) {
   const [step, setStep] = useState(1);
@@ -48,6 +50,7 @@ export default function ServiceLeadForm({
   const [zipCode, setZipCode] = useState('');
   const [name, setName] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
+  const [customDetails, setCustomDetails] = useState('');
 
   const { isSubmitting, submitStatus, errorMessage, honeypot, setHoneypot, submit } =
     useLeadFormSubmit();
@@ -67,6 +70,7 @@ export default function ServiceLeadForm({
       phone: phoneDigits ? `+1${phoneDigits}` : undefined,
       project_type: projectType,
       zip_code: zipCode,
+      custom_details: customDetails || undefined,
       landing_page_id: landingPageId,
     });
   };
@@ -87,12 +91,14 @@ export default function ServiceLeadForm({
           onNameChange={setName}
           phoneDigits={phoneDigits}
           onPhoneChange={setPhoneDigits}
+          customDetails={customDetails}
+          onCustomDetailsChange={setCustomDetails}
           onBack={() => setStep(2)}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           submitStatus={submitStatus}
           errorMessage={errorMessage}
-          successMessage="Thank you! We'll call you shortly to discuss your project."
+          successMessage={successMessage ?? "Thank you! We'll call you shortly to discuss your project."}
           honeypot={honeypot}
           setHoneypot={setHoneypot}
         />

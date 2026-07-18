@@ -79,6 +79,8 @@ export interface ContactFormData {
   zip_code?: string;
   /** Folded into the lead's `notes` server-side — not a ContactLead column. */
   service_subtype?: string;
+  /** Free-text "describe your project" field. Folded into the lead's `notes` server-side — not a ContactLead column. */
+  custom_details?: string;
 }
 
 export interface LeadStats {

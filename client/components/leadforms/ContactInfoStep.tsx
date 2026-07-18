@@ -8,6 +8,8 @@ interface ContactInfoStepProps {
   onNameChange: (value: string) => void;
   phoneDigits: string;
   onPhoneChange: (digits: string) => void;
+  customDetails: string;
+  onCustomDetailsChange: (value: string) => void;
   onBack: () => void;
   onSubmit: () => void;
   isSubmitting: boolean;
@@ -24,6 +26,8 @@ export default function ContactInfoStep({
   onNameChange,
   phoneDigits,
   onPhoneChange,
+  customDetails,
+  onCustomDetailsChange,
   onBack,
   onSubmit,
   isSubmitting,
@@ -117,6 +121,20 @@ export default function ContactInfoStep({
               placeholder="(904) 123-4567"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="lf-custom-details" className="block text-sm font-semibold text-gray-700 mb-1.5">
+            Anything specific you&apos;d like done? <span className="font-normal text-gray-400">(optional)</span>
+          </label>
+          <textarea
+            id="lf-custom-details"
+            value={customDetails}
+            onChange={(e) => onCustomDetailsChange(e.target.value)}
+            rows={3}
+            className="w-full px-4 py-3 text-base text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            placeholder="e.g. walk-in shower, specific tile style, timeline..."
+          />
         </div>
 
         <div className="flex items-center gap-3">

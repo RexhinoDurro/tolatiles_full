@@ -33,9 +33,12 @@ SECTIONS = [
             'show_lead_form': True,
             'lead_form': {
                 'heading': 'Get Your Free Bathroom Remodel Quote',
-                'button_label': 'Schedule Now',
-                'success_message': 'A member of our team will contact you shortly to schedule your free in-home estimate.',
-                'project_type': 'bathroom',
+                'form_variant': 'service_type',
+                'service_id': 'bathroom',
+                'success_message': (
+                    "Thank you for your submission! A member of our team will contact you "
+                    "shortly to schedule your free in-home estimate."
+                ),
             },
         },
     },

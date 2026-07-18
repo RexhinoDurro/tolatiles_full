@@ -213,7 +213,7 @@ export default function AdminHeader({ title, backHref, backLabel }: AdminHeaderP
                   </div>
 
                   {/* Notification list */}
-                  <div className="flex-1 overflow-y-auto divide-y divide-gray-100 overscroll-contain">
+                  <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-gray-100 overscroll-contain">
                     {recentNotifications.length > 0 ? (
                       recentNotifications.map((notification) => (
                         <NotificationItem

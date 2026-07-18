@@ -5,12 +5,18 @@ import { Phone } from 'lucide-react';
 import { displayPhoneNumber } from '@/lib/phoneUtils';
 import GoogleRatingBadge from '../GoogleRatingBadge';
 import LeadCaptureForm from '../LeadCaptureForm';
+import ServiceTypeForm from '@/components/leadforms/ServiceTypeForm';
+import type { ServiceId } from '@/data/services';
 
 interface HeroLeadFormConfig {
   heading?: string;
   button_label?: string;
   success_message?: string;
   project_type?: string;
+  /** 'service_type' renders the multi-step ServiceTypeForm (sub-type -> zip -> contact) instead of the simple name+phone form. */
+  form_variant?: 'simple' | 'service_type';
+  /** Required when form_variant is 'service_type'. */
+  service_id?: ServiceId;
 }
 
 interface HeroConfig {
@@ -98,7 +104,17 @@ export default function HeroSection({ config, phoneNumber, landingPageId }: Hero
 
         {show_lead_form && landingPageId && (
           <div className="mb-6">
-            <LeadCaptureForm config={lead_form || {}} landingPageId={landingPageId} id="lead-form" />
+            {lead_form?.form_variant === 'service_type' && lead_form.service_id ? (
+              <ServiceTypeForm
+                id="lead-form"
+                serviceId={lead_form.service_id}
+                heading={lead_form.heading}
+                successMessage={lead_form.success_message}
+                landingPageId={landingPageId}
+              />
+            ) : (
+              <LeadCaptureForm config={lead_form || {}} landingPageId={landingPageId} id="lead-form" />
+            )}
           </div>
         )}
 
