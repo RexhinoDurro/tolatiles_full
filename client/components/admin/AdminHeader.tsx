@@ -193,6 +193,14 @@ export default function AdminHeader({ title, backHref, backLabel }: AdminHeaderP
                   <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
                     <h3 className="font-semibold text-gray-900 text-lg sm:text-base">Notifications</h3>
                     <div className="flex items-center gap-3">
+                      <Link
+                        href="/admin/notifications"
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        onClick={() => setShowNotifications(false)}
+                      >
+                        <span>View all</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
                       {unreadCount > 0 && (
                         <button
                           onClick={handleMarkAllRead}
