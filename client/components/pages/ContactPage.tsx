@@ -136,28 +136,31 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
 
   return (
     <div className="pt-[var(--navbar-height)]">
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-16">
-            <header className="text-center md:text-left md:w-[58%]">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{content.heroH1}</h1>
-              <p className="text-xl text-gray-600">{content.heroSubtitle}</p>
-            </header>
-            <div className="w-full md:w-[42%] flex justify-center md:justify-end">
-              <div className="relative w-full max-w-md h-56 md:h-72">
+      <section className="py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col">
+          
+          <header className="text-center md:text-left mb-8 md:mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">{content.heroH1}</h1>
+            <a href="tel:+1-904-866-1738" className="inline-flex items-center justify-center md:justify-start gap-3 text-2xl md:text-3xl font-bold text-brand-ink hover:text-[#00a8e8] transition-colors">
+              <Phone className="h-7 w-7 md:h-8 md:w-8" />
+              (904) 866-1738
+            </a>
+          </header>
+
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+            
+            {/* Left Column on Desktop / Bottom on Mobile */}
+            <div className="order-2 lg:order-1 flex flex-col gap-12">
+              <div className="relative w-full max-w-lg mx-auto lg:mx-0 h-56 md:h-72 lg:-mt-6">
                 <Image
                   src="/images/tolatiles-service-truck-jacksonville-st-augustine.webp"
                   alt="Tola Tiles work truck — free estimates, (904) 866-1738"
                   fill
-                  sizes="(max-width: 768px) 80vw, 40vw"
+                  sizes="(max-width: 768px) 90vw, 50vw"
                   className="object-contain drop-shadow-xl"
                   priority
                 />
               </div>
-            </div>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Information */}
             <div>
               <h2 className="text-3xl font-semibold text-gray-900 mb-8">Get in Touch</h2>
@@ -234,27 +237,29 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Contact Form */}
-            <div className="bg-white p-8 rounded-2xl shadow-xl">
-              <h2 className="text-3xl font-semibold text-gray-900 mb-8">Request a Free Quote</h2>
+          {/* Right Column on Desktop / Top on Mobile: Contact Form */}
+          <div className="order-1 lg:order-2">
+              <div className="bg-brand-ink p-8 rounded-2xl shadow-xl text-white">
+                <h2 className="text-3xl font-semibold mb-8">Request a Free Quote</h2>
 
               {submitStatus === 'success' && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-green-700">
+                <div className="mb-6 p-4 bg-white/10 border border-green-400 rounded-lg flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-white">
                     <p className="font-medium">Thank you for your inquiry!</p>
-                    <p className="text-sm mt-1">We&apos;ve received your message and will respond within 24 hours.</p>
+                    <p className="text-sm mt-1 text-white/80">We&apos;ve received your message and will respond within 24 hours.</p>
                   </div>
                 </div>
               )}
 
               {submitStatus === 'error' && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-red-700">
+                <div className="mb-6 p-4 bg-white/10 border border-red-400 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-white">
                     <p className="font-medium">Unable to submit form</p>
-                    <p className="text-sm mt-1">{errorMessage || 'Please try again or call us directly at +1 (904) 866-1738.'}</p>
+                    <p className="text-sm mt-1 text-white/80">{errorMessage || 'Please try again or call us directly at +1 (904) 866-1738.'}</p>
                   </div>
                 </div>
               )}
@@ -276,7 +281,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="firstName" className="block text-sm font-medium text-white/90 mb-2">
                       First Name *
                     </label>
                     <input
@@ -286,12 +291,12 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                       value={formData.firstName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 bg-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 text-gray-900 placeholder-gray-400"
                       placeholder="John"
                     />
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-white/90 mb-2">
                       Last Name *
                     </label>
                     <input
@@ -301,15 +306,15 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                       value={formData.lastName}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full px-4 py-3 bg-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 text-gray-900 placeholder-gray-400"
                       placeholder="Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
+                  <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">
+                    Email
                   </label>
                   <input
                     type="email"
@@ -317,19 +322,18 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 text-gray-900 placeholder-gray-400"
                     placeholder="john@example.com"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone
+                  <label htmlFor="phone" className="block text-sm font-medium text-white/90 mb-2">
+                    Phone *
                   </label>
                   <div className="relative flex">
                     {formData.phone && (
-                      <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-brand-ink font-bold text-sm select-none">
+                      <span className="inline-flex items-center px-3 border border-transparent border-r-gray-200 rounded-l-lg bg-gray-50 text-gray-700 font-bold text-sm select-none">
                         +1
                       </span>
                     )}
@@ -339,7 +343,8 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                       name="phone"
                       value={formatPhoneNumber(formData.phone)}
                       onChange={handlePhoneChange}
-                      className={`w-full px-4 py-3 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                      required
+                      className={`w-full px-4 py-3 bg-white border border-transparent focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 text-gray-900 placeholder-gray-400 ${
                         formData.phone ? 'rounded-r-lg' : 'rounded-lg'
                       }`}
                       placeholder="(904) 123-4567"
@@ -348,7 +353,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 </div>
 
                 <div>
-                  <label htmlFor="projectType" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="projectType" className="block text-sm font-medium text-white/90 mb-2">
                     Project Type *
                   </label>
                   <select
@@ -357,7 +362,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                     value={formData.projectType}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 text-gray-900"
                   >
                     <option value="">Select a service...</option>
                     <option value="Kitchen Backsplash">Kitchen Backsplash</option>
@@ -371,7 +376,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="message" className="block text-sm font-medium text-white/90 mb-2">
                     Project Details *
                   </label>
                   <textarea
@@ -381,7 +386,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                     onChange={handleInputChange}
                     required
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    className="w-full px-4 py-3 bg-white border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00a8e8] transition-all duration-200 resize-none text-gray-900 placeholder-gray-400"
                     placeholder="Tell us about your project, including size, timeline, and any specific requirements..."
                   ></textarea>
                 </div>
@@ -389,7 +394,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-brand-ink text-white py-4 px-6 rounded-lg hover:bg-[#0097d2] disabled:bg-blue-400 transition-all duration-300 font-semibold transform hover:scale-[1.02] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="w-full bg-[#00a8e8] text-white py-4 px-6 rounded-lg hover:bg-blue-400 disabled:bg-blue-300 transition-all duration-300 font-bold transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -405,20 +410,21 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 </button>
               </form>
 
-              <div className="mt-6 text-sm text-gray-500 text-center">
+              <div className="mt-6 text-sm text-white/70 text-center">
                 <p>
                   * Required fields. We&apos;ll respond within 24 hours.
                   <br />
                   For immediate assistance, call{' '}
-                  <a href="tel:+1-904-866-1738" className="text-brand-ink hover:underline">
+                  <a href="tel:+1-904-866-1738" className="text-[#00a8e8] hover:underline font-semibold">
                     +1 (904) 866-1738
                   </a>
                 </p>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Map Section */}
+        {/* Map Section */}
           <div className="mt-16">
             <h2 className="text-3xl font-semibold text-gray-900 mb-6 text-center">{content.mapHeading}</h2>
             <div className="grid lg:grid-cols-3 gap-6">

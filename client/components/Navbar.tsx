@@ -233,7 +233,7 @@ const Navbar = () => {
                   alt="Tola Tiles Logo"
                   width={700}
                   height={191}
-                  className="h-11 w-auto"
+                  className="h-8 sm:h-10 w-auto transition-all"
                   priority
                 />
               </Link>
@@ -304,21 +304,22 @@ const Navbar = () => {
               {/* Services Button on Left */}
               <button
                 onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
-                className="pointer-events-auto flex items-center gap-1.5 bg-white/5 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-bold uppercase text-xs tracking-wider border border-white/20 transition-all shadow-sm"
+                className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-white/5 hover:bg-white/20 backdrop-blur-md px-2 sm:px-3 py-1.5 rounded-full text-white font-bold uppercase text-[10px] sm:text-xs tracking-wider border border-white/20 transition-all shadow-sm"
                 aria-label={isMobileServicesOpen ? 'Close services' : 'Open services'}
                 aria-expanded={isMobileServicesOpen}
               >
                 Services
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileServicesOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-300 ${isMobileServicesOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Phone Icon on Right */}
+              {/* Phone Button on Right */}
               <a
                 href="tel:+1-904-866-1738"
-                className="pointer-events-auto p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+                className="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-white/5 hover:bg-white/20 backdrop-blur-md px-2 sm:px-3 py-1.5 rounded-full text-white font-bold text-[10px] sm:text-xs tracking-wider border border-white/20 transition-all shadow-sm"
                 aria-label="Call Us"
               >
-                <Phone className="w-6 h-6" />
+                <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>904-866-1738</span>
               </a>
             </div>
 
