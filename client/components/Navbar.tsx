@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, Mail, Clock, Phone } from 'lucide-react';
+import { ChevronDown, Mail, Phone } from 'lucide-react';
 
 type LocationType = 'florida' | 'jacksonville' | 'st-augustine';
 
@@ -123,12 +123,8 @@ const Navbar = () => {
               {/* Spacer for the hanging logo */}
               <div className="w-32 lg:w-64 xl:w-96 flex-shrink-0" />
 
-              {/* Contact & Hours Info */}
+              {/* Contact Info */}
               <div className="flex items-center space-x-4 lg:space-x-6">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#00a8e8]" />
-                  <span>Mon-Fri: 8:00 AM - 6:00 PM</span>
-                </span>
                 <a href="mailto:menitola@tolatiles.com" className="flex items-center gap-1.5 hover:text-[#00a8e8] transition-colors">
                   <Mail className="w-3.5 h-3.5 text-[#00a8e8]" />
                   <span>menitola@tolatiles.com</span>

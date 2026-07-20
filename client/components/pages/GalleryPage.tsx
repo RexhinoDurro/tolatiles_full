@@ -24,7 +24,7 @@ const locationContentMap: Record<string, GalleryLocationContent> = {
   jacksonville: {
     ctaHeading: 'Transform Your Jacksonville Home',
     ctaDescription:
-      'Let our Duval County tile experts bring your vision to life. From Riverside renovations to Jax Beach patio upgrades, every project is backed by our quality guarantee and 15+ years of local experience.',
+      'Let our Duval County tile experts bring your vision to life. From Riverside renovations to Jax Beach patio upgrades, every project is backed by our quality guarantee and 13+ years of local experience.',
     categoryDescriptions: {
       all: {
         title: 'Tile Installation Portfolio - Jacksonville FL',

@@ -4,6 +4,7 @@ import HomePage from '@/components/pages/HomePage';
 import { VALID_LOCATIONS, isValidLocation, locationNames, areaServed, type LocationType } from '@/lib/locations';
 import BreadcrumbSchema, { buildCityBreadcrumbs } from '@/components/BreadcrumbSchema';
 import { DEFAULT_OG_IMAGE } from '@/lib/seo';
+import { getHomepageBlogPosts } from '@/lib/blogServer';
 
 // Location-specific metadata
 const locationMetadata: Record<LocationType, {
@@ -44,13 +45,13 @@ const locationSchemas: Record<LocationType, object> = {
       streetAddress: '445 Hutchinson Ln',
       addressLocality: 'St Augustine',
       addressRegion: 'FL',
-      postalCode: '32084',
+      postalCode: '32095',
       addressCountry: 'US',
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: '30.1766',
-      longitude: '-81.6076',
+      latitude: '29.901244',
+      longitude: '-81.312434',
     },
   },
   jacksonville: {
@@ -68,7 +69,7 @@ const locationSchemas: Record<LocationType, object> = {
       streetAddress: '445 Hutchinson Ln',
       addressLocality: 'St Augustine',
       addressRegion: 'FL',
-      postalCode: '32084',
+      postalCode: '32095',
       addressCountry: 'US',
     },
     geo: {
@@ -89,26 +90,6 @@ const locationSchemas: Record<LocationType, object> = {
         { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Shower Tile Installation Jacksonville' } },
       ],
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '89',
-      bestRating: '5',
-    },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '08:00',
-        closes: '18:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: 'Saturday',
-        opens: '09:00',
-        closes: '16:00',
-      },
-    ],
     sameAs: [
       'https://www.facebook.com/TolaTiles',
       'https://www.instagram.com/tolatiles',
@@ -129,7 +110,7 @@ const locationSchemas: Record<LocationType, object> = {
       streetAddress: '445 Hutchinson Ln',
       addressLocality: 'St Augustine',
       addressRegion: 'FL',
-      postalCode: '32084',
+      postalCode: '32095',
       addressCountry: 'US',
     },
     geo: {
@@ -150,26 +131,6 @@ const locationSchemas: Record<LocationType, object> = {
         { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Shower Tile Installation St Augustine' } },
       ],
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '89',
-      bestRating: '5',
-    },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '08:00',
-        closes: '18:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: 'Saturday',
-        opens: '09:00',
-        closes: '16:00',
-      },
-    ],
     sameAs: [
       'https://www.facebook.com/TolaTiles',
       'https://www.instagram.com/tolatiles',
@@ -230,6 +191,7 @@ export default async function LocationHomePage({ params }: { params: Promise<{ l
   const location = resolvedParams.location;
   const schema = locationSchemas[location];
   const breadcrumbItems = buildCityBreadcrumbs(location);
+  const initialBlogPosts = await getHomepageBlogPosts();
 
   return (
     <>
@@ -238,7 +200,7 @@ export default async function LocationHomePage({ params }: { params: Promise<{ l
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <BreadcrumbSchema items={breadcrumbItems} />
-      <HomePage location={location} />
+      <HomePage location={location} initialBlogPosts={initialBlogPosts} />
     </>
   );
 }

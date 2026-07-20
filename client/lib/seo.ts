@@ -3,10 +3,10 @@
  * from the root layout once a page overrides it, so omitting this silently drops
  * the preview image on shares. */
 export const DEFAULT_OG_IMAGE = {
-  url: 'https://tolatiles.com/images/tolatiles-team-background-jacksonville-tile-installers.webp',
+  url: 'https://tolatiles.com/images/tolatiles-installation-team-group-photo.webp',
   width: 2048,
   height: 1143,
-  alt: 'Tola Tiles - Tile Installation Team in Jacksonville & St. Augustine, FL',
+  alt: 'The Tola Tiles team - expert tile installers in Jacksonville & St. Augustine, FL',
 };
 
 /** Strips a redundant trailing "Tola Tiles" brand suffix from CMS-authored titles.

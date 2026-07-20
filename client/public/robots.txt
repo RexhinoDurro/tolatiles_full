@@ -21,10 +21,3 @@ Allow: /faqs/
 # Allow Google Image Bot
 User-agent: Googlebot-Image
 Allow: /assets/images/
-
-# Block AI training crawlers
-User-agent: ChatGPT-User
-Disallow: /
-
-User-agent: GPTBot
-Disallow: /

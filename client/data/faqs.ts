@@ -24,7 +24,7 @@ export const faqs: FAQ[] = [
     category: 'general',
     question: 'How long has Tola Tiles been in business?',
     answer:
-      "Tola Tiles has been serving the community for over 15 years since 2008. We're a family-owned business with a proven track record of quality installations and satisfied customers.",
+      "Tola Tiles has been serving the community for over 13 years since 2013. We're a family-owned business with a proven track record of quality installations and satisfied customers.",
   },
   {
     category: 'general',

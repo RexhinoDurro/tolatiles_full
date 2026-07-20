@@ -16,7 +16,7 @@ const locationContent: Record<string, AboutLocationContent> = {
   jacksonville: {
     heroH1: "About Tola Tiles - Jacksonville's Premier Tile Installation Company",
     heroSubtitle:
-      "Transforming homes across Duval County with exceptional craftsmanship since 2008. From Riverside lofts to Mandarin family homes, we're the River City's most trusted tile artisans.",
+      "Transforming homes across Duval County with exceptional craftsmanship since 2013. From Riverside lofts to Mandarin family homes, we're the River City's most trusted tile artisans.",
     localStoryParagraph:
       "Over the years, we've completed hundreds of projects across Jacksonville and Duval County — from elegant kitchen backsplashes in San Marco bungalows to expansive floor installations in Ortega estates. Our deep familiarity with Jacksonville's diverse architectural styles, from historic Riverside homes to modern Southside condos, allows us to recommend the perfect materials and techniques for every project. We understand the River City's humidity and climate demands, ensuring every installation is built to last in Northeast Florida conditions.",
     whyChooseHeading: "Why Jacksonville Homeowners Choose Tola Tiles",
@@ -24,7 +24,7 @@ const locationContent: Record<string, AboutLocationContent> = {
   'st-augustine': {
     heroH1: "About Tola Tiles - St Augustine's Trusted Tile Installation Experts",
     heroSubtitle:
-      "Bringing masterful tile craftsmanship to the Ancient City and St. Johns County since 2008. We specialize in both historic renovations and modern coastal installations.",
+      "Bringing masterful tile craftsmanship to the Ancient City and St. Johns County since 2013. We specialize in both historic renovations and modern coastal installations.",
     localStoryParagraph:
       "Based right here in St. Augustine, we've earned the trust of homeowners throughout St. Johns County — from meticulous restorations in the Historic District to contemporary builds in Nocatee and World Golf Village. Our team understands the unique challenges of coastal construction, including salt air exposure, humidity management, and preserving the character of older homes on Anastasia Island and in Lincolnville. Living and working in the Ancient City gives us first-hand knowledge of what materials and methods perform best in our coastal climate.",
     whyChooseHeading: "Why St. Augustine Homeowners Choose Tola Tiles",
@@ -32,7 +32,7 @@ const locationContent: Record<string, AboutLocationContent> = {
   florida: {
     heroH1: "About Tola Tiles - Northeast Florida's Trusted Tile Installers",
     heroSubtitle:
-      "Transforming spaces across Northeast Florida with exceptional craftsmanship since 2008. We're not just tile installers — we're artisans who bring your vision to life with precision, passion, and an unwavering commitment to quality.",
+      "Transforming spaces across Northeast Florida with exceptional craftsmanship since 2013. We're not just tile installers — we're artisans who bring your vision to life with precision, passion, and an unwavering commitment to quality.",
     localStoryParagraph:
       "From our home base in St. Augustine, we serve homeowners and businesses throughout the greater Northeast Florida region — including Jacksonville, Ponte Vedra, Palm Coast, and surrounding communities. Our broad regional experience means we've worked with every style of home in the area, from historic properties along the coast to brand-new construction in master-planned communities. With over 1,500 completed projects across Duval, St. Johns, and Flagler counties, we bring unmatched local expertise to every tile installation.",
     whyChooseHeading: "Why Northeast Florida Chooses Tola Tiles",
@@ -79,7 +79,7 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
               <div className="text-gray-600 font-medium">Projects Completed</div>
             </div>
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
-              <div className="text-4xl font-bold text-brand-ink mb-2">15+</div>
+              <div className="text-4xl font-bold text-brand-ink mb-2">13+</div>
               <div className="text-gray-600 font-medium">Years of Excellence</div>
             </div>
             <div className="text-center bg-white rounded-xl p-6 border border-gray-100">
@@ -104,7 +104,7 @@ const AboutPage = ({ location = 'florida' }: AboutPageProps) => {
               </h2>
               <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
                 <p>
-                  What started as a small family business in 2008 has grown into the region&apos;s most trusted tile installation company. Founded by{' '}
+                  What started as a small family business in 2013 has grown into the region&apos;s most trusted tile installation company. Founded by{' '}
                   <span>Gazmend Tola</span> with just a vision for exceptional craftsmanship, we&apos;ve built our reputation one perfectly placed tile
                   at a time.
                 </p>

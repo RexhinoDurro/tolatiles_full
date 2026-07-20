@@ -79,17 +79,16 @@ const localBusinessSchema = {
   url: 'https://tolatiles.com',
   telephone: '+1-904-866-1738',
   email: 'menitola@tolatiles.com',
-  foundingDate: '2008',
+  foundingDate: '2013',
   priceRange: '$8-25 per sq ft',
-  paymentAccepted: 'Cash, Check, Credit Card',
+  paymentAccepted: 'Cash, Check, Zelle, Venmo, Wire transfer',
   currenciesAccepted: 'USD',
-  openingHours: ['Mo-Fr 08:00-18:00', 'Sa 09:00-16:00'],
   address: {
     '@type': 'PostalAddress',
     streetAddress: '445 Hutchinson Ln',
     addressLocality: 'Saint Augustine',
     addressRegion: 'FL',
-    postalCode: '32084',
+    postalCode: '32095',
     addressCountry: 'US',
   },
   geo: {
@@ -109,13 +108,6 @@ const localBusinessSchema = {
   logo: 'https://tolatiles.com/assets/logo.png',
   image: ['https://tolatiles.com/assets/tolatiles_1.jpg'],
   sameAs: ['https://www.facebook.com/TolaTiles', 'https://www.instagram.com/tolatiles'],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: '127',
-    bestRating: '5',
-    worstRating: '1',
-  },
 };
 
 const organizationSchema = {
@@ -136,14 +128,14 @@ const organizationSchema = {
     streetAddress: '445 Hutchinson Ln',
     addressLocality: 'Saint Augustine',
     addressRegion: 'FL',
-    postalCode: '32084',
+    postalCode: '32095',
     addressCountry: 'US',
   },
   founder: {
     '@type': 'Person',
     name: 'Gazmend Tola',
   },
-  foundingDate: '2008',
+  foundingDate: '2013',
   numberOfEmployees: '15',
 };
 

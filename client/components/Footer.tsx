@@ -59,7 +59,7 @@ const Footer = () => {
               <h2 className="text-2xl font-bold">Tola Tiles</h2>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Premium tile installation services for residential and commercial properties in {locationName}. Creating beautiful, lasting spaces since 2008.
+              Premium tile installation services for residential and commercial properties in {locationName}. Serving Northeast Florida since 2013.
             </p>
 
             {/* Social Media */}
@@ -248,7 +248,7 @@ const Footer = () => {
                     <span itemProp="streetAddress">445 Hutchinson Ln</span>
                     <br />
                     <span itemProp="addressLocality">St Augustine</span>, <span itemProp="addressRegion">FL</span>{' '}
-                    <span itemProp="postalCode">32084</span>
+                    <span itemProp="postalCode">32095</span>
                   </address>
                 </div>
               </div>
@@ -261,9 +261,7 @@ const Footer = () => {
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Business Hours</div>
                   <div className="text-sm">
-                    <div>Mon-Fri: 8:00 AM - 6:00 PM</div>
-                    <div>Sat: 9:00 AM - 4:00 PM</div>
-                    <div>Sun: Closed</div>
+                    <a href="tel:+1-904-866-1738" className="hover:text-white transition-colors">Call us for current hours</a>
                   </div>
                 </div>
               </div>

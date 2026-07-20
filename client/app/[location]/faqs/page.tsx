@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ location:
 
   return {
     title: `Tile Installation FAQs ${locationName} FL`,
-    description: `Answers to common tile installation questions in ${locationName} FL — pricing, materials, timelines, and maintenance from local tile experts with 15+ years of experience.`,
+    description: `Answers to common tile installation questions in ${locationName} FL — pricing, materials, timelines, and maintenance from local tile experts with 13+ years of experience.`,
     keywords: `tile installation FAQ ${locationName.toLowerCase()} FL, tile contractor questions ${locationName.toLowerCase()}, tile installation cost Florida, how long does tile installation take, grout sealing ${locationName.toLowerCase()}`,
     alternates: {
       canonical: `https://tolatiles.com/${resolvedParams.location}/faqs`,

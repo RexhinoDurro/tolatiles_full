@@ -199,7 +199,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                     <address className="text-lg text-gray-700 not-italic">
                       445 Hutchinson Ln
                       <br />
-                      Saint Augustine, FL 32084
+                      Saint Augustine, FL 32095
                     </address>
                   </div>
                 </div>
@@ -210,20 +210,13 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                   <Clock className="h-6 w-6 text-[#00a8e8] mr-3" aria-hidden="true" />
                   <h3 className="text-lg font-semibold text-gray-900">Business Hours</h3>
                 </div>
-                <div className="space-y-2 text-gray-600">
-                  <div className="flex justify-between">
-                    <span>Monday - Friday:</span>
-                    <span>8:00 AM - 6:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Saturday:</span>
-                    <span>9:00 AM - 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Sunday:</span>
-                    <span>Closed</span>
-                  </div>
-                </div>
+                <p className="text-gray-600">
+                  Call{' '}
+                  <a href="tel:+1-904-866-1738" className="text-[#00a8e8] hover:underline font-semibold">
+                    (904) 866-1738
+                  </a>{' '}
+                  for our current hours.
+                </p>
               </div>
 
               {/* Service Areas */}
@@ -430,7 +423,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 h-[400px] rounded-xl overflow-hidden shadow-lg">
                 <iframe
-                  src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32084&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32095&t=&z=15&ie=UTF8&iwloc=&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -445,7 +438,7 @@ const ContactPage = ({ location = 'florida' }: ContactPageProps) => {
                 <address className="not-italic space-y-4 text-gray-600 mb-6">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-[#00a8e8] mt-0.5 flex-shrink-0" />
-                    <span>445 Hutchinson Ln<br />Saint Augustine, FL 32084</span>
+                    <span>445 Hutchinson Ln<br />Saint Augustine, FL 32095</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-[#00a8e8] flex-shrink-0" />

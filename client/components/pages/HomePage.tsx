@@ -83,13 +83,13 @@ const stAugustineContent: LocationContent = {
   locationNameFull: 'St Augustine, Florida',
   heroH1: 'Tile Installer St Augustine FL - Expert Tile Installation Services',
   heroTitle: "St Augustine's Trusted Tile Installation Experts",
-  heroSubtitle: 'Serving the Ancient City Since 2008 • Licensed & Insured',
+  heroSubtitle: 'Serving the Ancient City Since 2013 • Licensed & Insured',
   heroDescription:
     "From historic downtown renovations to beachfront condos, we specialize in tile installation that withstands St Augustine's coastal climate.",
   heroChecklist: [
     'From the Historic District to Vilano Beach',
     'Coastal-Grade Materials for Salt Air & Humidity',
-    'Licensed, Insured & Local Since 2008',
+    'Licensed, Insured & Local Since 2013',
   ],
   heroLine1: "St Augustine's Trusted",
   heroLine2: 'Tile Installation Experts',
@@ -110,13 +110,13 @@ const jacksonvilleContent: LocationContent = {
   locationNameFull: 'Jacksonville, Florida',
   heroH1: 'Tile Installer Jacksonville FL - Professional Tile Installation Services',
   heroTitle: "Jacksonville's Premier Tile Installation Company",
-  heroSubtitle: 'Serving Jax & the Beaches Since 2008 • Licensed & Insured',
+  heroSubtitle: 'Serving Jax & the Beaches Since 2013 • Licensed & Insured',
   heroDescription:
     'From Riverside bungalows to San Marco condos and Ponte Vedra beach homes, we deliver expert tile installation across Jacksonville.',
   heroChecklist: [
     'From Riverside Bungalows to Ponte Vedra Estates',
     'Humidity-Rated Waterproofing for Duval County Homes',
-    'Licensed, Insured & Local Since 2008',
+    'Licensed, Insured & Local Since 2013',
   ],
   heroLine1: "Jacksonville's Premier",
   heroLine2: 'Tile Installation Company',
@@ -141,9 +141,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://tolatiles.com/api';
 
 interface HomePageProps {
   location?: 'florida' | 'st-augustine' | 'jacksonville';
+  initialBlogPosts?: BlogPostListItem[];
 }
 
-const HomePage = ({ location = 'florida' }: HomePageProps) => {
+const HomePage = ({ location = 'florida', initialBlogPosts = [] }: HomePageProps) => {
   const content =
     location === 'st-augustine'
       ? stAugustineContent
@@ -167,7 +168,7 @@ const HomePage = ({ location = 'florida' }: HomePageProps) => {
       <LeadFormSection />
       <ProjectsStripSection />
       <GoogleReviewsSlider location={location} />
-      <BlogCarouselSection basePath={content.basePath} />
+      <BlogCarouselSection basePath={content.basePath} initialPosts={initialBlogPosts} />
       <LocationSection content={content} />
       <FinalCTASection content={content} />
     </>
@@ -458,10 +459,10 @@ const WhoWeAreSection = () => (
         Why Homeowners in Jacksonville &amp; St. Augustine Trust Us
       </h2>
       <p className="text-lg text-gray-600 leading-relaxed">
-        Tola Tiles has been a family-owned tile installation company since 2008, led by founder Gazmend
+        Tola Tiles has been serving Northeast Florida since 2013, led by founder Gazmend
         "Meni" Tola. We run one small, dedicated crew (no subcontractors) so the people who show up at
         your door are the same people who've built our name across Jacksonville and St. Augustine for
-        over 15 years.
+        over 13 years.
       </p>
     </div>
 
@@ -776,56 +777,12 @@ const LocalServicesSection = ({ content }: { content: LocationContent }) => {
 
 // ─── Blog Carousel Section ─────────────────────────────────────────────────────
 
-const PLACEHOLDER_POSTS: BlogPostListItem[] = [
-  {
-    id: -1, title: 'How to Choose the Right Tile for Your Kitchen Backsplash',
-    slug: '#', excerpt: 'From subway tiles to mosaic glass, we break down the best backsplash options for Florida kitchens, and what to avoid.',
-    featured_image: '/images/backsplash/2.webp', featured_image_alt: 'Kitchen backsplash tile options',
-    categories: [{ id: 1, name: 'Kitchen', slug: 'kitchen' }],
-    location: 'florida', publish_date: '2025-03-15', reading_time: 5,
-  },
-  {
-    id: -2, title: '5 Bathroom Tile Trends Taking Over Northeast Florida Homes',
-    slug: '#', excerpt: 'Large-format tiles, bold patterns, and wet-room showers: here are the looks our customers love most this year.',
-    featured_image: '/images/shower/3.webp', featured_image_alt: 'Modern bathroom tile trends',
-    categories: [{ id: 2, name: 'Bathroom', slug: 'bathroom' }],
-    location: 'florida', publish_date: '2025-02-28', reading_time: 4,
-  },
-  {
-    id: -3, title: 'Outdoor Tile vs. Pavers: Which Is Right for Your Florida Patio?',
-    slug: '#', excerpt: 'Both have pros and cons in our humid climate. We compare slip resistance, maintenance, cost, and curb appeal side by side.',
-    featured_image: '/images/patio/1.webp', featured_image_alt: 'Outdoor patio tile installation',
-    categories: [{ id: 3, name: 'Outdoor', slug: 'outdoor' }],
-    location: 'florida', publish_date: '2025-01-20', reading_time: 6,
-  },
-  {
-    id: -4, title: 'The Complete Guide to Fireplace Tile Surrounds',
-    slug: '#', excerpt: 'Transform a plain fireplace into a focal point. We cover materials, heat ratings, grout choices, and installation tips.',
-    featured_image: '/images/fireplace/4.webp', featured_image_alt: 'Fireplace tile surround',
-    categories: [{ id: 4, name: 'Fireplace', slug: 'fireplace' }],
-    location: 'florida', publish_date: '2024-12-10', reading_time: 7,
-  },
-  {
-    id: -5, title: 'How Long Does Tile Installation Take? A Room-by-Room Breakdown',
-    slug: '#', excerpt: 'Wondering how long your project will take? We give realistic timelines for kitchens, bathrooms, floors, and patios.',
-    featured_image: '/images/flooring/3.webp', featured_image_alt: 'Floor tile installation timeline',
-    categories: [{ id: 5, name: 'Tips', slug: 'tips' }],
-    location: 'florida', publish_date: '2024-11-05', reading_time: 4,
-  },
-  {
-    id: -6, title: 'Porcelain vs. Ceramic Tile: What\'s the Difference?',
-    slug: '#', excerpt: 'The two most popular tile types explained: density, water absorption, durability, and which one to pick for each room.',
-    featured_image: '/images/backsplash/6.webp', featured_image_alt: 'Porcelain vs ceramic tile comparison',
-    categories: [{ id: 5, name: 'Tips', slug: 'tips' }],
-    location: 'florida', publish_date: '2024-10-22', reading_time: 5,
-  },
-] as unknown as BlogPostListItem[];
-
-const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
-  const [posts, setPosts] = useState<BlogPostListItem[]>(PLACEHOLDER_POSTS);
+const BlogCarouselSection = ({ basePath, initialPosts }: { basePath: string; initialPosts: BlogPostListItem[] }) => {
+  const [posts, setPosts] = useState<BlogPostListItem[]>(initialPosts);
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
+    if (initialPosts.length > 0) return;
     const load = async () => {
       try {
         const res = await fetch(`${API_BASE}/blog/posts/?status=published&ordering=-publish_date&page_size=6`);
@@ -836,7 +793,9 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
       } catch { }
     };
     load();
-  }, []);
+  }, [initialPosts]);
+
+  if (posts.length === 0) return null;
 
   const visible = 3;
   const max = Math.max(0, posts.length - visible);
@@ -888,7 +847,7 @@ const BlogCarouselSection = ({ basePath }: { basePath: string }) => {
             style={{ transform: `translateX(-${idx * (100 / visible)}%)` }}
           >
             {posts.map((post) => {
-              const postHref = post.id < 0 ? `${basePath}/blog` : `${basePath}/blog/${post.slug}`;
+              const postHref = `${basePath}/blog/${post.slug}`;
               return (
                 <article
                   key={post.id}
@@ -976,7 +935,7 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
       <div className="grid lg:grid-cols-2 gap-8 items-center">
         <div className="w-full h-[400px] rounded-xl overflow-hidden shadow-lg">
           <iframe
-            src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32084&t=&z=15&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=445+Hutchinson+Ln,+Saint+Augustine,+FL+32095&t=&z=15&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="100%"
             style={{ border: 0 }}
@@ -992,7 +951,7 @@ const LocationSection = ({ content }: { content: LocationContent }) => (
             <address className="not-italic space-y-3 text-gray-600">
               <p className="flex items-start gap-3">
                 <span className="text-brand-ink font-medium">Address:</span>
-                <span>445 Hutchinson Ln<br />St Augustine, FL 32084</span>
+                <span>445 Hutchinson Ln<br />St Augustine, FL 32095</span>
               </p>
               <p className="flex items-center gap-3">
                 <span className="text-brand-ink font-medium">Phone:</span>
