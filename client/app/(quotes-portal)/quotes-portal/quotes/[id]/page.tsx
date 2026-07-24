@@ -171,10 +171,11 @@ function PortalQuoteDetailContent({ id }: { id: string }) {
     ? (quote.pdf_url.startsWith('http') ? quote.pdf_url : `${process.env.NEXT_PUBLIC_SITE_URL || ''}${quote.pdf_url}`)
     : null;
 
+  // Always resolve against the canonical public site origin, not window.location.origin:
+  // this page is served from the quote.tolatiles.com portal subdomain (login-gated), while
+  // the public quote link must point at tolatiles.com (no login required).
   const shareableLink = quote.public_url
-    ? (typeof window !== 'undefined'
-      ? `${window.location.origin}${quote.public_url}`
-      : quote.public_url)
+    ? `${process.env.NEXT_PUBLIC_SITE_URL || ''}${quote.public_url}`
     : null;
 
   return (
@@ -348,7 +349,7 @@ function PortalQuoteDetailContent({ id }: { id: string }) {
                   Copy
                 </button>
                 <a
-                  href={quote.public_url}
+                  href={shareableLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded"
