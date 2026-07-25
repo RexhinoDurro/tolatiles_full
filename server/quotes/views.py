@@ -1248,9 +1248,16 @@ class PortalCustomerSearchView(APIView):
 
 
 class PortalCustomerCreateView(APIView):
-    """Create a customer from the quotes portal."""
+    """List and create customers from the quotes portal (read-only listing + create)."""
 
     permission_classes = [IsQuotesManager]
+
+    def get(self, request):
+        customers = Customer.objects.filter(is_archived=False).exclude(
+            name=_PORTAL_PLACEHOLDER_NAME
+        ).order_by('name')
+        serializer = CustomerSerializer(customers, many=True, context={'request': request})
+        return Response(serializer.data)
 
     def post(self, request):
         serializer = CustomerCreateSerializer(data=request.data)

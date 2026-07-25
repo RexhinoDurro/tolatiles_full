@@ -162,6 +162,10 @@ class PortalApiClient {
     });
   }
 
+  async getCustomers(): Promise<Customer[]> {
+    return this.fetch<Customer[]>('/portal/customers/');
+  }
+
   async createCustomer(data: CustomerCreate): Promise<Customer> {
     return this.fetch<Customer>('/portal/customers/', {
       method: 'POST',

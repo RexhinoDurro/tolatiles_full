@@ -2,11 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, FileText } from 'lucide-react';
+import { CalendarDays, FileText, Users } from 'lucide-react';
 
 export default function PortalBottomNav() {
   const pathname = usePathname();
   const isSchedule = pathname.includes('/schedule');
+  const isCustomers = pathname.includes('/customers');
+  const isQuotes = !isSchedule && !isCustomers;
+
+  const activeIndex = isSchedule ? 0 : isQuotes ? 1 : 2;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -15,7 +19,7 @@ export default function PortalBottomNav() {
         <div
           className="absolute left-2 top-2 w-12 h-12 bg-blue-600 rounded-full transition-transform duration-300 ease-out shadow-sm"
           style={{
-            transform: `translateX(${isSchedule ? '0px' : '56px'})`,
+            transform: `translateX(${activeIndex * 56}px)`,
           }}
         />
 
@@ -33,10 +37,20 @@ export default function PortalBottomNav() {
         <Link
           href="/quotes-portal/quotes"
           className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full transition-colors duration-300 ${
-            !isSchedule ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+            isQuotes ? 'text-white' : 'text-gray-600 hover:text-gray-900'
           }`}
         >
           <FileText size={22} />
+        </Link>
+
+        {/* Customers Button */}
+        <Link
+          href="/quotes-portal/customers"
+          className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full transition-colors duration-300 ${
+            isCustomers ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <Users size={22} />
         </Link>
       </div>
     </div>
