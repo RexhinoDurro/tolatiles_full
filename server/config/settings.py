@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     'localhost', '127.0.0.1', 'tolatiles.com', 'www.tolatiles.com', 'api.tolatiles.com',
     'quotes.tolatiles.com', 'quote.tolatiles.com',
     '.tolatiles.com',  # leading-dot wildcard: covers admin-created landing page subdomains too
+    'backend',  # Docker Compose service DNS name — frontend's server-side fetches hit this directly
 ]
 
 # Trust X-Forwarded-Proto header from nginx proxy for HTTPS detection

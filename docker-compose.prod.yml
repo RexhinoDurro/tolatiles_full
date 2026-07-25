@@ -82,6 +82,11 @@ services:
       # NEXT_PUBLIC_* vars are already correct in .env.production (committed).
       # Only set build args here if you need to override them.
     restart: unless-stopped
+    environment:
+      # Server-side data fetching uses this to reach Django directly over the
+      # Docker network instead of hairpinning through nginx at tolatiles.com,
+      # which shares nginx's per-IP rate limit with real visitor traffic.
+      INTERNAL_API_URL: http://backend:8000/api
     ports:
       - "127.0.0.1:3000:3000"
 

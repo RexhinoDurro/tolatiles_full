@@ -2,7 +2,11 @@ import type { Category, GalleryImage } from '@/types/api';
 import { categoryNameMap } from '@/types/api';
 import { sampleImages } from '@/data/gallery';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// INTERNAL_API_URL hits the backend container directly over the Docker network,
+// bypassing nginx entirely. Without it, SSR fetches loop back through the public
+// domain (hairpin NAT) and share nginx's per-IP rate limit with real visitor
+// traffic, causing intermittent 503s under concurrent page renders.
+const API_BASE = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export interface DisplayImage {
   id: number;
