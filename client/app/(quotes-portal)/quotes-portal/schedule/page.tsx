@@ -1,44 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay, eachDayOfInterval, parseISO } from 'date-fns';
-import { enUS } from 'date-fns/locale';
-import { Loader2, RefreshCw, Plus, X } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { eachDayOfInterval, parseISO, format } from 'date-fns';
+import { RefreshCw, Plus, X, CalendarDays } from 'lucide-react';
 import PortalProtectedRoute from '@/components/quotes-portal/PortalProtectedRoute';
+import PortalScheduleFeed from '@/components/quotes-portal/PortalScheduleFeed';
 import { portalApi as api } from '@/lib/portalApi';
-import type { EstimateVisit, Appointment, AppointmentType, Deal } from '@/types/api';
-
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-const locales = { 'en-US': enUS };
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
-
-type EventType = 'visit' | 'appointment';
-
-interface CalendarEvent {
-  id: number;
-  title: string;
-  start: Date;
-  end: Date;
-  type: EventType;
-  dealId: number | null;
-  resource: EstimateVisit | Appointment;
-}
-
-const visitStatusColors: Record<string, { bg: string; border: string; text: string }> = {
-  scheduled:   { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
-  in_progress: { bg: '#fef9c3', border: '#eab308', text: '#713f12' },
-  completed:   { bg: '#dcfce7', border: '#22c55e', text: '#14532d' },
-};
-
-const apptTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  consultation: { bg: '#f3e8ff', border: '#a855f7', text: '#6b21a8' },
-  follow_up:    { bg: '#fce7f3', border: '#ec4899', text: '#9d174d' },
-  measurement:  { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' },
-  other:        { bg: '#e0e7ff', border: '#6366f1', text: '#3730a3' },
-};
+import type { AppointmentType, Deal } from '@/types/api';
 
 const apptTypeLabels: Record<AppointmentType, string> = {
   consultation: 'Consultation',
@@ -275,119 +243,28 @@ function AppointmentCreateModal({
 }
 
 export default function PortalSchedulePage() {
-  const router = useRouter();
-  const [visits, setVisits] = useState<EstimateVisit[]>([]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<View>('month');
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [feedKey, setFeedKey] = useState(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchDeals = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [visitsData, apptsData, dealsData] = await Promise.all([
-        api.getAllEstimateVisits(),
-        api.getAllAppointments(),
-        api.getDeals(),
-      ]);
-      setVisits(visitsData);
-      setAppointments(apptsData);
-      setDeals(dealsData);
+      setDeals(await api.getDeals());
     } catch {
-      setError('Failed to load calendar events');
+      setError('Failed to load deals');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-
-  const events: CalendarEvent[] = useMemo(() => {
-    const visitEvents: CalendarEvent[] = visits
-      .filter((v) => v.scheduled_date)
-      .map((v) => ({
-        id: v.id,
-        title: v.title,
-        start: new Date(v.scheduled_date),
-        end: new Date(v.scheduled_date),
-        type: 'visit' as EventType,
-        dealId: v.deal,
-        resource: v,
-      }));
-
-    const apptEvents: CalendarEvent[] = appointments.flatMap((a) => {
-      if (a.days && a.days.length > 0) {
-        return a.days.map((day) => {
-          const startDate = day.start_time
-            ? new Date(`${day.date}T${day.start_time}`)
-            : new Date(day.date);
-          const endDate = day.end_time
-            ? new Date(`${day.date}T${day.end_time}`)
-            : startDate;
-          return {
-            id: a.id,
-            title: a.title,
-            start: startDate,
-            end: endDate,
-            type: 'appointment' as EventType,
-            dealId: a.deal,
-            resource: a,
-          };
-        });
-      }
-      if (a.scheduled_date) {
-        return [{
-          id: a.id,
-          title: a.title,
-          start: new Date(a.scheduled_date),
-          end: new Date(a.scheduled_date),
-          type: 'appointment' as EventType,
-          dealId: a.deal,
-          resource: a,
-        }];
-      }
-      return [];
-    });
-
-    return [...visitEvents, ...apptEvents];
-  }, [visits, appointments]);
-
-  const eventStyleGetter = useCallback((event: object) => {
-    const ev = event as CalendarEvent;
-    let colors: { bg: string; border: string; text: string };
-
-    if (ev.type === 'visit') {
-      const v = ev.resource as EstimateVisit;
-      colors = visitStatusColors[v.status] ?? visitStatusColors.scheduled;
-    } else {
-      const a = ev.resource as Appointment;
-      colors = apptTypeColors[a.appointment_type] ?? apptTypeColors.other;
-    }
-
-    return {
-      style: {
-        backgroundColor: colors.bg,
-        borderLeft: `3px solid ${colors.border}`,
-        color: colors.text,
-        borderRadius: '4px',
-        padding: '2px 6px',
-        fontSize: '12px',
-        fontWeight: 500,
-        cursor: 'pointer',
-      },
-    };
-  }, []);
-
-  const handleSelectEvent = useCallback((event: object) => {
-    const ev = event as CalendarEvent;
-    if (ev.dealId) {
-      router.push(`/admin/crm/deals/${ev.dealId}`);
-    }
-  }, [router]);
+  const handleRefresh = () => {
+    fetchDeals();
+    setFeedKey((k) => k + 1);
+  };
 
   return (
     <PortalProtectedRoute>
@@ -400,103 +277,53 @@ export default function PortalSchedulePage() {
           </div>
         </header>
         <div className="max-w-5xl mx-auto px-4 py-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Schedule</h2>
-          <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600">Estimate visits and appointments</p>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={fetchData}
-              disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              New Appointment
-            </button>
-          </div>
-        </div>
-
-        {error && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>}
-
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          </div>
-        ) : (
-          <>
-            <div className="bg-white rounded-xl shadow-sm p-4" style={{ height: 'calc(100dvh - 240px)', minHeight: '400px' }}>
-              <Calendar
-                localizer={localizer}
-                events={events}
-                view={view}
-                date={currentDate}
-                onNavigate={setCurrentDate}
-                onView={setView}
-                onSelectEvent={handleSelectEvent}
-                eventPropGetter={eventStyleGetter}
-                popup
-                views={['month', 'week', 'day']}
-                min={new Date(0, 0, 0, 7, 0, 0)}
-                max={new Date(0, 0, 0, 19, 0, 0)}
-                step={30}
-                timeslots={2}
-                messages={{
-                  today: 'Today',
-                  previous: 'Back',
-                  next: 'Next',
-                  month: 'Month',
-                  week: 'Week',
-                  day: 'Day',
-                  showMore: (total) => `+${total} more`,
-                  noEventsInRange: 'No events in this period.',
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Schedule</h2>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              <button
+                onClick={() => {
+                  if (deals.length === 0) fetchDeals();
+                  setShowCreateModal(true);
                 }}
-                formats={{
-                  monthHeaderFormat: 'MMMM yyyy',
-                  weekdayFormat: 'EEE',
-                  dayHeaderFormat: 'EEEE, MMMM d',
-                }}
-              />
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4" />
+                New Appointment
+              </button>
             </div>
+          </div>
 
-            {/* Legend */}
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Estimate Visits:</span>
+          {error && <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>}
+
+          {/* Schedule Feed */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="font-semibold text-gray-900">Schedule</h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </p>
               </div>
-              {Object.entries(visitStatusColors).map(([status, colors]) => (
-                <div key={status} className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }} />
-                  <span className="text-gray-600 capitalize">{status.replace('_', ' ')}</span>
-                </div>
-              ))}
-              <div className="flex items-center gap-2 ml-4">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Appointments:</span>
-              </div>
-              {Object.entries(apptTypeColors).map(([type, colors]) => (
-                <div key={type} className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded" style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }} />
-                  <span className="text-gray-600 capitalize">{type.replace('_', ' ')}</span>
-                </div>
-              ))}
+              <CalendarDays className="w-5 h-5 text-gray-300" />
             </div>
-          </>
-        )}
-      </div>
+            <PortalScheduleFeed key={feedKey} />
+          </div>
 
-      {showCreateModal && (
-        <AppointmentCreateModal
-          deals={deals}
-          onClose={() => setShowCreateModal(false)}
-          onCreated={fetchData}
-        />
-      )}
+          {showCreateModal && (
+            <AppointmentCreateModal
+              deals={deals}
+              onClose={() => setShowCreateModal(false)}
+              onCreated={handleRefresh}
+            />
+          )}
         </div>
       </div>
     </PortalProtectedRoute>
