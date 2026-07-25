@@ -1,18 +1,22 @@
 /** Shared IIFE snippet builders for third-party tracking, used by both the main
  * site's env-var-driven Analytics.tsx and per-landing-page LandingPageTracking.tsx. */
 
+// Loader is fetched from metrics.tolatiles.com (our server-side GTM container), not
+// www.googletagmanager.com, so the resulting gtag.js instance treats the first-party
+// domain as its home and sends hits (pageviews included) there instead of falling
+// back to Google's own collection domains.
 export function buildGtmScript(gtmId: string): string {
   return `
     (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    'https://metrics.tolatiles.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','${gtmId}');
   `;
 }
 
 export function buildGtmNoscript(gtmId: string): string {
-  return `<iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
+  return `<iframe src="https://metrics.tolatiles.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
 }
 
 export function buildGaScript(gaId: string): string {
