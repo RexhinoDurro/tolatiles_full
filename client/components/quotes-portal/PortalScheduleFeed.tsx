@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Clock, AlertTriangle, CheckCircle2, Loader2, CalendarDays } from 'lucide-react';
+import { Calendar, Clock, AlertTriangle, CheckCircle2, Loader2, CalendarDays, X, User, Phone, Mail, MapPin, StickyNote } from 'lucide-react';
 import { portalApi as api } from '@/lib/portalApi';
-import type { EstimateVisit, Appointment } from '@/types/api';
+import type { EstimateVisit, Appointment, Deal, Customer } from '@/types/api';
 
 interface ScheduleEvent {
   id: number;
@@ -13,6 +13,14 @@ interface ScheduleEvent {
   dealId: number | null;
   status: string;
   subtype?: string;
+}
+
+interface ClientInfo {
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
 }
 
 function formatTime(date: Date) {
@@ -53,7 +61,59 @@ const apptStatusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelled', color: 'text-gray-500 bg-gray-50 ring-gray-200' },
 };
 
-function EventCard({ event, isOverdue }: { event: ScheduleEvent; isOverdue: boolean }) {
+function ClientInfoModal({ client, onClose }: { client: ClientInfo; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={onClose}>
+      <div
+        className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-blue-50 rounded-full flex items-center justify-center">
+              <User className="w-4.5 h-4.5 text-blue-600" />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">{client.name}</h3>
+          </div>
+          <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-4 space-y-3">
+          {client.phone && (
+            <div className="flex items-center gap-3 text-sm">
+              <Phone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <a href={`tel:${client.phone}`} className="text-gray-700 hover:text-blue-600">{client.phone}</a>
+            </div>
+          )}
+          {client.email && (
+            <div className="flex items-center gap-3 text-sm">
+              <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <a href={`mailto:${client.email}`} className="text-gray-700 hover:text-blue-600 break-all">{client.email}</a>
+            </div>
+          )}
+          {client.address && (
+            <div className="flex items-start gap-3 text-sm">
+              <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <span className="text-gray-700">{client.address}</span>
+            </div>
+          )}
+          {client.notes && (
+            <div className="flex items-start gap-3 text-sm pt-2 border-t">
+              <StickyNote className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+              <span className="text-gray-600 whitespace-pre-wrap">{client.notes}</span>
+            </div>
+          )}
+          {!client.phone && !client.email && !client.address && !client.notes && (
+            <p className="text-sm text-gray-400">No additional contact info on file.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventCard({ event, isOverdue, onSelect }: { event: ScheduleEvent; isOverdue: boolean; onSelect?: () => void }) {
   const isVisit = event.type === 'visit';
   const accentColor = isOverdue
     ? 'border-l-red-400'
@@ -66,10 +126,17 @@ function EventCard({ event, isOverdue }: { event: ScheduleEvent; isOverdue: bool
     : apptStatusConfig[event.status] ?? apptStatusConfig.scheduled;
 
   const StatusIcon = isVisit ? (visitStatusConfig[event.status]?.icon ?? Clock) : Clock;
+  const clickable = !!onSelect;
 
   return (
     <div
-      className={`flex items-start gap-4 bg-white rounded-xl shadow-sm border-l-4 ${accentColor} px-4 py-3.5`}
+      onClick={onSelect}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={clickable ? (e) => { if (e.key === 'Enter') onSelect?.(); } : undefined}
+      className={`flex items-start gap-4 bg-white rounded-xl shadow-sm border-l-4 ${accentColor} px-4 py-3.5 ${
+        clickable ? 'cursor-pointer hover:shadow-md transition-shadow' : ''
+      }`}
     >
       {/* Time */}
       <div className="flex-shrink-0 w-16 text-center pt-0.5">
@@ -108,7 +175,17 @@ function EventCard({ event, isOverdue }: { event: ScheduleEvent; isOverdue: bool
   );
 }
 
-function DaySection({ label, events, today }: { label: string; events: ScheduleEvent[]; today: Date }) {
+function DaySection({
+  label,
+  events,
+  today,
+  onSelectEvent,
+}: {
+  label: string;
+  events: ScheduleEvent[];
+  today: Date;
+  onSelectEvent: (event: ScheduleEvent) => void;
+}) {
   const isToday = label === 'Today';
   const overdue = isToday ? [] : events.filter(
     (e) => e.start < today && e.status !== 'completed' && e.status !== 'cancelled'
@@ -128,6 +205,7 @@ function DaySection({ label, events, today }: { label: string; events: ScheduleE
           key={`${ev.type}-${ev.id}`}
           event={ev}
           isOverdue={overdue.includes(ev)}
+          onSelect={ev.dealId ? () => onSelectEvent(ev) : undefined}
         />
       ))}
     </div>
@@ -137,14 +215,39 @@ function DaySection({ label, events, today }: { label: string; events: ScheduleE
 export default function PortalScheduleFeed() {
   const [visits, setVisits] = useState<EstimateVisit[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<ClientInfo | null>(null);
 
   useEffect(() => {
-    Promise.all([api.getAllEstimateVisits(), api.getAllAppointments()])
-      .then(([v, a]) => { setVisits(v); setAppointments(a); })
+    Promise.all([
+      api.getAllEstimateVisits(),
+      api.getAllAppointments(),
+      api.getDeals(),
+      api.getCustomers(),
+    ])
+      .then(([v, a, d, c]) => { setVisits(v); setAppointments(a); setDeals(d); setCustomers(c); })
       .catch(() => {})
       .finally(() => setIsLoading(false));
   }, []);
+
+  const dealsById = useMemo(() => new Map(deals.map((d) => [d.id, d])), [deals]);
+  const customersById = useMemo(() => new Map(customers.map((c) => [c.id, c])), [customers]);
+
+  const handleSelectEvent = (event: ScheduleEvent) => {
+    if (!event.dealId) return;
+    const deal = dealsById.get(event.dealId);
+    if (!deal) return;
+    const customer = customersById.get(deal.customer);
+    setSelectedClient({
+      name: customer?.name ?? deal.customer_name,
+      phone: customer?.phone ?? deal.customer_phone,
+      email: customer?.email,
+      address: customer?.address ?? deal.address,
+      notes: customer?.notes,
+    });
+  };
 
   const today = useMemo(() => new Date(), []);
 
@@ -255,14 +358,19 @@ export default function PortalScheduleFeed() {
             <span className="text-xs text-red-400">{overdueEvents.length} not completed</span>
           </div>
           {overdueEvents.map((ev) => (
-            <EventCard key={`${ev.type}-${ev.id}`} event={ev} isOverdue />
+            <EventCard
+              key={`${ev.type}-${ev.id}`}
+              event={ev}
+              isOverdue
+              onSelect={ev.dealId ? () => handleSelectEvent(ev) : undefined}
+            />
           ))}
         </div>
       )}
 
       {/* Today */}
       {todayEvents.length > 0 ? (
-        <DaySection label="Today" events={todayEvents} today={today} />
+        <DaySection label="Today" events={todayEvents} today={today} onSelectEvent={handleSelectEvent} />
       ) : (
         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-dashed border-gray-200">
           <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -272,8 +380,12 @@ export default function PortalScheduleFeed() {
 
       {/* Upcoming */}
       {upcomingGroups.map(({ label, events }) => (
-        <DaySection key={label} label={label} events={events} today={today} />
+        <DaySection key={label} label={label} events={events} today={today} onSelectEvent={handleSelectEvent} />
       ))}
+
+      {selectedClient && (
+        <ClientInfoModal client={selectedClient} onClose={() => setSelectedClient(null)} />
+      )}
     </div>
   );
 }
