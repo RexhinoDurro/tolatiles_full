@@ -1,12 +1,38 @@
+from django import forms
 from django.contrib import admin
 from .models import BlogPost, BlogCategory
 
 
+class BlogCategoryAdminForm(forms.ModelForm):
+    content_types = forms.MultipleChoiceField(
+        choices=BlogPost.CONTENT_TYPE_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text='Which content type(s) this category is selectable for. Leave all unchecked to '
+                   'apply it to every type (use that for cross-cutting tags like city names).'
+    )
+
+    class Meta:
+        model = BlogCategory
+        fields = '__all__'
+
+    def clean_content_types(self):
+        return list(self.cleaned_data.get('content_types') or [])
+
+
 @admin.register(BlogCategory)
 class BlogCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug', 'created_at']
+    form = BlogCategoryAdminForm
+    list_display = ['name', 'slug', 'content_types_display', 'created_at']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name']
+
+    def content_types_display(self, obj):
+        if not obj.content_types:
+            return 'All types'
+        labels = dict(BlogPost.CONTENT_TYPE_CHOICES)
+        return ', '.join(labels.get(ct, ct) for ct in obj.content_types)
+    content_types_display.short_description = 'Content Types'
 
 
 @admin.register(BlogPost)

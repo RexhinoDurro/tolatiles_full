@@ -36,12 +36,27 @@ RELATED_SERVICE_PAGE_LABELS = {
     for value, label in options
 }
 
+# Media/link placeholder markers are rendered by TipTap as atom nodes
+# (<span data-media-marker="N">/<span data-link-marker="N">), never as raw
+# HTML comments -- comments (nodeType 8) are silently dropped by TipTap's
+# ProseMirror parser on every parse/serialize round-trip, which would let a
+# post silently lose its markers (and the publish-gate below along with it)
+# the moment anyone opens it in the rich-text editor.
+MEDIA_MARKER_RE = re.compile(r'data-media-marker="(\d+)"')
+LINK_MARKER_RE = re.compile(r'data-link-marker="(\d+)"')
+
 
 class BlogCategory(models.Model):
     """Category for organizing blog posts."""
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    content_types = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Which content type(s) this category can be applied to (blog/guide/design_idea/story). '
+                   'Empty list means it applies to all four — use that for cross-cutting tags like city names.'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -57,6 +72,10 @@ class BlogCategory(models.Model):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
+
+    def applies_to(self, content_type):
+        """True if this category is selectable for the given content_type (empty list = all types)."""
+        return not self.content_types or content_type in self.content_types
 
 
 class BlogPost(models.Model):
@@ -148,6 +167,27 @@ class BlogPost(models.Model):
         help_text='FAQ data as JSON array: [{"question": "...", "answer": "..."}]'
     )
 
+    # Media plan: AI-suggested image/video placeholders with detailed prompts,
+    # positioned inline in `content` via <span data-media-marker="N">/
+    # data-link-marker="N"> atom nodes. External citation links are NOT part
+    # of this -- those are vetted before drafting and embedded directly as
+    # real <a href> tags in `content`, same as the existing related_service_page
+    # CTA link. See _validate_media_and_links() for the publish-gate enforcement.
+    media_plan = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Image/video placeholders: [{"id", "type", "placement_hint", "prompt", '
+                   '"alt_text", "status", "resolved_source", "resolved_url", "candidates"}]. '
+                   'status is "unresolved" | "resolved" | "skipped".'
+    )
+    suggested_links = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Auto-suggested internal cross-links to other posts (not external citations): '
+                   '[{"id", "anchor_text_hint", "target_slug", "target_title", "score", "status"}]. '
+                   'status is "suggested" | "accepted" | "rejected".'
+    )
+
     # Categories
     categories = models.ManyToManyField(
         BlogCategory,
@@ -210,12 +250,63 @@ class BlogPost(models.Model):
     def clean(self):
         super().clean()
         self._validate_related_service_page()
+        self._validate_media_and_links()
 
     def _validate_related_service_page(self):
         if self.status == 'published' and self.content_type == 'blog' and not self.related_service_page:
             raise ValidationError({
                 'related_service_page': 'Related Service Page is required to publish a Blog post.'
             })
+
+    def _unresolved_media_and_link_ids(self):
+        """Shared scan used by both the publish-gate validator and the
+        `has_unresolved_media` calendar flag -- never raises, just reports."""
+        media_by_id = {str(item.get('id')): item for item in (self.media_plan or [])}
+        link_by_id = {str(item.get('id')): item for item in (self.suggested_links or [])}
+
+        unresolved_media = sorted({
+            marker_id for marker_id in MEDIA_MARKER_RE.findall(self.content or '')
+            if media_by_id.get(marker_id, {}).get('status') not in ('resolved', 'skipped')
+        }, key=int)
+        unresolved_links = sorted({
+            marker_id for marker_id in LINK_MARKER_RE.findall(self.content or '')
+            if link_by_id.get(marker_id, {}).get('status') not in ('accepted', 'rejected')
+        }, key=int)
+        return unresolved_media, unresolved_links
+
+    @property
+    def has_unresolved_media(self):
+        """True if any in-body media/link placeholder still needs resolving --
+        used to flag stuck scheduled posts in the admin calendar and by
+        publish_scheduled_posts before attempting to auto-publish."""
+        unresolved_media, unresolved_links = self._unresolved_media_and_link_ids()
+        return bool(unresolved_media or unresolved_links)
+
+    def _validate_media_and_links(self):
+        """Block publish while any in-body media/link placeholder is still unresolved.
+
+        Applies to all 4 content types (unlike related_service_page, there's no
+        asymmetry here -- media/link planning uses the same shared `content`
+        pipeline regardless of content_type).
+        """
+        if self.status != 'published':
+            return
+
+        unresolved_media, unresolved_links = self._unresolved_media_and_link_ids()
+
+        errors = {}
+        if unresolved_media:
+            errors['media_plan'] = (
+                f"Unresolved media placeholder(s): {', '.join(unresolved_media)}. "
+                f"Resolve or skip each one before publishing."
+            )
+        if unresolved_links:
+            errors['suggested_links'] = (
+                f"Unresolved link suggestion(s): {', '.join(unresolved_links)}. "
+                f"Accept or reject each one before publishing."
+            )
+        if errors:
+            raise ValidationError(errors)
 
     def _content_links_to(self, path):
         """Plain regex scan for an existing href pointing at `path`."""
@@ -239,6 +330,7 @@ class BlogPost(models.Model):
             self.publish_date = timezone.now()
 
         self._validate_related_service_page()
+        self._validate_media_and_links()
 
         # Hybrid enforcement on the transition to published: if the body
         # doesn't already link to the Related Service Page, auto-append a

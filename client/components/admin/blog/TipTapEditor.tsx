@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent, BubbleMenu, ReactNodeViewRenderer } from '@tiptap/react';
-import { mergeAttributes } from '@tiptap/core';
+import { mergeAttributes, Node } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
@@ -34,17 +34,158 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Video as VideoIcon,
 } from 'lucide-react';
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import type { MediaPlanEntry, SuggestedLinkEntry } from '@/types/api';
 import AIImageGenerator from './AIImageGenerator';
 import ResizableImageNodeView from './ResizableImageNodeView';
+import MediaMarkerNodeView from './MediaMarkerNodeView';
+import LinkMarkerNodeView from './LinkMarkerNodeView';
+import VideoEmbedNodeView from './VideoEmbedNodeView';
+import { MediaPlanContext } from './MediaPlanContext';
 
 interface TipTapEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
+  mediaPlan?: MediaPlanEntry[];
+  suggestedLinks?: SuggestedLinkEntry[];
 }
+
+// Marker for a media_plan image/video placeholder. Saved/public HTML is an
+// invisible <span data-media-marker="N"> (comments would silently vanish on
+// TipTap's parse/serialize round-trip -- this is a real schema node instead,
+// so it survives). The visible badge editors see comes entirely from
+// addNodeView; renderHTML controls only what gets saved.
+const MediaMarker = Node.create({
+  name: 'mediaMarker',
+  group: 'block',
+  atom: true,
+  selectable: true,
+
+  addAttributes() {
+    return {
+      mediaId: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-media-marker'),
+        renderHTML: (attributes: Record<string, unknown>) => ({ 'data-media-marker': attributes.mediaId }),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-media-marker]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['span', mergeAttributes(HTMLAttributes, { style: 'display:none' })];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(MediaMarkerNodeView);
+  },
+});
+
+// Marker for a suggested_links internal cross-link suggestion. Same
+// real-node-not-a-comment reasoning as MediaMarker above.
+const LinkMarker = Node.create({
+  name: 'linkMarker',
+  group: 'inline',
+  inline: true,
+  atom: true,
+  selectable: true,
+
+  addAttributes() {
+    return {
+      linkId: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-link-marker'),
+        renderHTML: (attributes: Record<string, unknown>) => ({ 'data-link-marker': attributes.linkId }),
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'span[data-link-marker]' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['span', mergeAttributes(HTMLAttributes, { style: 'display:none' })];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(LinkMarkerNodeView);
+  },
+});
+
+// A resolved video embed (YouTube or Vimeo). This is what a video-type
+// media_plan placeholder becomes once resolved (see resolve_media_placeholder
+// in views.py), and is also insertable ad-hoc via the toolbar. Registered as
+// a real schema node (not raw <iframe> HTML) so it survives TipTap's
+// parse/serialize cycle instead of being stripped as an unrecognized tag.
+const VideoEmbed = Node.create({
+  name: 'videoEmbed',
+  group: 'block',
+  atom: true,
+  selectable: true,
+
+  addAttributes() {
+    return {
+      provider: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-video-provider'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          attributes.provider ? { 'data-video-provider': attributes.provider } : {},
+      },
+      videoId: {
+        default: null,
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-video-id'),
+        renderHTML: (attributes: Record<string, unknown>) =>
+          attributes.videoId ? { 'data-video-id': attributes.videoId } : {},
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'div[data-video-embed]' }];
+  },
+
+  renderHTML({ node }) {
+    const { provider, videoId } = node.attrs as { provider: string | null; videoId: string | null };
+    if (!provider || !videoId) {
+      return ['div', { 'data-video-embed': 'true' }];
+    }
+    const embedSrc =
+      provider === 'youtube'
+        ? `https://www.youtube.com/embed/${videoId}`
+        : `https://player.vimeo.com/video/${videoId}`;
+    return [
+      'div',
+      {
+        'data-video-embed': 'true',
+        'data-video-provider': provider,
+        'data-video-id': videoId,
+        style: 'position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;',
+      },
+      [
+        'iframe',
+        {
+          src: embedSrc,
+          style: 'position:absolute;top:0;left:0;width:100%;height:100%;',
+          frameborder: '0',
+          allowfullscreen: 'true',
+          loading: 'lazy',
+        },
+      ],
+    ];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(VideoEmbedNodeView);
+  },
+});
 
 // Extended Image extension with width, alignment, drag-to-move and resize.
 // Attribute parsing keeps width/align in sync with saved HTML; the actual
@@ -99,7 +240,13 @@ const ResizableImage = Image.extend({
   },
 });
 
-export default function TipTapEditor({ content, onChange, placeholder }: TipTapEditorProps) {
+export default function TipTapEditor({
+  content,
+  onChange,
+  placeholder,
+  mediaPlan = [],
+  suggestedLinks = [],
+}: TipTapEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showTableMenu, setShowTableMenu] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
@@ -150,6 +297,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
           class: 'border border-gray-300 px-4 py-2 bg-gray-100 font-semibold',
         },
       }),
+      MediaMarker,
+      LinkMarker,
+      VideoEmbed,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -230,6 +380,11 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
     if (!editor) return;
     editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
     setShowTableMenu(false);
+  }, [editor]);
+
+  const insertVideoEmbed = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().insertContent({ type: 'videoEmbed' }).run();
   }, [editor]);
 
   const handleAIImageGenerated = useCallback((imageUrl: string) => {
@@ -390,6 +545,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
             title="Horizontal Rule"
           >
             <Minus className="w-4 h-4" />
+          </ToolbarButton>
+          <ToolbarButton onClick={insertVideoEmbed} title="Insert Video (YouTube/Vimeo)">
+            <VideoIcon className="w-4 h-4" />
           </ToolbarButton>
 
           {/* Table Dropdown */}
@@ -572,7 +730,9 @@ export default function TipTapEditor({ content, onChange, placeholder }: TipTapE
       />
 
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <MediaPlanContext.Provider value={{ mediaPlan, suggestedLinks }}>
+        <EditorContent editor={editor} />
+      </MediaPlanContext.Provider>
 
       {/* Bubble Menu */}
       {editor && (

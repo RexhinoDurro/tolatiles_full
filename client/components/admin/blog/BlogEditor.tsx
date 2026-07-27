@@ -33,6 +33,8 @@ import FAQEditor from './FAQEditor';
 import AIAssistant from './AIAssistant';
 import AIImageGenerator from './AIImageGenerator';
 import InlineCalendarPicker from './InlineCalendarPicker';
+import MediaPlanEditor from './MediaPlanEditor';
+import SuggestedLinksPanel from './SuggestedLinksPanel';
 
 interface BlogEditorProps {
   post?: BlogPost;
@@ -45,9 +47,13 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'faq'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'faq' | 'media'>('content');
   const [slugWarning, setSlugWarning] = useState(false);
   const [originalSlug, setOriginalSlug] = useState(post?.slug || '');
+  // Tracks media_plan/suggested_links resolve/accept/reject actions, which
+  // mutate the post server-side outside the normal save flow (see
+  // serializers.py -- those two fields are deliberately read-only there).
+  const [currentPost, setCurrentPost] = useState<BlogPost | undefined>(post);
 
   // Form state
   const [title, setTitle] = useState(post?.title || '');
@@ -81,6 +87,11 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
   const [featuredImageAlt, setFeaturedImageAlt] = useState(post?.featured_image_alt || '');
   const [showFeaturedImageAI, setShowFeaturedImageAI] = useState(false);
 
+  const handlePostUpdated = (updated: BlogPost) => {
+    setCurrentPost(updated);
+    setContent(updated.content); // a marker in `content` was just replaced server-side
+  };
+
   useEffect(() => {
     loadCategories();
   }, []);
@@ -93,6 +104,22 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
       console.error('Failed to load categories:', err);
     }
   };
+
+  // Each category is scoped to a curated set of content types (empty
+  // content_types = applies to all four, used for cross-cutting tags like
+  // city names). Only offer categories valid for the currently selected
+  // Content Type, so writers can't tag a Guide with a Blog-only category
+  // (or invent one-off categories that fragment archive pages).
+  const availableCategories = categories.filter(
+    (category) => !category.content_types?.length || category.content_types.includes(contentType)
+  );
+
+  useEffect(() => {
+    if (categories.length === 0) return; // categories haven't loaded yet — nothing to prune against
+    const availableIds = new Set(availableCategories.map((c) => c.id));
+    setSelectedCategories((prev) => prev.filter((id) => availableIds.has(id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentType, categories]);
 
   const handleFeaturedImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -425,6 +452,16 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 >
                   FAQ Schema
                 </button>
+                <button
+                  onClick={() => setActiveTab('media')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium ${
+                    activeTab === 'media'
+                      ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Media &amp; Links
+                </button>
               </div>
 
               <div className="p-6">
@@ -434,6 +471,8 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                       content={content}
                       onChange={setContent}
                       placeholder="Start writing your blog post..."
+                      mediaPlan={currentPost?.media_plan}
+                      suggestedLinks={currentPost?.suggested_links}
                     />
 
                     {/* Excerpt */}
@@ -479,6 +518,27 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                     hasFaqSchema={hasFaqSchema}
                     onToggleSchema={setHasFaqSchema}
                   />
+                )}
+
+                {activeTab === 'media' && (
+                  <div className="space-y-8">
+                    {!currentPost ? (
+                      <p className="text-sm text-gray-500 text-center py-8">
+                        Save this post first — media/link planning applies to existing posts.
+                      </p>
+                    ) : (
+                      <>
+                        <div>
+                          <h3 className="font-medium text-gray-900 mb-3">Media Plan</h3>
+                          <MediaPlanEditor post={currentPost} onPostUpdated={handlePostUpdated} />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 mb-3">Suggested Internal Links</h3>
+                          <SuggestedLinksPanel post={currentPost} onPostUpdated={handlePostUpdated} />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -624,10 +684,13 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 Categories
               </h3>
               <div className="space-y-2">
-                {categories.length === 0 ? (
-                  <p className="text-sm text-gray-500">No categories available</p>
+                {availableCategories.length === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    No categories available for {CONTENT_TYPE_LABELS[contentType]} yet — add one
+                    under Blog Categories and scope it to this content type.
+                  </p>
                 ) : (
-                  categories.map((category) => (
+                  availableCategories.map((category) => (
                     <label
                       key={category.id}
                       className="flex items-center gap-2 cursor-pointer"

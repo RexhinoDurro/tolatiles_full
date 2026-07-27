@@ -36,6 +36,7 @@ interface CalendarEvent {
   slug: string;
   categories: { id: number; name: string; slug: string }[];
   allDay: boolean;
+  hasUnresolvedMedia: boolean;
 }
 
 interface BlogCalendarProps {
@@ -74,6 +75,7 @@ export default function BlogCalendar({
           slug: post.slug,
           categories: post.categories,
           allDay: true,
+          hasUnresolvedMedia: post.has_unresolved_media,
         };
       });
   }, [posts, statusFilter]);

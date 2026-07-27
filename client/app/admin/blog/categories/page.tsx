@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, Edit, Trash2, X, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { BlogCategory } from '@/types/api';
+import { CONTENT_TYPES, CONTENT_TYPE_LABELS, type ContentType } from '@/lib/contentTypes';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function BlogCategoriesPage() {
@@ -20,6 +21,7 @@ export default function BlogCategoriesPage() {
   const [formName, setFormName] = useState('');
   const [formSlug, setFormSlug] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formContentTypes, setFormContentTypes] = useState<ContentType[]>([]);
 
   useEffect(() => {
     loadCategories();
@@ -43,11 +45,13 @@ export default function BlogCategoriesPage() {
       setFormName(category.name);
       setFormSlug(category.slug);
       setFormDescription(category.description);
+      setFormContentTypes(category.content_types || []);
     } else {
       setEditingCategory(null);
       setFormName('');
       setFormSlug('');
       setFormDescription('');
+      setFormContentTypes([]);
     }
     setError(null);
     setIsModalOpen(true);
@@ -59,7 +63,14 @@ export default function BlogCategoriesPage() {
     setFormName('');
     setFormSlug('');
     setFormDescription('');
+    setFormContentTypes([]);
     setError(null);
+  };
+
+  const toggleFormContentType = (type: ContentType) => {
+    setFormContentTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
   };
 
   const generateSlug = (name: string) => {
@@ -98,6 +109,7 @@ export default function BlogCategoriesPage() {
           name: formName.trim(),
           slug: formSlug.trim(),
           description: formDescription.trim(),
+          content_types: formContentTypes,
         });
         setCategories(categories.map((c) => (c.id === updated.id ? updated : c)));
       } else {
@@ -105,6 +117,7 @@ export default function BlogCategoriesPage() {
           name: formName.trim(),
           slug: formSlug.trim(),
           description: formDescription.trim(),
+          content_types: formContentTypes,
         });
         setCategories([...categories, created]);
       }
@@ -178,6 +191,9 @@ export default function BlogCategoriesPage() {
                     Slug
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Content Types
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Posts
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -200,6 +216,11 @@ export default function BlogCategoriesPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       /blog/category/{category.slug}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {category.content_types && category.content_types.length > 0
+                        ? category.content_types.map((ct) => CONTENT_TYPE_LABELS[ct]).join(', ')
+                        : 'All types'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {category.post_count || 0} posts
@@ -294,6 +315,29 @@ export default function BlogCategoriesPage() {
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content Types
+                  </label>
+                  <div className="space-y-1.5">
+                    {CONTENT_TYPES.map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formContentTypes.includes(type)}
+                          onChange={() => toggleFormContentType(type)}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">{CONTENT_TYPE_LABELS[type]}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Leave all unchecked to apply this category to every content type (use that for
+                    cross-cutting tags like city names).
+                  </p>
                 </div>
               </div>
 

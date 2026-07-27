@@ -938,6 +938,7 @@ export interface BlogCategory {
   name: string;
   slug: string;
   description: string;
+  content_types: ContentType[];
   post_count?: number;
   created_at: string;
   updated_at: string;
@@ -953,11 +954,59 @@ export interface BlogCategoryCreate {
   name: string;
   slug?: string;
   description?: string;
+  content_types?: ContentType[];
 }
 
 export interface FAQItem {
   question: string;
   answer: string;
+}
+
+export type MediaPlaceholderType = 'image' | 'video';
+export type MediaPlaceholderStatus = 'unresolved' | 'resolved' | 'skipped';
+// 'web' candidates are found by an agent/session with real web access
+// (Claude searching + vetting) and attached via the add_web_image_candidate
+// management command -- there is no live search API, so this app never
+// queries a third-party image-search service on its own.
+export type MediaResolvedSource = 'ai' | 'gallery' | 'web' | 'manual_url';
+
+export interface MediaCandidate {
+  thumbnail_url: string;
+  full_url: string;
+  credit?: string;
+  source_page_url?: string;
+  id?: number; // present for gallery candidates
+  title?: string; // present for gallery candidates
+}
+
+export interface MediaPlaceholderCandidates {
+  ai: MediaCandidate[];
+  gallery: MediaCandidate[];
+  web: MediaCandidate[];
+}
+
+export interface MediaPlanEntry {
+  id: number;
+  type: MediaPlaceholderType;
+  placement_hint: string;
+  prompt: string;
+  alt_text?: string;
+  status: MediaPlaceholderStatus;
+  resolved_source: MediaResolvedSource | null;
+  resolved_url: string | null;
+  candidates?: MediaPlaceholderCandidates;
+}
+
+export type SuggestedLinkStatus = 'suggested' | 'accepted' | 'rejected';
+
+export interface SuggestedLinkEntry {
+  id: number;
+  anchor_text_hint: string;
+  target_slug: string;
+  target_title: string;
+  target_content_type: ContentType;
+  score: number;
+  status: SuggestedLinkStatus;
 }
 
 export interface BlogPost {
@@ -980,6 +1029,8 @@ export interface BlogPost {
   content_type: ContentType;
   related_service_page: string;
   related_link_auto_appended: boolean;
+  media_plan: MediaPlanEntry[];
+  suggested_links: SuggestedLinkEntry[];
   status: BlogPostStatus;
   publish_date: string | null;
   scheduled_publish_date: string | null;
@@ -1160,6 +1211,7 @@ export interface CalendarBlogPost {
   created_at: string;
   categories: BlogCategoryMinimal[];
   display_date: string;
+  has_unresolved_media: boolean;
 }
 
 export interface QuickDraftCreate {

@@ -58,6 +58,7 @@ import type {
   AIImageOptionsResponse,
   CalendarBlogPost,
   QuickDraftCreate,
+  MediaResolvedSource,
   Estimate,
   EstimateListItem,
   EstimateCreate,
@@ -1047,7 +1048,7 @@ class ApiClient {
     return this.fetch<BlogCategory>(`/blog/categories/${slug}/`);
   }
 
-  async createBlogCategory(data: { name: string; slug?: string; description?: string }): Promise<BlogCategory> {
+  async createBlogCategory(data: { name: string; slug?: string; description?: string; content_types?: ContentType[] }): Promise<BlogCategory> {
     return this.fetch<BlogCategory>('/blog/categories/', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -1217,6 +1218,32 @@ class ApiClient {
 
   async getAIImageOptions(): Promise<AIImageOptionsResponse> {
     return this.fetch<AIImageOptionsResponse>('/blog/posts/ai_image_options/');
+  }
+
+  async resolveMediaPlaceholder(
+    slug: string,
+    data: { media_id: number; resolved_source?: MediaResolvedSource; resolved_url?: string; status?: 'skipped' }
+  ): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/resolve_media_placeholder/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resolveInternalLink(
+    slug: string,
+    data: { link_id: number; action: 'accept' | 'reject' }
+  ): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/resolve_internal_link/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async refreshInternalLinkSuggestions(slug: string): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/refresh_internal_link_suggestions/`, {
+      method: 'POST',
+    });
   }
 
   // ============ Blog Calendar ============

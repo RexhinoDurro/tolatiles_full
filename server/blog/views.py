@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 from django.conf import settings
 from django.db.models import Q
@@ -11,6 +12,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 from .models import BlogPost, BlogCategory
+
+# Route prefix per content type for constructing internal cross-link hrefs --
+# must stay in sync with CONTENT_TYPE_ROUTE_PREFIX in client/lib/contentTypes.ts
+# (same duplication precedent as RELATED_SERVICE_PAGE_CHOICES's own comment
+# in models.py, since there's no shared source of truth across Python/TS).
+CONTENT_TYPE_ROUTE_PREFIX = {
+    'blog': 'blog',
+    'guide': 'guides',
+    'design_idea': 'design-ideas',
+    'story': 'stories',
+}
 from .serializers import (
     BlogCategorySerializer,
     BlogPostListSerializer,
@@ -434,3 +446,141 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             BlogPostCalendarSerializer(post).data,
             status=status.HTTP_201_CREATED
         )
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def resolve_media_placeholder(self, request, slug=None):
+        """Resolve (pick a candidate) or skip one media_plan placeholder,
+        replacing its <span data-media-marker="N"> in `content` with the
+        real <img>/<iframe> markup (or removing it entirely if skipped).
+        Any image URL that isn't already ours gets downloaded and saved
+        locally first -- never hotlinked (video URLs are embedded directly,
+        since those point at YouTube/Vimeo's own player, not a stray site)."""
+        post = self.get_object()
+        media_id = request.data.get('media_id')
+        if media_id is None:
+            return Response({'error': 'media_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        media_id = str(media_id)
+
+        media_plan = post.media_plan or []
+        entry = next((item for item in media_plan if str(item.get('id')) == media_id), None)
+        if entry is None:
+            return Response(
+                {'error': f'No media_plan entry with id {media_id}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        marker_pattern = r'<span[^>]*data-media-marker="' + re.escape(media_id) + r'"[^>]*>\s*</span>'
+
+        if request.data.get('status') == 'skipped':
+            entry['status'] = 'skipped'
+            entry['resolved_source'] = None
+            entry['resolved_url'] = None
+            post.content = re.sub(marker_pattern, '', post.content or '', count=1)
+        else:
+            resolved_source = request.data.get('resolved_source')
+            resolved_url = request.data.get('resolved_url')
+            if not resolved_source or not resolved_url:
+                return Response(
+                    {'error': 'resolved_source and resolved_url are required unless status is "skipped"'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Never hotlink an externally-hosted image: 'ai'/'gallery' URLs are
+            # already local (produced by our own services), but anything else
+            # (a human pasting a raw URL, or a 'web' candidate that somehow
+            # wasn't pre-downloaded) gets downloaded and saved here so the
+            # blog always ends up serving its own copy.
+            if entry.get('type') == 'image' and not resolved_url.startswith(settings.MEDIA_URL):
+                from .services import download_and_save_image, WebImageDownloadError
+                try:
+                    saved = download_and_save_image(resolved_url)
+                except WebImageDownloadError as e:
+                    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                resolved_url = saved['url']
+
+            entry['status'] = 'resolved'
+            entry['resolved_source'] = resolved_source
+            entry['resolved_url'] = resolved_url
+
+            if entry.get('type') == 'video':
+                replacement = (
+                    '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">'
+                    f'<iframe src="{resolved_url}" style="position:absolute;top:0;left:0;width:100%;height:100%;" '
+                    'frameborder="0" allowfullscreen loading="lazy"></iframe></div>'
+                )
+            else:
+                alt_text = entry.get('alt_text', '') or ''
+                replacement = f'<img src="{resolved_url}" alt="{alt_text}" loading="lazy" />'
+
+            post.content = re.sub(marker_pattern, replacement, post.content or '', count=1)
+
+        post.media_plan = media_plan
+        post.save(update_fields=['content', 'media_plan'])
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def resolve_internal_link(self, request, slug=None):
+        """Accept or reject one suggested_links entry. Accepting replaces its
+        <span data-link-marker="N"> with a real <a> tag; rejecting strips the
+        marker with no link."""
+        post = self.get_object()
+        link_id = request.data.get('link_id')
+        link_action = request.data.get('action')
+        if link_id is None or link_action not in ('accept', 'reject'):
+            return Response(
+                {'error': 'link_id and action ("accept" or "reject") are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        link_id = str(link_id)
+
+        suggested_links = post.suggested_links or []
+        entry = next((item for item in suggested_links if str(item.get('id')) == link_id), None)
+        if entry is None:
+            return Response(
+                {'error': f'No suggested_links entry with id {link_id}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        marker_pattern = r'<span[^>]*data-link-marker="' + re.escape(link_id) + r'"[^>]*>\s*</span>'
+
+        if link_action == 'accept':
+            entry['status'] = 'accepted'
+            route_prefix = CONTENT_TYPE_ROUTE_PREFIX.get(entry.get('target_content_type', 'blog'), 'blog')
+            anchor_text = entry.get('anchor_text_hint') or entry.get('target_title', '')
+            replacement = f'<a href="/{route_prefix}/{entry["target_slug"]}">{anchor_text}</a>'
+            post.content = re.sub(marker_pattern, replacement, post.content or '', count=1)
+        else:
+            entry['status'] = 'rejected'
+            post.content = re.sub(marker_pattern, '', post.content or '', count=1)
+
+        post.suggested_links = suggested_links
+        post.save(update_fields=['content', 'suggested_links'])
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def refresh_internal_link_suggestions(self, request, slug=None):
+        """Re-run internal-link matching against the current post corpus.
+        Already-resolved (accepted/rejected) entries and their markers are
+        left untouched; only entries still 'suggested' get replaced -- useful
+        for a post imported early in the content calendar to pick up better
+        matches once more posts exist later."""
+        from .services import suggest_internal_links, insert_link_markers
+
+        post = self.get_object()
+        existing = post.suggested_links or []
+        kept = [item for item in existing if item.get('status') != 'suggested']
+
+        content = post.content or ''
+        for item in existing:
+            if item.get('status') == 'suggested':
+                pattern = r'<span[^>]*data-link-marker="' + re.escape(str(item.get('id'))) + r'"[^>]*>\s*</span>'
+                content = re.sub(pattern, '', content)
+
+        next_id = max([item.get('id', 0) for item in kept], default=0) + 1
+        new_suggestions = suggest_internal_links(post)
+        content, new_links = insert_link_markers(content, new_suggestions, start_id=next_id)
+
+        post.content = content
+        post.suggested_links = kept + new_links
+        post.save(update_fields=['content', 'suggested_links'])
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)

@@ -15,7 +15,7 @@ import {
   startOfWeek,
   endOfWeek,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar, TriangleAlert } from 'lucide-react';
 import type { CalendarBlogPost, BlogPostStatus } from '@/types/api';
 import { statusColors } from './BlogCalendarEvent';
 
@@ -301,6 +301,12 @@ export default function MobileCalendar({
                             <span className="text-xs text-gray-500">
                               {post.categories[0].name}
                             </span>
+                          )}
+                          {post.has_unresolved_media && (
+                            <TriangleAlert
+                              className="w-3.5 h-3.5 text-amber-600 flex-shrink-0"
+                              aria-label="Needs attention: unresolved media/link placeholders"
+                            />
                           )}
                         </div>
                       </div>

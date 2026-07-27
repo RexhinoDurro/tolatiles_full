@@ -3,6 +3,7 @@ from rest_framework.decorators import action, parser_classes as parser_classes_d
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from PIL import Image
 import os
@@ -44,8 +45,9 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
 
     queryset = GalleryImage.objects.all()
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = ['category__name', 'is_active']
+    search_fields = ['title', 'description']
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:

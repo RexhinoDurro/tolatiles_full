@@ -1,5 +1,6 @@
 'use client';
 
+import { TriangleAlert } from 'lucide-react';
 import type { BlogPostStatus } from '@/types/api';
 import type { EventProps } from 'react-big-calendar';
 
@@ -7,6 +8,7 @@ interface CalendarEvent {
   title: string;
   status: BlogPostStatus;
   categories: { id: number; name: string; slug: string }[];
+  hasUnresolvedMedia?: boolean;
 }
 
 const statusColors = {
@@ -34,6 +36,12 @@ export default function BlogCalendarEvent({ event }: EventProps<object>) {
           style={{ backgroundColor: colors.dot }}
         />
         <span className="truncate">{calendarEvent.title}</span>
+        {calendarEvent.hasUnresolvedMedia && (
+          <TriangleAlert
+            className="w-3 h-3 flex-shrink-0 text-amber-600"
+            aria-label="Needs attention: unresolved media/link placeholders"
+          />
+        )}
       </div>
       {calendarEvent.categories.length > 0 && (
         <div className="text-[10px] opacity-75 truncate mt-0.5">

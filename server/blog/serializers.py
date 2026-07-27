@@ -30,7 +30,7 @@ class BlogCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BlogCategory
-        fields = ['id', 'name', 'slug', 'description', 'post_count', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'slug', 'description', 'content_types', 'post_count', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_post_count(self, obj):
@@ -85,11 +85,21 @@ class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.Mo
             'has_faq_schema', 'faq_data',
             'categories', 'category_ids', 'location', 'content_type',
             'related_service_page', 'related_link_auto_appended',
+            'media_plan', 'suggested_links',
             'status', 'publish_date', 'scheduled_publish_date',
             'reading_time', 'effective_meta_title', 'effective_meta_description',
             'created_at', 'last_updated'
         ]
-        read_only_fields = ['id', 'created_at', 'last_updated', 'reading_time', 'related_link_auto_appended']
+        # media_plan/suggested_links are read-only here deliberately: they're
+        # only ever mutated through the dedicated resolve_media_placeholder/
+        # resolve_internal_link/refresh_internal_link_suggestions actions,
+        # never through the generic save/update flow -- avoids the admin's
+        # client-side form state (which doesn't track server-computed
+        # candidates) ever silently overwriting them with stale data.
+        read_only_fields = [
+            'id', 'created_at', 'last_updated', 'reading_time',
+            'related_link_auto_appended', 'media_plan', 'suggested_links',
+        ]
 
     def validate_slug(self, value):
         """Ensure slug is unique, excluding current instance."""
@@ -237,6 +247,7 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
     """Lightweight serializer for calendar view."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     display_date = serializers.SerializerMethodField()
+    has_unresolved_media = serializers.ReadOnlyField()
 
     class Meta:
         model = BlogPost
@@ -244,7 +255,7 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'status', 'location', 'content_type',
             'related_service_page', 'related_link_auto_appended',
             'scheduled_publish_date', 'publish_date', 'created_at',
-            'categories', 'display_date'
+            'categories', 'display_date', 'has_unresolved_media'
         ]
 
     def get_display_date(self, obj):
