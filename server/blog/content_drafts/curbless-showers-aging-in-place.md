@@ -36,7 +36,7 @@ Draft from [[Blog Ideas]], part of [[Content & SEO System]].
 [
   {"id": 1, "type": "image", "placement_hint": "after the intro paragraph", "prompt": "Bright, modern curbless walk-in shower with large-format porcelain tile flowing seamlessly from the bathroom floor into the shower, linear drain along the back wall, minimalist glass panel, natural light, no people", "alt_text": "Modern curbless walk-in shower with seamless tile floor"},
   {"id": 2, "type": "image", "placement_hint": "in the 'engineering challenges' section, near subfloor modification", "prompt": "Cutaway or in-progress construction photo showing a recessed concrete slab with a linear drain and sloped mortar bed before tile is set, illustrating curbless shower subfloor prep", "alt_text": "Recessed and sloped subfloor prep for a curbless shower"},
-  {"id": 3, "type": "video", "placement_hint": "after the 'designing your curbless shower' section"}
+  {"id": 3, "type": "video", "placement_hint": "after the 'designing your curbless shower' section", "prompt": "Short walkthrough video of a finished curbless shower installation, showing the seamless floor-to-shower transition, linear drain, and barrier-free entry"}
 ]
 ```
 

@@ -40,7 +40,7 @@ Draft from [[Blog Ideas]], part of [[Content & SEO System]]. Written to fill hig
 [
   {"id": 1, "type": "image", "placement_hint": "after the intro paragraph", "prompt": "Overhead shot of porcelain, ceramic, and natural stone tile samples arranged side by side on a design table, hands comparing swatches, natural light, editorial style", "alt_text": "Porcelain, ceramic, and natural stone tile samples being compared"},
   {"id": 2, "type": "image", "placement_hint": "after the 'which material fits which room' table", "prompt": "Bright Florida primary bathroom with large-format porcelain floor and shower walls, natural stone accent niche, clean modern styling", "alt_text": "Florida bathroom mixing porcelain floor with a natural stone accent"},
-  {"id": 3, "type": "video", "placement_hint": "after the 'our honest take' closing section"}
+  {"id": 3, "type": "video", "placement_hint": "after the 'our honest take' closing section", "prompt": "Short video of the Tola Tiles team comparing porcelain, ceramic, and natural stone samples side by side, giving a quick honest take on which material suits which room"}
 ]
 ```
 

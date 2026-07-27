@@ -47,8 +47,6 @@ Draft from [[Blog Ideas]], part of [[Content & SEO System]]. Written to fill hig
 **Web image candidates found while drafting** (verified free-license via Pexels, not yet downloaded into the site — run after `import_content_drafts`):
 - Media id 2 (tile-setting close-up): [Construction worker laying tile](https://www.pexels.com/photo/construction-worker-laying-tile-in-renovation-project-29181494/), photo by Sergei Starostin, Pexels License. `python manage.py add_web_image_candidate bathroom-shower-tile-installation-timeline 2 https://images.pexels.com/photos/29181494/pexels-photo-29181494.jpeg --credit "Photo by Sergei Starostin / Pexels" --source-page-url "https://www.pexels.com/photo/construction-worker-laying-tile-in-renovation-project-29181494/"`
 
-* **Scheduled Publish Date:** (not set — leave as draft for editorial review)
-
 ---
 
 ## HTML Content
