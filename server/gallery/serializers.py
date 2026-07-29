@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import Category, GalleryImage
 
@@ -29,11 +30,13 @@ class GalleryImageSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
-        elif obj.image:
+        if not obj.image:
+            return None
+        if not request:
             return obj.image.url
-        return None
+        if request.get_host().split(':')[0] == 'backend':
+            return f"{settings.PUBLIC_MEDIA_BASE_URL}{obj.image.url}"
+        return request.build_absolute_uri(obj.image.url)
 
 
 class GalleryImageCreateSerializer(serializers.ModelSerializer):

@@ -189,7 +189,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'authentication.backends.OptionalJWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
@@ -311,6 +311,13 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Frontend URL for redirects
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://tolatiles.com')
+
+# Public origin for media URLs returned by the API. Server-side fetches from the
+# Next.js frontend hit this backend directly at http://backend:8000 (see 'backend'
+# in ALLOWED_HOSTS above), bypassing nginx to dodge its public rate limiter. If we
+# let request.build_absolute_uri() run in that case, it stamps the internal Docker
+# hostname into image URLs served to the browser, which can't resolve it.
+PUBLIC_MEDIA_BASE_URL = os.environ.get('PUBLIC_MEDIA_BASE_URL', 'https://tolatiles.com')
 
 
 # Google OAuth Settings (Search Console)
