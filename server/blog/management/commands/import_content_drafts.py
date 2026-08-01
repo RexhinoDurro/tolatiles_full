@@ -21,7 +21,10 @@ web-image search -- "web" candidates only ever come from the
 add_web_image_candidate management command, run after a real web image has
 actually been found and vetted (by an agent/session with real web access,
 not a live third-party search API). Already-resolved/skipped placeholders
-are left untouched on re-import (never re-fetched, never overwritten).
+are left untouched on re-import (never re-fetched, never overwritten). The
+featured image goes through the exact same candidate-fetch/never-overwrite
+pipeline via the optional **Featured Image (JSON):** block -- see
+featured_image_plan on BlogPost and resolve_featured_image on the API side.
 Internal link suggestions are computed once, only when a post has none yet
 -- re-run via the refresh_internal_link_suggestions admin action to pick up
 new matches later.
@@ -45,6 +48,7 @@ BULLET_RE = re.compile(r'^\*\s+\*\*(.+?):\*\*\s*(.*)$', re.MULTILINE)
 BACKTICK_RE = re.compile(r'`([^`]+)`')
 FAQ_JSON_RE = re.compile(r'\*\*FAQ Data \(JSON\):\*\*\s*```json\s*(.*?)```', re.DOTALL)
 MEDIA_PLAN_JSON_RE = re.compile(r'\*\*Media Plan \(JSON\):\*\*\s*```json\s*(.*?)```', re.DOTALL)
+FEATURED_IMAGE_JSON_RE = re.compile(r'\*\*Featured Image \(JSON\):\*\*\s*```json\s*(.*?)```', re.DOTALL)
 HTML_FENCE_RE = re.compile(r'```html\s*(.*)', re.DOTALL)
 MEDIA_MARKER_RE = re.compile(r'data-media-marker="(\d+)"')
 
@@ -102,6 +106,21 @@ def _parse_media_plan(metadata_section):
         if entry['type'] not in ('image', 'video'):
             raise DraftParseError(f'Media Plan entry type must be "image" or "video", got {entry["type"]!r}')
     return entries
+
+
+def _parse_featured_image(metadata_section):
+    """Parse the optional **Featured Image (JSON):** block into
+    {"prompt": str, "alt_text": str}, or None if the field is absent."""
+    match = FEATURED_IMAGE_JSON_RE.search(metadata_section)
+    if not match:
+        return None
+    try:
+        entry = json.loads(match.group(1))
+    except json.JSONDecodeError as e:
+        raise DraftParseError(f'invalid Featured Image JSON: {e}')
+    if not isinstance(entry, dict) or 'prompt' not in entry:
+        raise DraftParseError(f'Featured Image entry needs at least a "prompt", got {entry!r}')
+    return entry
 
 
 def parse_draft(text):
@@ -195,6 +214,8 @@ def parse_draft(text):
     if not title:
         raise DraftParseError('missing Title')
 
+    featured_image_raw = _parse_featured_image(metadata_section)
+
     return {
         'title': title,
         'content_type': content_type,
@@ -210,6 +231,7 @@ def parse_draft(text):
         'faq_data': faq_data,
         'content': content_html,
         'media_plan_raw': media_plan_raw,
+        'featured_image_raw': featured_image_raw,
         'scheduled_publish_date': scheduled_publish_date,
     }
 
@@ -243,6 +265,25 @@ def _merge_media_plan(existing_entries, parsed_entries, stdout):
             new_entry['candidates'] = fetch_candidates_for_placeholder(entry['prompt'])
         merged.append(new_entry)
     return merged
+
+
+def _merge_featured_image_plan(existing_plan, parsed_entry, stdout):
+    """Same resolved/skipped-preservation rule as _merge_media_plan, but for
+    the single featured_image_plan slot: never re-fetch candidates for a
+    decision that's already been made, and leave an absent Featured Image
+    field alone entirely (some drafts may not specify one)."""
+    if parsed_entry is None:
+        return existing_plan or {}
+    if existing_plan and existing_plan.get('status') in ('resolved', 'skipped'):
+        return existing_plan
+
+    stdout.write(f'    fetching candidates for featured image: "{parsed_entry["prompt"][:60]}"...')
+    return {
+        'prompt': parsed_entry['prompt'],
+        'status': 'unresolved',
+        'resolved_source': None,
+        'candidates': fetch_candidates_for_placeholder(parsed_entry['prompt']),
+    }
 
 
 class Command(BaseCommand):
@@ -334,6 +375,13 @@ class Command(BaseCommand):
                     post.media_plan = _merge_media_plan(
                         existing.media_plan if existing else [], parsed['media_plan_raw'], self.stdout
                     )
+                    post.featured_image_plan = _merge_featured_image_plan(
+                        existing.featured_image_plan if existing else {}, parsed['featured_image_raw'], self.stdout
+                    )
+                    if parsed['featured_image_raw'] and not post.featured_image_alt:
+                        alt_text = parsed['featured_image_raw'].get('alt_text', '').strip()
+                        if alt_text:
+                            post.featured_image_alt = alt_text
 
                     # Validate BEFORE writing — catches oversized fields (including
                     # `excerpt`, whose max_length=300 is enforced only here, not by

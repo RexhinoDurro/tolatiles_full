@@ -80,7 +80,7 @@ class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.Mo
         model = BlogPost
         fields = [
             'id', 'title', 'slug', 'content', 'excerpt', 'author_name',
-            'featured_image', 'featured_image_alt',
+            'featured_image', 'featured_image_alt', 'featured_image_plan',
             'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
             'has_faq_schema', 'faq_data',
             'categories', 'category_ids', 'location', 'content_type',
@@ -90,15 +90,17 @@ class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.Mo
             'reading_time', 'effective_meta_title', 'effective_meta_description',
             'created_at', 'last_updated'
         ]
-        # media_plan/suggested_links are read-only here deliberately: they're
-        # only ever mutated through the dedicated resolve_media_placeholder/
-        # resolve_internal_link/refresh_internal_link_suggestions actions,
+        # media_plan/suggested_links/featured_image_plan are read-only here
+        # deliberately: they're only ever mutated through the dedicated
+        # resolve_media_placeholder/resolve_internal_link/
+        # refresh_internal_link_suggestions/resolve_featured_image actions,
         # never through the generic save/update flow -- avoids the admin's
         # client-side form state (which doesn't track server-computed
         # candidates) ever silently overwriting them with stale data.
         read_only_fields = [
             'id', 'created_at', 'last_updated', 'reading_time',
             'related_link_auto_appended', 'media_plan', 'suggested_links',
+            'featured_image_plan',
         ]
 
     def validate_slug(self, value):

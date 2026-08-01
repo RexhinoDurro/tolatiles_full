@@ -188,6 +188,18 @@ class BlogPost(models.Model):
                    'status is "suggested" | "accepted" | "rejected".'
     )
 
+    # Featured image plan: same resolve-through-the-picker flow as a
+    # media_plan image placeholder (see resolve_featured_image), except
+    # there's exactly one of these per post and no <span data-media-marker>
+    # to rewrite in `content` -- resolving just sets `featured_image` itself.
+    featured_image_plan = models.JSONField(
+        blank=True,
+        null=True,
+        default=dict,
+        help_text='Featured image candidate plan: {"prompt", "status", "resolved_source", "resolved_url", '
+                   '"candidates": {"ai", "gallery", "web"}}. status is "unresolved" | "resolved" | "skipped".'
+    )
+
     # Categories
     categories = models.ManyToManyField(
         BlogCategory,

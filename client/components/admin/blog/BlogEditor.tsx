@@ -8,13 +8,10 @@ import {
   Eye,
   Clock,
   Tag,
-  Image as ImageIcon,
   X,
   AlertTriangle,
   Loader2,
   ChevronDown,
-  Upload,
-  Sparkles,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import type {
@@ -31,7 +28,6 @@ import TipTapEditor from './TipTapEditor';
 import SEOFields from './SEOFields';
 import FAQEditor from './FAQEditor';
 import AIAssistant from './AIAssistant';
-import AIImageGenerator from './AIImageGenerator';
 import InlineCalendarPicker from './InlineCalendarPicker';
 import MediaPlanEditor from './MediaPlanEditor';
 import SuggestedLinksPanel from './SuggestedLinksPanel';
@@ -80,12 +76,7 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
       ? new Date(post.scheduled_publish_date).toISOString().slice(0, 16)
       : ''
   );
-  const [featuredImage, setFeaturedImage] = useState<File | null>(null);
-  const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(
-    post?.featured_image || null
-  );
   const [featuredImageAlt, setFeaturedImageAlt] = useState(post?.featured_image_alt || '');
-  const [showFeaturedImageAI, setShowFeaturedImageAI] = useState(false);
 
   const handlePostUpdated = (updated: BlogPost) => {
     setCurrentPost(updated);
@@ -120,36 +111,6 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
     setSelectedCategories((prev) => prev.filter((id) => availableIds.has(id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentType, categories]);
-
-  const handleFeaturedImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFeaturedImage(file);
-      setFeaturedImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const removeFeaturedImage = () => {
-    setFeaturedImage(null);
-    setFeaturedImagePreview(null);
-  };
-
-  const handleAIFeaturedImage = async (imageUrl: string) => {
-    try {
-      // Fetch the AI-generated image and convert to File
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const file = new File([blob], 'ai_featured_image.png', { type: 'image/png' });
-
-      // Set as featured image
-      setFeaturedImage(file);
-      // Use blob URL for preview to avoid Next.js Image optimization issues
-      setFeaturedImagePreview(URL.createObjectURL(blob));
-      setShowFeaturedImageAI(false);
-    } catch (err) {
-      console.error('Failed to set AI image as featured:', err);
-    }
-  };
 
   const handleSlugChange = (newSlug: string) => {
     if (!isNew && originalSlug && newSlug !== originalSlug) {
@@ -207,9 +168,6 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
         scheduled_publish_date: finalStatus === 'scheduled' ? scheduledDate : null,
       };
 
-      if (featuredImage) {
-        postData.featured_image = featuredImage;
-      }
       if (featuredImageAlt) {
         postData.featured_image_alt = featuredImageAlt;
       }
@@ -546,65 +504,37 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
 
           {/* Right Column - Settings */}
           <div className="space-y-6">
-            {/* Featured Image */}
+            {/* Featured Image -- resolved via the Media & Links tab's picker
+                (same AI/Gallery/Web/Paste URL flow as any media_plan image
+                placeholder); this is a read-only preview that updates as
+                soon as currentPost refreshes from that action. */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="font-medium text-gray-900 mb-4">Featured Image</h3>
-              {featuredImagePreview ? (
-                <div className="relative">
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src={featuredImagePreview}
-                      alt={featuredImageAlt || 'Featured image'}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <button
-                    onClick={removeFeaturedImage}
-                    className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <input
-                    type="text"
-                    value={featuredImageAlt}
-                    onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                    placeholder="Alt text for image"
-                    className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              {currentPost?.featured_image ? (
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src={currentPost.featured_image}
+                    alt={currentPost.featured_image_alt || 'Featured image'}
+                    fill
+                    className="object-cover"
                   />
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {/* Upload option */}
-                  <label className="flex flex-col items-center justify-center w-full aspect-video border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-colors">
-                    <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                    <span className="text-sm text-gray-600">Click to upload</span>
-                    <span className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFeaturedImageChange}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {/* Divider */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 border-t border-gray-300" />
-                    <span className="text-xs text-gray-400">or</span>
-                    <div className="flex-1 border-t border-gray-300" />
-                  </div>
-
-                  {/* AI Generate button */}
-                  <button
-                    onClick={() => setShowFeaturedImageAI(true)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 font-medium transition-all"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Generate with AI
-                  </button>
+                <div className="aspect-video rounded-lg bg-gray-50 border border-dashed border-gray-300 flex items-center justify-center px-4 text-center">
+                  <p className="text-sm text-gray-500">
+                    {currentPost
+                      ? 'No featured image yet — resolve one from the Media & Links tab.'
+                      : 'Save this post first, then resolve a featured image from the Media & Links tab.'}
+                  </p>
                 </div>
               )}
+              <input
+                type="text"
+                value={featuredImageAlt}
+                onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                placeholder="Alt text for image"
+                className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
 
             {/* Content Type */}
@@ -757,17 +687,6 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
         onUpdateField={handleAIUpdateField}
       />
 
-      {/* AI Image Generator Modal for Featured Images */}
-      {showFeaturedImageAI && (
-        <AIImageGenerator
-          onClose={() => setShowFeaturedImageAI(false)}
-          onImageGenerated={handleAIFeaturedImage}
-          currentContent={title + ' ' + content}
-          defaultAspectRatio="16:9"
-          insertButtonText="Use as Featured Image"
-          showAspectRatioSelector={false}
-        />
-      )}
     </div>
   );
 }

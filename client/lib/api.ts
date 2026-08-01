@@ -1230,6 +1230,16 @@ class ApiClient {
     });
   }
 
+  async resolveFeaturedImage(
+    slug: string,
+    data: { resolved_source?: MediaResolvedSource; resolved_url?: string; status?: 'skipped' }
+  ): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/resolve_featured_image/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async resolveInternalLink(
     slug: string,
     data: { link_id: number; action: 'accept' | 'reject' }

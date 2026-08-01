@@ -2,6 +2,7 @@ import os
 import re
 import uuid
 from django.conf import settings
+from django.core.files import File
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from rest_framework import viewsets, status
@@ -524,6 +525,59 @@ class BlogPostViewSet(viewsets.ModelViewSet):
 
         post.media_plan = media_plan
         post.save(update_fields=['content', 'media_plan'])
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def resolve_featured_image(self, request, slug=None):
+        """Resolve (pick a candidate) or skip the post's featured image --
+        the same picker/candidate flow as resolve_media_placeholder, but
+        there's exactly one of these per post and no <span data-media-marker>
+        in `content` to rewrite; resolving just sets `featured_image` itself."""
+        post = self.get_object()
+        plan = post.featured_image_plan or {}
+
+        if request.data.get('status') == 'skipped':
+            plan['status'] = 'skipped'
+            plan['resolved_source'] = None
+            plan['resolved_url'] = None
+            post.featured_image_plan = plan
+            post.save(update_fields=['featured_image_plan'])
+            return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+        resolved_source = request.data.get('resolved_source')
+        resolved_url = request.data.get('resolved_url')
+        if not resolved_source or not resolved_url:
+            return Response(
+                {'error': 'resolved_source and resolved_url are required unless status is "skipped"'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Same never-hotlink rule as resolve_media_placeholder: anything not
+        # already ours gets downloaded and saved locally first.
+        if not resolved_url.startswith(settings.MEDIA_URL):
+            from .services import download_and_save_image, WebImageDownloadError
+            try:
+                saved = download_and_save_image(resolved_url)
+            except WebImageDownloadError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            resolved_url = saved['url']
+
+        # featured_image is an ImageField (a real file), not a URL string
+        # embedded in `content` -- open the local copy we just resolved to
+        # and assign it, reusing _process_featured_image for the existing
+        # WebP conversion + chmod pipeline rather than duplicating it.
+        relative_path = resolved_url[len(settings.MEDIA_URL):]
+        local_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+        with open(local_path, 'rb') as f:
+            post.featured_image.save(os.path.basename(local_path), File(f), save=False)
+
+        plan['status'] = 'resolved'
+        plan['resolved_source'] = resolved_source
+        plan['resolved_url'] = resolved_url
+        post.featured_image_plan = plan
+        post.save(update_fields=['featured_image', 'featured_image_plan'])
+        self._process_featured_image(post)
+
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])

@@ -997,6 +997,17 @@ export interface MediaPlanEntry {
   candidates?: MediaPlaceholderCandidates;
 }
 
+// Same resolve-through-the-picker shape as a MediaPlanEntry, minus id/type/
+// placement_hint/alt_text -- there's exactly one of these per post and it's
+// always an image (see resolve_featured_image on BlogPostViewSet).
+export interface FeaturedImagePlan {
+  prompt?: string;
+  status?: MediaPlaceholderStatus;
+  resolved_source?: MediaResolvedSource | null;
+  resolved_url?: string | null;
+  candidates?: MediaPlaceholderCandidates;
+}
+
 export type SuggestedLinkStatus = 'suggested' | 'accepted' | 'rejected';
 
 export interface SuggestedLinkEntry {
@@ -1018,6 +1029,7 @@ export interface BlogPost {
   author_name: string;
   featured_image: string | null;
   featured_image_alt: string;
+  featured_image_plan: FeaturedImagePlan | null;
   meta_title: string;
   meta_description: string;
   canonical_url: string;
