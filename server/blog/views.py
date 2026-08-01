@@ -2,9 +2,11 @@ import os
 import re
 import uuid
 from django.conf import settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
@@ -105,7 +107,10 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         return queryset.prefetch_related('categories')
 
     def perform_create(self, serializer):
-        instance = serializer.save()
+        try:
+            instance = serializer.save()
+        except DjangoValidationError as e:
+            raise DRFValidationError(e.message_dict if hasattr(e, 'message_dict') else e.messages)
         # Process featured image if provided
         if instance.featured_image:
             self._process_featured_image(instance)
@@ -114,7 +119,10 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         old_instance = self.get_object()
         old_image = old_instance.featured_image.name if old_instance.featured_image else None
 
-        instance = serializer.save()
+        try:
+            instance = serializer.save()
+        except DjangoValidationError as e:
+            raise DRFValidationError(e.message_dict if hasattr(e, 'message_dict') else e.messages)
 
         # Process new featured image if changed
         new_image = instance.featured_image.name if instance.featured_image else None
