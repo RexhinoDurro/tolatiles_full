@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, LogOut, ExternalLink, Settings, X, BarChart3, PenSquare, Briefcase, FolderKanban, HelpCircle, Rocket, BookOpen, Palette, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, LogOut, ExternalLink, Settings, X, BarChart3, PenSquare, Briefcase, FolderKanban, HelpCircle, Rocket } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AdminSidebarProps {
@@ -27,24 +27,12 @@ const navItems = [
     icon: Briefcase,
   },
   {
+    // Guides/Design Ideas/Stories live nested under /admin/blog/... now
+    // (see ADMIN_CONTENT_TYPE_ROUTE_PREFIX) and are reachable via the
+    // ContentTypeTabs nav rendered on each section's list page.
     name: 'Blog',
     href: '/admin/blog',
     icon: PenSquare,
-  },
-  {
-    name: 'Guides',
-    href: '/admin/guides',
-    icon: BookOpen,
-  },
-  {
-    name: 'Design Ideas',
-    href: '/admin/design-ideas',
-    icon: Palette,
-  },
-  {
-    name: 'Stories',
-    href: '/admin/stories',
-    icon: Sparkles,
   },
   {
     name: 'Projects',

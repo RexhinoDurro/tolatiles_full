@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { Plus, Search, Edit, Trash2, Eye, Calendar, Tag, PenSquare, CalendarDays } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { BlogPostListItem, BlogCategory, BlogPostStatus } from '@/types/api';
-import { CONTENT_TYPE_ROUTE_PREFIX, CONTENT_TYPE_LABELS_PLURAL, type ContentType } from '@/lib/contentTypes';
+import { CONTENT_TYPE_ROUTE_PREFIX, ADMIN_CONTENT_TYPE_ROUTE_PREFIX, CONTENT_TYPE_LABELS_PLURAL, type ContentType } from '@/lib/contentTypes';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ContentTypeTabs from './ContentTypeTabs';
 
 const statusColors: Record<BlogPostStatus, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -27,6 +28,7 @@ interface ContentListPageProps {
 
 export default function ContentListPage({ contentType }: ContentListPageProps) {
   const prefix = CONTENT_TYPE_ROUTE_PREFIX[contentType];
+  const adminPrefix = ADMIN_CONTENT_TYPE_ROUTE_PREFIX[contentType];
   const label = CONTENT_TYPE_LABELS_PLURAL[contentType];
 
   const [posts, setPosts] = useState<BlogPostListItem[]>([]);
@@ -90,6 +92,8 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
   return (
     <AdminLayout>
       <div className="p-4 sm:p-6">
+        <ContentTypeTabs active={contentType} />
+
         {/* Header */}
         <div className="flex flex-col gap-4 mb-4 sm:mb-6">
           <div className="flex items-center justify-between">
@@ -107,7 +111,7 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
                 <span className="hidden sm:inline">Calendar</span>
               </Link>
               <Link
-                href={`/admin/${prefix}/new`}
+                href={`/admin/${adminPrefix}/new`}
                 className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
               >
                 <Plus className="w-4 h-4" />
@@ -183,7 +187,7 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
             <p className="text-gray-500 mb-4">No {label.toLowerCase()} found</p>
             <Link
-              href={`/admin/${prefix}/new`}
+              href={`/admin/${adminPrefix}/new`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
@@ -196,7 +200,7 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
             <div className="sm:hidden space-y-3">
               {posts.map((post) => (
                 <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  <Link href={`/admin/${prefix}/${post.id}`} className="block">
+                  <Link href={`/admin/${adminPrefix}/${post.id}`} className="block">
                     <div className="flex gap-3 p-3">
                       {post.featured_image ? (
                         <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
@@ -251,7 +255,7 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
                       </Link>
                     )}
                     <Link
-                      href={`/admin/${prefix}/${post.id}`}
+                      href={`/admin/${adminPrefix}/${post.id}`}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm text-blue-600 hover:bg-blue-50 transition-colors border-r border-gray-100"
                     >
                       <Edit className="w-4 h-4" />
@@ -361,7 +365,7 @@ export default function ContentListPage({ contentType }: ContentListPageProps) {
                               </Link>
                             )}
                             <Link
-                              href={`/admin/${prefix}/${post.id}`}
+                              href={`/admin/${adminPrefix}/${post.id}`}
                               className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit post"
                             >

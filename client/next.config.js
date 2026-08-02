@@ -315,6 +315,42 @@ const nextConfig = {
         destination: '/blog/:path*',
         permanent: true,
       },
+
+      // Admin-only: Guides/Design Ideas/Stories moved from their own
+      // top-level /admin/* routes to nested /admin/blog/* routes (see
+      // ADMIN_CONTENT_TYPE_ROUTE_PREFIX in lib/contentTypes.ts). Not
+      // permanent -- internal tool, no SEO concern, and bookmarks should
+      // keep working without the browser hard-caching the redirect.
+      {
+        source: '/admin/guides/:path*',
+        destination: '/admin/blog/guides/:path*',
+        permanent: false,
+      },
+      {
+        source: '/admin/guides',
+        destination: '/admin/blog/guides',
+        permanent: false,
+      },
+      {
+        source: '/admin/design-ideas/:path*',
+        destination: '/admin/blog/design-ideas/:path*',
+        permanent: false,
+      },
+      {
+        source: '/admin/design-ideas',
+        destination: '/admin/blog/design-ideas',
+        permanent: false,
+      },
+      {
+        source: '/admin/stories/:path*',
+        destination: '/admin/blog/stories/:path*',
+        permanent: false,
+      },
+      {
+        source: '/admin/stories',
+        destination: '/admin/blog/stories',
+        permanent: false,
+      },
     ];
   },
 };

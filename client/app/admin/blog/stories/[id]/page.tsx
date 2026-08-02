@@ -54,7 +54,7 @@ export default function EditStoryPage() {
       <AdminLayout>
         <div className="flex flex-col items-center justify-center h-96">
           <p className="text-red-600 mb-4">{error || 'Post not found'}</p>
-          <a href="/admin/stories" className="text-blue-600 hover:underline">
+          <a href="/admin/blog/stories" className="text-blue-600 hover:underline">
             ← Back to stories list
           </a>
         </div>

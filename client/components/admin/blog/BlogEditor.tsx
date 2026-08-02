@@ -23,7 +23,7 @@ import type {
   BlogLocation,
   FAQItem,
 } from '@/types/api';
-import { CONTENT_TYPE_LABELS, CONTENT_TYPE_ROUTE_PREFIX, RELATED_SERVICE_PAGE_OPTIONS, type ContentType } from '@/lib/contentTypes';
+import { CONTENT_TYPE_LABELS, CONTENT_TYPE_ROUTE_PREFIX, ADMIN_CONTENT_TYPE_ROUTE_PREFIX, RELATED_SERVICE_PAGE_OPTIONS, type ContentType } from '@/lib/contentTypes';
 import TipTapEditor from './TipTapEditor';
 import SEOFields from './SEOFields';
 import FAQEditor from './FAQEditor';
@@ -175,13 +175,13 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
       if (isNew) {
         const newPost = await api.createBlogPost(postData as BlogPostCreate);
         setAutoAppended(newPost.related_link_auto_appended);
-        router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${newPost.id}`);
+        router.push(`/admin/${ADMIN_CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${newPost.id}`);
       } else if (post) {
         const updatedPost = await api.updateBlogPost(post.slug, postData as BlogPostUpdate);
         setAutoAppended(updatedPost.related_link_auto_appended);
         // If slug changed, redirect to new URL
         if (slug !== post.slug) {
-          router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${post.id}`);
+          router.push(`/admin/${ADMIN_CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${post.id}`);
         }
       }
 
@@ -232,7 +232,7 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.push(`/admin/${CONTENT_TYPE_ROUTE_PREFIX[contentType]}`)}
+              onClick={() => router.push(`/admin/${ADMIN_CONTENT_TYPE_ROUTE_PREFIX[contentType]}`)}
               className="text-gray-600 hover:text-gray-900"
             >
               ← Back

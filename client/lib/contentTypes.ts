@@ -7,11 +7,24 @@ export type ContentType = 'blog' | 'guide' | 'design_idea' | 'story';
 export const CONTENT_TYPES: ContentType[] = ['blog', 'guide', 'design_idea', 'story'];
 
 // Root-level route prefix per type — flat parallel routes, no shared /content/ hub.
+// Public-facing only; the admin panel nests guides/design-ideas/stories under
+// /admin/blog (see ADMIN_CONTENT_TYPE_ROUTE_PREFIX) even though the public
+// site keeps its own flat top-level URLs for each.
 export const CONTENT_TYPE_ROUTE_PREFIX: Record<ContentType, string> = {
   blog: 'blog',
   guide: 'guides',
   design_idea: 'design-ideas',
   story: 'stories',
+};
+
+// Admin-only route prefix — guides/design-ideas/stories live nested under
+// /admin/blog/... so the admin sidebar collapses to a single "Blog" entry,
+// with in-page tabs (ContentTypeTabs) switching between the four sections.
+export const ADMIN_CONTENT_TYPE_ROUTE_PREFIX: Record<ContentType, string> = {
+  blog: 'blog',
+  guide: 'blog/guides',
+  design_idea: 'blog/design-ideas',
+  story: 'blog/stories',
 };
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {

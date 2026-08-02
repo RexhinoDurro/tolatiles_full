@@ -8,7 +8,7 @@ import type { BlogPost } from '@/types/api';
 import BlogEditor from '@/components/admin/blog/BlogEditor';
 import AdminLayout from '@/components/admin/AdminLayout';
 
-export default function EditGuidePage() {
+export default function EditDesignIdeaPage() {
   const params = useParams();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,7 @@ export default function EditGuidePage() {
     try {
       setLoading(true);
       // The ID in the URL is actually the post ID, but we need the slug for the API
-      const posts = await api.getBlogPosts({ content_type: 'guide' });
+      const posts = await api.getBlogPosts({ content_type: 'design_idea' });
       const postData = posts.find((p) => p.id === Number(params.id));
 
       if (!postData) {
@@ -54,8 +54,8 @@ export default function EditGuidePage() {
       <AdminLayout>
         <div className="flex flex-col items-center justify-center h-96">
           <p className="text-red-600 mb-4">{error || 'Post not found'}</p>
-          <a href="/admin/guides" className="text-blue-600 hover:underline">
-            ← Back to guides list
+          <a href="/admin/blog/design-ideas" className="text-blue-600 hover:underline">
+            ← Back to design ideas list
           </a>
         </div>
       </AdminLayout>
@@ -64,7 +64,7 @@ export default function EditGuidePage() {
 
   return (
     <AdminLayout hideDefaultPadding>
-      <BlogEditor post={post} contentType="guide" />
+      <BlogEditor post={post} contentType="design_idea" />
     </AdminLayout>
   );
 }
