@@ -1,5 +1,26 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import BlogPost, BlogCategory
+
+
+class FeaturedImageURLMixin:
+    """Same internal-hostname-safe URL fixup as gallery.serializers
+    .GalleryImageSerializer.get_image_url. SSR fetches hit backend:8000
+    directly (see the SSR hairpin fix), so request.build_absolute_uri()
+    (used internally by DRF's ImageField) stamps that internal Docker
+    hostname into `featured_image` -- Next's image optimizer then 400s on
+    it since 'backend' isn't an allowed remotePattern host. Patches the
+    already-serialized value rather than swapping the field type, so this
+    works whether the field is read-only (List/Detail/Public) or also
+    accepts file uploads (Create)."""
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        if data.get('featured_image') and instance.featured_image and request:
+            if request.get_host().split(':')[0] == 'backend':
+                data['featured_image'] = f"{settings.PUBLIC_MEDIA_BASE_URL}{instance.featured_image.url}"
+        return data
 
 
 class RelatedServicePageValidationMixin:
@@ -45,7 +66,7 @@ class BlogCategoryMinimalSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'slug']
 
 
-class BlogPostListSerializer(serializers.ModelSerializer):
+class BlogPostListSerializer(FeaturedImageURLMixin, serializers.ModelSerializer):
     """Serializer for blog post list views."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     reading_time = serializers.ReadOnlyField()
@@ -62,7 +83,7 @@ class BlogPostListSerializer(serializers.ModelSerializer):
         ]
 
 
-class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.ModelSerializer):
+class BlogPostDetailSerializer(FeaturedImageURLMixin, RelatedServicePageValidationMixin, serializers.ModelSerializer):
     """Full serializer for blog post detail views."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     category_ids = serializers.PrimaryKeyRelatedField(
@@ -124,7 +145,7 @@ class BlogPostDetailSerializer(RelatedServicePageValidationMixin, serializers.Mo
         return value
 
 
-class BlogPostCreateSerializer(RelatedServicePageValidationMixin, serializers.ModelSerializer):
+class BlogPostCreateSerializer(FeaturedImageURLMixin, RelatedServicePageValidationMixin, serializers.ModelSerializer):
     """Serializer for creating blog posts."""
     category_ids = serializers.PrimaryKeyRelatedField(
         queryset=BlogCategory.objects.all(),
@@ -172,7 +193,7 @@ class BlogPostSitemapSerializer(serializers.ModelSerializer):
         return list(obj.categories.values_list('slug', flat=True))
 
 
-class BlogPostPublicSerializer(serializers.ModelSerializer):
+class BlogPostPublicSerializer(FeaturedImageURLMixin, serializers.ModelSerializer):
     """Serializer for public blog post views."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     reading_time = serializers.ReadOnlyField()
