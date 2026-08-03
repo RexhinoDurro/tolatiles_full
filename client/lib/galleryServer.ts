@@ -13,6 +13,7 @@ export interface DisplayImage {
   src: string;
   title: string;
   description: string;
+  alt_text?: string;
 }
 
 export interface DisplayCategory {
@@ -61,6 +62,7 @@ export async function getGalleryData(selectedCategory: string): Promise<{ images
       src: img.image_url || img.image,
       title: img.title,
       description: img.description,
+      alt_text: img.alt_text || '',
     }));
 
     return { images, categories };

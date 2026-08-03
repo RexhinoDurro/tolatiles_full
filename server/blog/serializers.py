@@ -70,6 +70,7 @@ class BlogPostListSerializer(FeaturedImageURLMixin, serializers.ModelSerializer)
     """Serializer for blog post list views."""
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     reading_time = serializers.ReadOnlyField()
+    has_pending_changes = serializers.ReadOnlyField()
 
     class Meta:
         model = BlogPost
@@ -78,7 +79,7 @@ class BlogPostListSerializer(FeaturedImageURLMixin, serializers.ModelSerializer)
             'featured_image', 'featured_image_alt',
             'categories', 'location', 'content_type',
             'related_service_page', 'related_link_auto_appended',
-            'status', 'publish_date',
+            'status', 'publish_date', 'has_pending_changes',
             'reading_time', 'created_at', 'last_updated'
         ]
 
@@ -96,6 +97,7 @@ class BlogPostDetailSerializer(FeaturedImageURLMixin, RelatedServicePageValidati
     reading_time = serializers.ReadOnlyField()
     effective_meta_title = serializers.ReadOnlyField()
     effective_meta_description = serializers.ReadOnlyField()
+    has_pending_changes = serializers.ReadOnlyField()
 
     class Meta:
         model = BlogPost
@@ -108,6 +110,7 @@ class BlogPostDetailSerializer(FeaturedImageURLMixin, RelatedServicePageValidati
             'related_service_page', 'related_link_auto_appended',
             'media_plan', 'suggested_links',
             'status', 'publish_date', 'scheduled_publish_date',
+            'last_published_at', 'pending_snapshot', 'has_pending_changes',
             'reading_time', 'effective_meta_title', 'effective_meta_description',
             'created_at', 'last_updated'
         ]
@@ -118,10 +121,12 @@ class BlogPostDetailSerializer(FeaturedImageURLMixin, RelatedServicePageValidati
         # never through the generic save/update flow -- avoids the admin's
         # client-side form state (which doesn't track server-computed
         # candidates) ever silently overwriting them with stale data.
+        # pending_snapshot/last_published_at are read-only for the same
+        # reason -- they're only ever mutated through autosave/publish_changes.
         read_only_fields = [
             'id', 'created_at', 'last_updated', 'reading_time',
             'related_link_auto_appended', 'media_plan', 'suggested_links',
-            'featured_image_plan',
+            'featured_image_plan', 'pending_snapshot', 'last_published_at',
         ]
 
     def validate_slug(self, value):
@@ -271,6 +276,7 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
     categories = BlogCategoryMinimalSerializer(many=True, read_only=True)
     display_date = serializers.SerializerMethodField()
     has_unresolved_media = serializers.ReadOnlyField()
+    has_pending_changes = serializers.ReadOnlyField()
 
     class Meta:
         model = BlogPost
@@ -278,7 +284,8 @@ class BlogPostCalendarSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'status', 'location', 'content_type',
             'related_service_page', 'related_link_auto_appended',
             'scheduled_publish_date', 'publish_date', 'created_at',
-            'categories', 'display_date', 'has_unresolved_media'
+            'categories', 'display_date', 'has_unresolved_media',
+            'has_pending_changes',
         ]
 
     def get_display_date(self, obj):

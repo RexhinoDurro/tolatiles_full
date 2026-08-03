@@ -25,6 +25,8 @@ export interface GalleryImage {
   description: string;
   image: string;
   image_url: string;
+  alt_text: string;
+  file_name: string;
   order: number;
   is_active: boolean;
   created_at: string;
@@ -36,6 +38,8 @@ export interface GalleryImageCreate {
   title: string;
   description: string;
   image: File;
+  alt_text?: string;
+  file_name?: string;
   order?: number;
   is_active?: boolean;
 }
@@ -1046,11 +1050,31 @@ export interface BlogPost {
   status: BlogPostStatus;
   publish_date: string | null;
   scheduled_publish_date: string | null;
+  last_published_at: string | null;
+  pending_snapshot: Record<string, unknown> | null;
+  has_pending_changes: boolean;
   reading_time: number;
   effective_meta_title: string;
   effective_meta_description: string;
   created_at: string;
   last_updated: string;
+}
+
+export interface BlogPostAutosaveData {
+  title?: string;
+  slug?: string;
+  content?: string;
+  excerpt?: string;
+  author_name?: string;
+  meta_title?: string;
+  meta_description?: string;
+  canonical_url?: string;
+  is_indexed?: boolean;
+  has_faq_schema?: boolean;
+  faq_data?: FAQItem[];
+  category_ids?: number[];
+  location?: BlogLocation;
+  related_service_page?: string;
 }
 
 export interface BlogPostListItem {
@@ -1224,6 +1248,7 @@ export interface CalendarBlogPost {
   categories: BlogCategoryMinimal[];
   display_date: string;
   has_unresolved_media: boolean;
+  has_pending_changes: boolean;
 }
 
 export interface QuickDraftCreate {

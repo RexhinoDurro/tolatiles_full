@@ -25,7 +25,7 @@ export default function GallerySection({ config }: GallerySectionProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.image_url || img.image}
-                alt={img.title || ''}
+                alt={img.alt_text || img.title || ''}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />

@@ -37,6 +37,12 @@ class GalleryImage(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     image = models.ImageField(upload_to='gallery/%Y/%m/')
+    alt_text = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text='Alt text for accessibility/SEO. Falls back to title-based text if empty.'
+    )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

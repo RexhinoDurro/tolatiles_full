@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -18,6 +18,7 @@ import type {
   BlogPost,
   BlogPostCreate,
   BlogPostUpdate,
+  BlogPostAutosaveData,
   BlogCategory,
   BlogPostStatus,
   BlogLocation,
@@ -31,6 +32,7 @@ import AIAssistant from './AIAssistant';
 import InlineCalendarPicker from './InlineCalendarPicker';
 import MediaPlanEditor from './MediaPlanEditor';
 import SuggestedLinksPanel from './SuggestedLinksPanel';
+import ImageSeoPanel from './ImageSeoPanel';
 
 interface BlogEditorProps {
   post?: BlogPost;
@@ -76,11 +78,84 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
       ? new Date(post.scheduled_publish_date).toISOString().slice(0, 16)
       : ''
   );
-  const [featuredImageAlt, setFeaturedImageAlt] = useState(post?.featured_image_alt || '');
+  // For a published post with an active pending_snapshot, in-progress body
+  // image edits land in the snapshot's own `content` copy, not the live
+  // field (see _effective_content on BlogPostViewSet) -- so the editor must
+  // read from there too, or a just-resolved image would appear to vanish.
+  const getEffectiveContent = (p: BlogPost): string => {
+    const snapshotContent = (p.pending_snapshot as { content?: string } | null)?.content;
+    return typeof snapshotContent === 'string' ? snapshotContent : p.content;
+  };
 
   const handlePostUpdated = (updated: BlogPost) => {
     setCurrentPost(updated);
-    setContent(updated.content); // a marker in `content` was just replaced server-side
+    setContent(getEffectiveContent(updated)); // a marker in `content` was just replaced server-side
+  };
+
+  // Debounced autosave: fires ~2s after the last edit to any of the fields
+  // below. autosave() on the backend writes straight to the live post while
+  // it's still a draft (nothing public to protect), or into pending_snapshot
+  // once published (see BlogPostViewSet.autosave) -- either way, its response
+  // reflects the LIVE fields, which for a published post are deliberately
+  // stale until Publish Changes, so it must never be used to overwrite local
+  // form state (only currentPost, for has_pending_changes/etc).
+  const [autosaveState, setAutosaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didMountRef = useRef(false);
+
+  useEffect(() => {
+    if (isNew || !post) return; // nothing to autosave until the post exists
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return; // skip the initial load — only autosave real edits
+    }
+
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(async () => {
+      setAutosaveState('saving');
+      const data: BlogPostAutosaveData = {
+        title, slug, content, excerpt, author_name: authorName,
+        meta_title: metaTitle, meta_description: metaDescription,
+        canonical_url: canonicalUrl, is_indexed: isIndexed,
+        has_faq_schema: hasFaqSchema, faq_data: faqData,
+        category_ids: selectedCategories, location,
+        related_service_page: relatedServicePage,
+      };
+      try {
+        const updated = await api.autosaveBlogPost(post.slug, data);
+        setCurrentPost(updated); // has_pending_changes/pending_snapshot only — never local form state
+        setAutosaveState('saved');
+      } catch {
+        setAutosaveState('error');
+      }
+    }, 2000);
+
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    title, slug, content, excerpt, authorName, metaTitle, metaDescription,
+    canonicalUrl, isIndexed, hasFaqSchema, faqData, selectedCategories,
+    location, relatedServicePage,
+  ]);
+
+  const handlePublishChanges = async () => {
+    if (!post) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const updated = await api.publishBlogPostChanges(post.slug);
+      setCurrentPost(updated);
+      setStatus(updated.status);
+      if (updated.slug !== post.slug) {
+        router.push(`/admin/${ADMIN_CONTENT_TYPE_ROUTE_PREFIX[contentType]}/${post.id}`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to publish changes');
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -168,10 +243,6 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
         scheduled_publish_date: finalStatus === 'scheduled' ? scheduledDate : null,
       };
 
-      if (featuredImageAlt) {
-        postData.featured_image_alt = featuredImageAlt;
-      }
-
       if (isNew) {
         const newPost = await api.createBlogPost(postData as BlogPostCreate);
         setAutoAppended(newPost.related_link_auto_appended);
@@ -253,6 +324,18 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </span>
             )}
+            {!isNew && status === 'published' && currentPost?.has_pending_changes && (
+              <span className="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                Unpublished changes
+              </span>
+            )}
+            {!isNew && status === 'published' && (
+              <span className="text-xs text-gray-400">
+                {autosaveState === 'saving' && 'Saving…'}
+                {autosaveState === 'saved' && 'All changes saved'}
+                {autosaveState === 'error' && 'Autosave failed'}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -268,27 +351,38 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
               </a>
             )}
 
-            <button
-              onClick={() => handleSave('draft')}
-              disabled={saving}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-            >
-              Save Draft
-            </button>
-
-            <div className="relative group">
+            {!isNew && status === 'published' ? (
               <button
-                onClick={() => handleSave('published')}
-                disabled={saving}
+                onClick={handlePublishChanges}
+                disabled={saving || !currentPost?.has_pending_changes}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Publish
-                <ChevronDown className="w-4 h-4" />
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Publish Changes
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleSave('draft')}
+                  disabled={saving}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Save Draft
+                </button>
+
+                <div className="relative group">
+                  <button
+                    onClick={() => handleSave('published')}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    Publish
+                    <ChevronDown className="w-4 h-4" />
               </button>
 
               <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48">
@@ -310,6 +404,8 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 </button>
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -454,19 +550,27 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 )}
 
                 {activeTab === 'seo' && (
-                  <SEOFields
-                    metaTitle={metaTitle}
-                    metaDescription={metaDescription}
-                    slug={slug}
-                    canonicalUrl={canonicalUrl}
-                    isIndexed={isIndexed}
-                    onMetaTitleChange={setMetaTitle}
-                    onMetaDescriptionChange={setMetaDescription}
-                    onSlugChange={handleSlugChange}
-                    onCanonicalUrlChange={setCanonicalUrl}
-                    onIsIndexedChange={setIsIndexed}
-                    title={title}
-                  />
+                  <div className="space-y-8">
+                    <SEOFields
+                      metaTitle={metaTitle}
+                      metaDescription={metaDescription}
+                      slug={slug}
+                      canonicalUrl={canonicalUrl}
+                      isIndexed={isIndexed}
+                      onMetaTitleChange={setMetaTitle}
+                      onMetaDescriptionChange={setMetaDescription}
+                      onSlugChange={handleSlugChange}
+                      onCanonicalUrlChange={setCanonicalUrl}
+                      onIsIndexedChange={setIsIndexed}
+                      title={title}
+                    />
+                    {currentPost && (
+                      <div>
+                        <h3 className="font-medium text-gray-900 mb-3">Image SEO</h3>
+                        <ImageSeoPanel post={currentPost} onPostUpdated={handlePostUpdated} />
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {activeTab === 'faq' && (
@@ -528,13 +632,9 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                   </p>
                 </div>
               )}
-              <input
-                type="text"
-                value={featuredImageAlt}
-                onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                placeholder="Alt text for image"
-                className="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <p className="mt-3 text-xs text-gray-500">
+                Name and alt text are editable in the SEO tab&apos;s Image SEO panel.
+              </p>
             </div>
 
             {/* Content Type */}

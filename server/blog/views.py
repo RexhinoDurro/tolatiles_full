@@ -1,3 +1,4 @@
+import html
 import os
 import re
 import uuid
@@ -5,6 +6,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -13,6 +15,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+from config.media_utils import rename_local_media_file
 
 from .models import BlogPost, BlogCategory
 
@@ -456,6 +460,102 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
+    # Fields the editor's debounced autosave is allowed to touch -- a fixed
+    # whitelist rather than trusting arbitrary request.data keys, since
+    # published-post autosaves get merged into pending_snapshot and later
+    # applied to the live model via setattr() in publish_changes.
+    AUTOSAVE_FIELDS = {
+        'title', 'slug', 'content', 'excerpt', 'author_name',
+        'meta_title', 'meta_description', 'canonical_url', 'is_indexed',
+        'has_faq_schema', 'faq_data', 'category_ids', 'location',
+        'related_service_page',
+    }
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def autosave(self, request, slug=None):
+        """Debounced autosave from the editor. A draft post's autosave writes
+        straight to the live fields -- nothing's public yet, same as today's
+        Save Draft. An already-published post's autosave instead merges into
+        pending_snapshot, leaving the live page untouched until Publish
+        Changes explicitly copies it over (see publish_changes)."""
+        post = self.get_object()
+        data = {k: v for k, v in request.data.items() if k in self.AUTOSAVE_FIELDS}
+
+        if post.status != 'published':
+            serializer = BlogPostDetailSerializer(
+                post, data=data, partial=True, context={'request': request}
+            )
+            try:
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+            except DRFValidationError as e:
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+            return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+        snapshot = dict(post.pending_snapshot) if post.pending_snapshot is not None else {}
+        snapshot.update(data)
+        post.pending_snapshot = snapshot
+        post.save(update_fields=['pending_snapshot'])
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def publish_changes(self, request, slug=None):
+        """Copy the pending draft snapshot onto the live fields and go live.
+        Only meaningful for a published post that has autosaved changes
+        sitting in pending_snapshot -- a still-unpublished post just uses the
+        existing publish flow (PATCH status='published') since it has no
+        snapshot layer to begin with."""
+        post = self.get_object()
+        if post.pending_snapshot is None:
+            return Response({'error': 'No pending changes to publish'}, status=status.HTTP_400_BAD_REQUEST)
+
+        snapshot = post.pending_snapshot
+        category_ids = snapshot.pop('category_ids', None)
+        for field, value in snapshot.items():
+            if field in self.AUTOSAVE_FIELDS:
+                setattr(post, field, value)
+
+        post.pending_snapshot = None
+        post.last_published_at = timezone.now()
+
+        try:
+            post.save()
+        except DjangoValidationError as e:
+            return Response(
+                e.message_dict if hasattr(e, 'message_dict') else {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if category_ids is not None:
+            post.categories.set(category_ids)
+
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    def _effective_content(self, post):
+        """The content string in-progress body-image edits should read from --
+        the pending snapshot's copy if this published post has unpublished
+        changes, else the live field. Keeps an in-progress image swap off the
+        public page until Publish Changes, same as any other edited field.
+        (Note: the featured image itself is NOT gated this way -- see
+        resolve_featured_image/update_featured_image_meta -- it still takes
+        effect immediately, same as today, since deferring it would need a
+        second ImageField + a parallel WebP-processing path for one thumbnail.)
+        """
+        if post.pending_snapshot is not None:
+            return post.pending_snapshot.get('content', post.content or '')
+        return post.content or ''
+
+    def _save_effective_content(self, post, new_content):
+        """Writes back wherever _effective_content read from. Returns the
+        update_fields the caller should include in its save()."""
+        if post.pending_snapshot is not None:
+            snapshot = dict(post.pending_snapshot)
+            snapshot['content'] = new_content
+            post.pending_snapshot = snapshot
+            return ['pending_snapshot']
+        post.content = new_content
+        return ['content']
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
     def resolve_media_placeholder(self, request, slug=None):
         """Resolve (pick a candidate) or skip one media_plan placeholder,
@@ -479,12 +579,13 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             )
 
         marker_pattern = r'<span[^>]*data-media-marker="' + re.escape(media_id) + r'"[^>]*>\s*</span>'
+        content = self._effective_content(post)
 
         if request.data.get('status') == 'skipped':
             entry['status'] = 'skipped'
             entry['resolved_source'] = None
             entry['resolved_url'] = None
-            post.content = re.sub(marker_pattern, '', post.content or '', count=1)
+            content = re.sub(marker_pattern, '', content, count=1)
         else:
             resolved_source = request.data.get('resolved_source')
             resolved_url = request.data.get('resolved_url')
@@ -494,12 +595,15 @@ class BlogPostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Never hotlink an externally-hosted image: 'ai'/'gallery' URLs are
-            # already local (produced by our own services), but anything else
-            # (a human pasting a raw URL, or a 'web' candidate that somehow
-            # wasn't pre-downloaded) gets downloaded and saved here so the
-            # blog always ends up serving its own copy.
-            if entry.get('type') == 'image' and not resolved_url.startswith(settings.MEDIA_URL):
+            # Never hotlink an externally-hosted image, and never share a file
+            # with another model either: 'ai' URLs are already local, blog-owned
+            # copies, but 'gallery' candidates point straight at a GalleryImage's
+            # own file (see media_plan_service._gallery_candidates), and a raw
+            # pasted/'web' URL is someone else's file entirely -- anything not
+            # already under blog/ gets downloaded into its own independent copy
+            # here, so renaming or deleting it later can never affect (or be
+            # affected by) an unrelated GalleryImage row.
+            if entry.get('type') == 'image' and not resolved_url.startswith(f'{settings.MEDIA_URL}blog/'):
                 from .services import download_and_save_image, WebImageDownloadError
                 try:
                     saved = download_and_save_image(resolved_url)
@@ -518,13 +622,18 @@ class BlogPostViewSet(viewsets.ModelViewSet):
                     'frameborder="0" allowfullscreen loading="lazy"></iframe></div>'
                 )
             else:
-                alt_text = entry.get('alt_text', '') or ''
-                replacement = f'<img src="{resolved_url}" alt="{alt_text}" loading="lazy" />'
+                alt_text = html.escape(entry.get('alt_text', '') or '', quote=True)
+                # data-media-id lets update_media_meta find this exact tag
+                # later to rewrite its src/alt in place (see TipTapEditor.tsx's
+                # ResizableImage.addAttributes -- it's registered there too, or
+                # the editor would strip it the first time this node round-trips).
+                replacement = f'<img src="{resolved_url}" alt="{alt_text}" data-media-id="{media_id}" loading="lazy" />'
 
-            post.content = re.sub(marker_pattern, replacement, post.content or '', count=1)
+            content = re.sub(marker_pattern, replacement, content, count=1)
 
         post.media_plan = media_plan
-        post.save(update_fields=['content', 'media_plan'])
+        update_fields = self._save_effective_content(post, content) + ['media_plan']
+        post.save(update_fields=update_fields)
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
@@ -577,6 +686,106 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         post.featured_image_plan = plan
         post.save(update_fields=['featured_image', 'featured_image_plan'])
         self._process_featured_image(post)
+
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def update_featured_image_meta(self, request, slug=None):
+        """Edit the featured image's file name and/or alt text. Immediate
+        persist, same non-racy pattern as resolve_featured_image -- bypasses
+        the generic serializer entirely so this can never collide with a
+        Save Draft PATCH built from stale client-side form state."""
+        post = self.get_object()
+        name = request.data.get('name')
+        alt_text = request.data.get('alt_text')
+        update_fields = []
+
+        if name and post.featured_image:
+            new_relative_path = rename_local_media_file(post.featured_image.name, name)
+            post.featured_image.name = new_relative_path
+            update_fields.append('featured_image')
+
+        if alt_text is not None:
+            post.featured_image_alt = alt_text
+            update_fields.append('featured_image_alt')
+
+        if update_fields:
+            post.save(update_fields=update_fields)
+
+        return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
+    def update_media_meta(self, request, slug=None):
+        """Edit one media_plan image's file name and/or alt text. Alt text can
+        be set before the placeholder is even resolved (it's picked up at
+        resolve time, see resolve_media_placeholder); the file name only
+        applies once resolved, since there's no file to rename before then.
+        When resolved, the already-embedded <img> tag is kept in sync via its
+        data-media-id marker rather than waiting for a future resolve/save."""
+        post = self.get_object()
+        media_id = request.data.get('media_id')
+        if media_id is None:
+            return Response({'error': 'media_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        media_id = str(media_id)
+
+        media_plan = post.media_plan or []
+        entry = next((item for item in media_plan if str(item.get('id')) == media_id), None)
+        if entry is None:
+            return Response(
+                {'error': f'No media_plan entry with id {media_id}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        name = request.data.get('name')
+        alt_text = request.data.get('alt_text')
+        is_resolved = entry.get('status') == 'resolved' and entry.get('resolved_url')
+        tag_pattern = r'(<img[^>]*data-media-id="' + re.escape(media_id) + r'"[^>]*>)'
+        update_fields = ['media_plan']
+
+        if alt_text is not None:
+            entry['alt_text'] = alt_text
+            if is_resolved:
+                # Editorial content -- respects the pending-snapshot gate like
+                # any other text edit, so it doesn't reach the live page early.
+                escaped_alt = html.escape(alt_text, quote=True)
+                content = re.sub(
+                    tag_pattern,
+                    lambda m: re.sub(r'alt="[^"]*"', f'alt="{escaped_alt}"', m.group(1)),
+                    self._effective_content(post),
+                    count=1,
+                )
+                update_fields += self._save_effective_content(post, content)
+
+        if name and is_resolved:
+            # Renaming moves the one physical file on disk -- a shared
+            # resource, not draft-gated editorial content. Every place that
+            # references it (the live content AND a pending snapshot's own
+            # copy, if one exists) must be updated in lockstep, or whichever
+            # copy still holds the old src would 404 the moment it's viewed.
+            relative_path = entry['resolved_url'][len(settings.MEDIA_URL):]
+            new_relative_path = rename_local_media_file(relative_path, name)
+            new_url = f'{settings.MEDIA_URL}{new_relative_path}'
+            entry['resolved_url'] = new_url
+
+            def _fix_src(text):
+                return re.sub(
+                    tag_pattern,
+                    lambda m: re.sub(r'src="[^"]*"', f'src="{new_url}"', m.group(1)),
+                    text,
+                    count=1,
+                )
+
+            post.content = _fix_src(post.content or '')
+            update_fields.append('content')
+            if post.pending_snapshot is not None and 'content' in post.pending_snapshot:
+                snapshot = dict(post.pending_snapshot)
+                snapshot['content'] = _fix_src(snapshot['content'])
+                post.pending_snapshot = snapshot
+                if 'pending_snapshot' not in update_fields:
+                    update_fields.append('pending_snapshot')
+
+        post.media_plan = media_plan
+        post.save(update_fields=update_fields)
 
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 

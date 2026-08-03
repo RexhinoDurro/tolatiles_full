@@ -66,7 +66,7 @@ export default function GalleryGrid({ images, onEdit, onDelete, onToggleActive, 
             <div className="relative aspect-square">
               <Image
                 src={`${image.image_url || image.image}?t=${new Date(image.updated_at).getTime()}`}
-                alt={image.title}
+                alt={image.alt_text || image.title}
                 fill
                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                 className="object-cover"

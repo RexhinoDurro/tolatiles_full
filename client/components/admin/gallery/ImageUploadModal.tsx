@@ -29,6 +29,8 @@ export default function ImageUploadModal({
     title: '',
     description: '',
     category: '',
+    file_name: '',
+    alt_text: '',
     order: 0,
     is_active: true,
   });
@@ -42,6 +44,8 @@ export default function ImageUploadModal({
         title: editingImage.title,
         description: editingImage.description,
         category: String(editingImage.category),
+        file_name: editingImage.file_name || '',
+        alt_text: editingImage.alt_text || '',
         order: editingImage.order,
         is_active: editingImage.is_active,
       });
@@ -51,6 +55,8 @@ export default function ImageUploadModal({
         title: '',
         description: '',
         category: categories[0]?.id ? String(categories[0].id) : '',
+        file_name: '',
+        alt_text: '',
         order: 0,
         is_active: true,
       });
@@ -126,6 +132,8 @@ export default function ImageUploadModal({
       submitData.append('title', formData.title);
       submitData.append('description', formData.description);
       submitData.append('category', formData.category);
+      submitData.append('file_name', formData.file_name);
+      submitData.append('alt_text', formData.alt_text);
       submitData.append('order', String(formData.order));
       submitData.append('is_active', String(formData.is_active));
 
@@ -253,6 +261,39 @@ export default function ImageUploadModal({
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               placeholder="Enter image description"
+            />
+          </div>
+
+          {/* File Name */}
+          <div>
+            <label htmlFor="file_name" className="block text-sm font-medium text-gray-700 mb-2">
+              Name
+            </label>
+            <input
+              type="text"
+              id="file_name"
+              name="file_name"
+              value={formData.file_name}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g. walk-in-shower-tile-install"
+            />
+            <p className="text-xs text-gray-500 mt-1">Used as the image&apos;s file name — lowercase, hyphens only.</p>
+          </div>
+
+          {/* Alt Text */}
+          <div>
+            <label htmlFor="alt_text" className="block text-sm font-medium text-gray-700 mb-2">
+              Alt Text
+            </label>
+            <input
+              type="text"
+              id="alt_text"
+              name="alt_text"
+              value={formData.alt_text}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Describe the image for accessibility and search engines"
             />
           </div>
 

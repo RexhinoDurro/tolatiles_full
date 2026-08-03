@@ -209,6 +209,17 @@ const ResizableImage = Image.extend({
         parseHTML: element => element.getAttribute('data-align') || 'center',
         renderHTML: () => ({}),
       },
+      // Identifies which media_plan entry a resolved inline image came from,
+      // so the SEO tab's per-image Name/Alt Text editor can find and rewrite
+      // this exact tag later. Must be declared here (not just present in the
+      // raw HTML) or ProseMirror drops it the first time this node round-trips
+      // through parseHTML/renderHTML -- unrecognized attributes don't survive.
+      mediaId: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-media-id'),
+        renderHTML: attributes =>
+          attributes.mediaId ? { 'data-media-id': attributes.mediaId } : {},
+      },
     };
   },
 
@@ -311,6 +322,22 @@ export default function TipTapEditor({
       },
     },
   });
+
+  // useEditor only seeds the document from `content` once, at construction --
+  // it never re-applies later prop changes on its own. Without this, a
+  // server-side content rewrite (e.g. resolving a media placeholder into a
+  // real <img>) never reaches the live editor while it stays mounted, and the
+  // next keystroke's onUpdate pushes the editor's own stale document back
+  // into React state, silently reverting the just-resolved image on the next
+  // save. Safe against feedback loops: onUpdate always mirrors the editor's
+  // current HTML back into `content`, so this only fires on genuinely
+  // external changes.
+  useEffect(() => {
+    if (!editor) return;
+    if (content !== editor.getHTML()) {
+      editor.commands.setContent(content, false);
+    }
+  }, [content, editor]);
 
   // Check if image is selected
   useEffect(() => {

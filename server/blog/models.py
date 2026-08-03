@@ -246,6 +246,24 @@ class BlogPost(models.Model):
         blank=True,
         help_text='Scheduled date for auto-publishing'
     )
+    last_published_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When this post was last pushed live via Publish/Publish Changes.'
+    )
+
+    # Pending draft snapshot: for an already-published post, autosave writes
+    # here instead of the live fields above, so in-progress edits never touch
+    # the public page until "Publish Changes" copies this over. Null means
+    # there are no unpublished changes. Not used for a still-unpublished post
+    # (status='draft') -- there autosave writes the live fields directly,
+    # same as today's Save Draft, since nothing is public yet anyway.
+    pending_snapshot = models.JSONField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text='Autosaved unpublished edits for an already-published post; null when there are none.'
+    )
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -372,6 +390,13 @@ class BlogPost(models.Model):
     def is_published(self):
         """Check if post is currently published."""
         return self.status == 'published'
+
+    @property
+    def has_pending_changes(self):
+        """True when there's an autosaved draft snapshot not yet published --
+        drives the "unpublished changes" marker in the admin list/calendar
+        and the editor header."""
+        return self.pending_snapshot is not None
 
     @property
     def reading_time(self):

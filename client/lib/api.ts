@@ -42,6 +42,7 @@ import type {
   BlogPostListItem,
   BlogPostCreate,
   BlogPostUpdate,
+  BlogPostAutosaveData,
   BlogPostSitemapItem,
   BlogPostStatus,
   AIGeneratePostRequest,
@@ -1152,6 +1153,19 @@ class ApiClient {
     });
   }
 
+  async autosaveBlogPost(slug: string, data: BlogPostAutosaveData): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/autosave/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async publishBlogPostChanges(slug: string): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/publish_changes/`, {
+      method: 'POST',
+    });
+  }
+
   async deleteBlogPost(slug: string): Promise<void> {
     await this.fetch<void>(`/blog/posts/${slug}/`, {
       method: 'DELETE',
@@ -1235,6 +1249,26 @@ class ApiClient {
     data: { resolved_source?: MediaResolvedSource; resolved_url?: string; status?: 'skipped' }
   ): Promise<BlogPost> {
     return this.fetch<BlogPost>(`/blog/posts/${slug}/resolve_featured_image/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateFeaturedImageMeta(
+    slug: string,
+    data: { name?: string; alt_text?: string }
+  ): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/update_featured_image_meta/`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateMediaMeta(
+    slug: string,
+    data: { media_id: number; name?: string; alt_text?: string }
+  ): Promise<BlogPost> {
+    return this.fetch<BlogPost>(`/blog/posts/${slug}/update_media_meta/`, {
       method: 'POST',
       body: JSON.stringify(data),
     });

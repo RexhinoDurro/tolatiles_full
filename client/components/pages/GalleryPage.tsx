@@ -140,6 +140,7 @@ interface DisplayImage {
   src: string;
   title: string;
   description: string;
+  alt_text?: string;
 }
 
 const GalleryPage = ({ category, location = 'florida', initialImages, initialCategories }: GalleryPageProps) => {
@@ -412,7 +413,7 @@ const ImageCard = ({ image, index, category, onOpen }: ImageCardProps) => {
           {isInView && (
             <Image
               src={image.src}
-              alt={`${image.title} - ${image.description} | Tola Tiles ${category} installation`}
+              alt={image.alt_text || `${image.title} - ${image.description} | Tola Tiles ${category} installation`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
               className={`object-cover group-hover:scale-110 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
@@ -496,7 +497,7 @@ const ImageModal = ({ images, index, category, onClose, onPrev, onNext }: ImageM
           )}
           <Image
             src={image.src}
-            alt={`${image.title} - ${image.description} | Tola Tiles ${category} installation`}
+            alt={image.alt_text || `${image.title} - ${image.description} | Tola Tiles ${category} installation`}
             fill
             className={`object-contain transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
             sizes="(max-width: 768px) 100vw, 80vw"
