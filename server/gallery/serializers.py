@@ -2,8 +2,9 @@ import os
 
 from django.conf import settings
 from rest_framework import serializers
-from config.media_utils import rename_local_media_file, slugify_filename
+from config.media_utils import slugify_filename
 from .models import Category, GalleryImage
+from .storage import rename_media_file
 
 
 class GalleryImageSerializer(serializers.ModelSerializer):
@@ -35,14 +36,21 @@ class GalleryImageSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     def get_image_url(self, obj):
-        request = self.context.get('request')
         if not obj.image:
             return None
+        image_url = obj.image.url
+        # obj.image.url is already an absolute R2 URL when gallery media is
+        # on R2 -- only relative /media/... paths (local disk) need a host
+        # prepended. Prepending unconditionally double-prefixes R2 URLs with
+        # this site's own domain (same bug class as blog's featured_image).
+        if image_url.startswith(('http://', 'https://')):
+            return image_url
+        request = self.context.get('request')
         if not request:
-            return obj.image.url
+            return image_url
         if request.get_host().split(':')[0] == 'backend':
-            return f"{settings.PUBLIC_MEDIA_BASE_URL}{obj.image.url}"
-        return request.build_absolute_uri(obj.image.url)
+            return f"{settings.PUBLIC_MEDIA_BASE_URL}{image_url}"
+        return request.build_absolute_uri(image_url)
 
     def get_file_name(self, obj):
         if not obj.image:
@@ -78,7 +86,7 @@ class GalleryImageCreateSerializer(serializers.ModelSerializer):
         current_basename = os.path.splitext(os.path.basename(instance.image.name))[0]
         if slugify_filename(file_name) == current_basename:
             return
-        new_relative_path = rename_local_media_file(instance.image.name, file_name)
+        new_relative_path = rename_media_file(instance.image.name, file_name)
         instance.image.name = new_relative_path
         instance.save(update_fields=['image'])
 

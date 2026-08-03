@@ -2,12 +2,12 @@
 Management command to import gallery images from the Next.js client.
 """
 import os
-import shutil
 from pathlib import Path
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.conf import settings
 from gallery.models import Category, GalleryImage
+from gallery.storage import save_media_bytes
 
 
 # Gallery data from client/data/gallery.ts
@@ -130,10 +130,6 @@ class Command(BaseCommand):
             GalleryImage.objects.all().delete()
             Category.objects.all().delete()
 
-        # Create media gallery directory
-        gallery_media = settings.MEDIA_ROOT / 'gallery' / 'imported'
-        gallery_media.mkdir(parents=True, exist_ok=True)
-
         total_images = 0
 
         for category_name, data in GALLERY_DATA.items():
@@ -182,26 +178,25 @@ class Command(BaseCommand):
                     )
                     continue
 
-                # Copy image to media folder
-                dest_folder = gallery_media / category_name
-                dest_folder.mkdir(parents=True, exist_ok=True)
-                dest_file = dest_folder / image_data['file']
+                # Push the source file through the storage API (local disk
+                # or R2, whichever gallery_media_storage is currently
+                # configured for) instead of a raw shutil.copy2 -- that's
+                # what makes this command work the same either way.
+                with open(source_file, 'rb') as f:
+                    file_bytes = f.read()
 
-                shutil.copy2(source_file, dest_file)
+                desired_key = f'gallery/imported/{category_name}/{image_data["file"]}'
+                saved_key = save_media_bytes(desired_key, file_bytes)
 
-                # Create GalleryImage record
-                with open(dest_file, 'rb') as f:
-                    gallery_image = GalleryImage.objects.create(
-                        category=category,
-                        title=image_data['title'],
-                        description=image_data['description'],
-                        order=order,
-                        is_active=True,
-                    )
-                    # Save the image file to the model
-                    relative_path = f'gallery/imported/{category_name}/{image_data["file"]}'
-                    gallery_image.image.name = relative_path
-                    gallery_image.save()
+                gallery_image = GalleryImage.objects.create(
+                    category=category,
+                    title=image_data['title'],
+                    description=image_data['description'],
+                    order=order,
+                    is_active=True,
+                )
+                gallery_image.image.name = saved_key
+                gallery_image.save()
 
                 self.stdout.write(
                     self.style.SUCCESS(f'  Imported: {image_data["title"]}')

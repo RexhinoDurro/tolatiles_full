@@ -1,3 +1,5 @@
+import io
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, parser_classes as parser_classes_decorator
 from rest_framework.response import Response
@@ -6,7 +8,6 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from PIL import Image
-import os
 
 from .models import Category, GalleryImage
 from .serializers import (
@@ -15,6 +16,7 @@ from .serializers import (
     GalleryImageSerializer,
     GalleryImageCreateSerializer,
 )
+from .storage import read_media_bytes, overwrite_media_bytes
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -107,10 +109,12 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            image_path = image_obj.image.path
+            image_key = image_obj.image.name
 
-            # Open image
-            img = Image.open(image_path)
+            # Read via the storage API (not .path) -- .path only works for
+            # local FileSystemStorage and raises on S3Boto3Storage/R2.
+            image_bytes = read_media_bytes(image_key)
+            img = Image.open(io.BytesIO(image_bytes))
             original_format = img.format or 'WEBP'
 
             # Apply transformation (these are very fast operations)
@@ -123,16 +127,19 @@ class GalleryImageViewSet(viewsets.ModelViewSet):
             elif transform_type == 'flip_vertical':
                 transformed = img.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
 
-            # Save with optimized settings
+            # Save with optimized settings, back to the same key in place
+            buffer = io.BytesIO()
             if original_format == 'PNG':
-                transformed.save(image_path, 'PNG')
+                transformed.save(buffer, 'PNG')
             elif original_format == 'WEBP':
-                transformed.save(image_path, 'WEBP', quality=85, method=4)
+                transformed.save(buffer, 'WEBP', quality=85, method=4)
             else:
-                transformed.save(image_path, 'JPEG', quality=85, optimize=False)
+                transformed.save(buffer, 'JPEG', quality=85, optimize=False)
 
             img.close()
             transformed.close()
+
+            overwrite_media_bytes(image_key, buffer.getvalue())
 
             # Update timestamp
             image_obj.save(update_fields=['updated_at'])

@@ -1,11 +1,20 @@
 """
 Celery tasks for gallery image processing.
 """
+import io
 import os
 import logging
 from celery import shared_task
 from PIL import Image
 from django.conf import settings
+
+from .storage import (
+    gallery_media_storage,
+    read_media_bytes,
+    save_media_bytes,
+    delete_media_file,
+    is_local_storage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,30 +28,30 @@ def convert_image_to_webp(self, image_id: int) -> dict:
         image_id: The ID of the GalleryImage to convert
 
     Returns:
-        dict with status and new image path
+        dict with status and new image key
     """
     from gallery.models import GalleryImage
 
     try:
         image_obj = GalleryImage.objects.get(id=image_id)
-        original_path = image_obj.image.path
+        original_key = image_obj.image.name
 
         # Skip if already WebP
-        if original_path.lower().endswith('.webp'):
+        if original_key.lower().endswith('.webp'):
             logger.info(f'Image {image_id} is already WebP, skipping conversion')
             return {'status': 'skipped', 'reason': 'already_webp'}
 
         # Check if file exists
-        if not os.path.exists(original_path):
-            logger.error(f'Original image not found: {original_path}')
+        if not gallery_media_storage.exists(original_key):
+            logger.error(f'Original image not found: {original_key}')
             return {'status': 'error', 'reason': 'file_not_found'}
 
-        # Generate WebP path
-        base_path = os.path.splitext(original_path)[0]
-        webp_path = f'{base_path}.webp'
+        # Generate WebP key
+        base_key = os.path.splitext(original_key)[0]
+        webp_key = f'{base_key}.webp'
 
         # Open and convert image
-        with Image.open(original_path) as img:
+        with Image.open(io.BytesIO(read_media_bytes(original_key))) as img:
             # Convert to RGB if necessary (for PNG with transparency)
             if img.mode in ('RGBA', 'LA', 'P'):
                 # Create white background for transparent images
@@ -60,23 +69,25 @@ def convert_image_to_webp(self, image_id: int) -> dict:
 
             # Save as WebP
             quality = getattr(settings, 'IMAGE_WEBP_QUALITY', 85)
-            img.save(webp_path, 'WEBP', quality=quality, method=6)
+            buffer = io.BytesIO()
+            img.save(buffer, 'WEBP', quality=quality, method=6)
 
-        # Update model with new path
-        relative_path = os.path.relpath(webp_path, settings.MEDIA_ROOT)
-        image_obj.image.name = relative_path
+        saved_key = save_media_bytes(webp_key, buffer.getvalue())
+
+        # Update model with new key
+        image_obj.image.name = saved_key
         image_obj.save(update_fields=['image'])
 
         # Delete original file
-        if os.path.exists(original_path) and original_path != webp_path:
-            os.remove(original_path)
-            logger.info(f'Deleted original file: {original_path}')
+        if saved_key != original_key:
+            delete_media_file(original_key)
+            logger.info(f'Deleted original file: {original_key}')
 
-        logger.info(f'Successfully converted image {image_id} to WebP: {webp_path}')
+        logger.info(f'Successfully converted image {image_id} to WebP: {saved_key}')
         return {
             'status': 'success',
-            'original_path': original_path,
-            'webp_path': webp_path,
+            'original_key': original_key,
+            'webp_key': saved_key,
         }
 
     except GalleryImage.DoesNotExist:
@@ -94,8 +105,16 @@ def cleanup_orphaned_images():
     """
     Clean up image files that are no longer referenced in the database.
     Run this periodically to free up disk space.
+
+    Local disk only for now -- when gallery media is on R2, this is a
+    no-op (skipped) rather than silently walking/deleting the wrong thing;
+    an R2-aware version would need to list bucket objects via boto3
+    instead of os.walk.
     """
     from gallery.models import GalleryImage
+
+    if not is_local_storage():
+        return {'status': 'skipped', 'reason': 'remote_storage_not_supported'}
 
     media_gallery_path = os.path.join(settings.MEDIA_ROOT, 'gallery')
 

@@ -1,5 +1,7 @@
 from django.db import models
 
+from .storage import gallery_media_storage
+
 
 class Category(models.Model):
     """Gallery category model."""
@@ -36,7 +38,7 @@ class GalleryImage(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField()
-    image = models.ImageField(upload_to='gallery/%Y/%m/')
+    image = models.ImageField(upload_to='gallery/%Y/%m/', storage=gallery_media_storage)
     alt_text = models.CharField(
         max_length=255,
         blank=True,
