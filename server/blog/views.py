@@ -471,6 +471,26 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         'related_service_page',
     }
 
+    def _persist_post(self, post, update_fields):
+        """Save exactly `update_fields` via a raw queryset .update() --
+        bypassing post.save()'s "ready to publish" validation
+        (_validate_related_service_page/_validate_media_and_links), which
+        runs unconditionally on every save() while status='published',
+        regardless of update_fields. None of the fine-grained actions that
+        call this (resolve_media_placeholder, resolve_featured_image,
+        update_featured_image_meta, update_media_meta, autosave) ever touch
+        related_service_page, and they can only ever move a media/link
+        placeholder from unresolved towards resolved/skipped -- never the
+        other way -- so that validation can never meaningfully block them;
+        it can only spuriously 500 them against a post with pre-existing
+        legacy-invalid data (e.g. missing related_service_page), exactly as
+        it did here. Only publish_changes and the generic create/update
+        flow -- the actual "am I allowed to publish this" boundaries --
+        still go through post.save() and get the real check."""
+        BlogPost.objects.filter(pk=post.pk).update(
+            **{f: getattr(post, f) for f in update_fields}
+        )
+
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
     def autosave(self, request, slug=None):
         """Debounced autosave from the editor. A draft post's autosave writes
@@ -495,7 +515,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         snapshot = dict(post.pending_snapshot) if post.pending_snapshot is not None else {}
         snapshot.update(data)
         post.pending_snapshot = snapshot
-        post.save(update_fields=['pending_snapshot'])
+        self._persist_post(post, ['pending_snapshot'])
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
@@ -633,7 +653,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
 
         post.media_plan = media_plan
         update_fields = self._save_effective_content(post, content) + ['media_plan']
-        post.save(update_fields=update_fields)
+        self._persist_post(post, update_fields)
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
@@ -650,7 +670,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             plan['resolved_source'] = None
             plan['resolved_url'] = None
             post.featured_image_plan = plan
-            post.save(update_fields=['featured_image_plan'])
+            self._persist_post(post, ['featured_image_plan'])
             return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
         resolved_source = request.data.get('resolved_source')
@@ -684,7 +704,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         plan['resolved_source'] = resolved_source
         plan['resolved_url'] = resolved_url
         post.featured_image_plan = plan
-        post.save(update_fields=['featured_image', 'featured_image_plan'])
+        self._persist_post(post, ['featured_image', 'featured_image_plan'])
         self._process_featured_image(post)
 
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
@@ -710,7 +730,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             update_fields.append('featured_image_alt')
 
         if update_fields:
-            post.save(update_fields=update_fields)
+            self._persist_post(post, update_fields)
 
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
@@ -785,7 +805,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
                     update_fields.append('pending_snapshot')
 
         post.media_plan = media_plan
-        post.save(update_fields=update_fields)
+        self._persist_post(post, update_fields)
 
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
@@ -813,19 +833,21 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             )
 
         marker_pattern = r'<span[^>]*data-link-marker="' + re.escape(link_id) + r'"[^>]*>\s*</span>'
+        content = self._effective_content(post)
 
         if link_action == 'accept':
             entry['status'] = 'accepted'
             route_prefix = CONTENT_TYPE_ROUTE_PREFIX.get(entry.get('target_content_type', 'blog'), 'blog')
             anchor_text = entry.get('anchor_text_hint') or entry.get('target_title', '')
             replacement = f'<a href="/{route_prefix}/{entry["target_slug"]}">{anchor_text}</a>'
-            post.content = re.sub(marker_pattern, replacement, post.content or '', count=1)
+            content = re.sub(marker_pattern, replacement, content, count=1)
         else:
             entry['status'] = 'rejected'
-            post.content = re.sub(marker_pattern, '', post.content or '', count=1)
+            content = re.sub(marker_pattern, '', content, count=1)
 
         post.suggested_links = suggested_links
-        post.save(update_fields=['content', 'suggested_links'])
+        update_fields = self._save_effective_content(post, content) + ['suggested_links']
+        self._persist_post(post, update_fields)
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminUser])
@@ -841,7 +863,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         existing = post.suggested_links or []
         kept = [item for item in existing if item.get('status') != 'suggested']
 
-        content = post.content or ''
+        content = self._effective_content(post)
         for item in existing:
             if item.get('status') == 'suggested':
                 pattern = r'<span[^>]*data-link-marker="' + re.escape(str(item.get('id'))) + r'"[^>]*>\s*</span>'
@@ -851,7 +873,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         new_suggestions = suggest_internal_links(post)
         content, new_links = insert_link_markers(content, new_suggestions, start_id=next_id)
 
-        post.content = content
         post.suggested_links = kept + new_links
-        post.save(update_fields=['content', 'suggested_links'])
+        update_fields = self._save_effective_content(post, content) + ['suggested_links']
+        self._persist_post(post, update_fields)
         return Response(BlogPostDetailSerializer(post, context={'request': request}).data)

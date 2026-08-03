@@ -296,6 +296,42 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
     setContent((prev) => (prev ? prev + '\n\n' + newContent : newContent));
   };
 
+  // Publish/Schedule dropdown -- shared by the "brand new post" and
+  // "existing draft/scheduled post" cases below (an already-published post
+  // gets "Publish Changes" instead, see the button area).
+  const publishDropdown = (
+    <div className="relative group">
+      <button
+        onClick={() => handleSave('published')}
+        disabled={saving}
+        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        Publish
+        <ChevronDown className="w-4 h-4" />
+      </button>
+
+      <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48">
+        <button
+          onClick={() => handleSave('published')}
+          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
+        >
+          Publish Now
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('content');
+            setStatus('scheduled');
+          }}
+          className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+        >
+          <Clock className="w-4 h-4" />
+          Schedule
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -329,7 +365,7 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 Unpublished changes
               </span>
             )}
-            {!isNew && status === 'published' && (
+            {!isNew && (
               <span className="text-xs text-gray-400">
                 {autosaveState === 'saving' && 'Saving…'}
                 {autosaveState === 'saved' && 'All changes saved'}
@@ -360,7 +396,7 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Publish Changes
               </button>
-            ) : (
+            ) : isNew ? (
               <>
                 <button
                   onClick={() => handleSave('draft')}
@@ -369,42 +405,13 @@ export default function BlogEditor({ post, isNew = false, contentType: contentTy
                 >
                   Save Draft
                 </button>
-
-                <div className="relative group">
-                  <button
-                    onClick={() => handleSave('published')}
-                    disabled={saving}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Save className="w-4 h-4" />
-                    )}
-                    Publish
-                    <ChevronDown className="w-4 h-4" />
-              </button>
-
-              <div className="hidden group-hover:block absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-48">
-                <button
-                  onClick={() => handleSave('published')}
-                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
-                >
-                  Publish Now
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('content');
-                    setStatus('scheduled');
-                  }}
-                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <Clock className="w-4 h-4" />
-                  Schedule
-                </button>
-              </div>
-            </div>
+                {publishDropdown}
               </>
+            ) : (
+              // Existing draft/scheduled post: autosave already persists every
+              // change (see the useEffect above), so a manual "Save Draft"
+              // button here would just be a redundant no-op click.
+              publishDropdown
             )}
           </div>
         </div>
