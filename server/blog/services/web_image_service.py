@@ -10,12 +10,12 @@ module only ever downloads a URL that's already been found and vetted, via
 either the add_web_image_candidate management command or a human pasting a
 URL directly in the admin picker (resolve_media_placeholder).
 """
-import os
 import uuid
 import mimetypes
 
 import requests
-from django.conf import settings
+
+from ..storage import save_media_bytes, blog_media_url
 
 MAX_DOWNLOAD_BYTES = 15 * 1024 * 1024  # 15MB safety cap
 ALLOWED_CONTENT_TYPES = {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}
@@ -26,12 +26,14 @@ class WebImageDownloadError(Exception):
 
 
 def download_and_save_image(url, subdir='blog/web-sourced'):
-    """Download `url` and save it under MEDIA_ROOT/{subdir}/.
+    """Download `url` and save it into blog media storage (local disk or
+    R2, see blog/storage.py) under {subdir}/.
 
     Returns {'url': ..., 'filename': ...} (same shape ImageGenerationService
-    returns) pointing at the new LOCAL copy. Raises WebImageDownloadError on
-    any failure -- never falls back silently, since the caller needs to know
-    the save didn't happen rather than end up hotlinking the original URL.
+    returns) pointing at the app's own hosted copy. Raises
+    WebImageDownloadError on any failure -- never falls back silently, since
+    the caller needs to know the save didn't happen rather than end up
+    hotlinking the original URL.
     """
     try:
         response = requests.get(
@@ -63,14 +65,9 @@ def download_and_save_image(url, subdir='blog/web-sourced'):
         extension = '.jpg'
     filename = f'web_{uuid.uuid4().hex[:12]}{extension}'
 
-    upload_dir = os.path.join(settings.MEDIA_ROOT, *subdir.split('/'))
-    os.makedirs(upload_dir, mode=0o755, exist_ok=True)
-    file_path = os.path.join(upload_dir, filename)
-    with open(file_path, 'wb') as f:
-        f.write(bytes(body))
-    os.chmod(file_path, 0o644)
+    key = save_media_bytes(f'{subdir}/{filename}', bytes(body))
 
     return {
-        'url': f"{settings.MEDIA_URL}{subdir}/{filename}",
+        'url': blog_media_url(key),
         'filename': filename,
     }

@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
+from .storage import blog_media_storage
+
 
 # Related Service Page choices: the 2 city hubs + 6 services x 2 cities.
 # Slugs must stay in sync with next.config.js redirects and the
@@ -127,6 +129,7 @@ class BlogPost(models.Model):
     # Featured image
     featured_image = models.ImageField(
         upload_to='blog/featured/',
+        storage=blog_media_storage,
         blank=True,
         null=True
     )

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_celery_beat',
     'channels',
+    'storages',
     # Local apps
     'gallery',
     'leads',
@@ -179,6 +180,56 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # container user, and nginx returns 403 for /media/ assets (e.g. blog images).
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
+# --- Blog media storage: local disk by default, Cloudflare R2 in production ---
+# Scoped to the blog app only (see blog/storage.py) -- gallery/projects/etc.
+# keep using local disk regardless of these settings. Set all four R2_* vars
+# to switch blog media (AI-generated images, web-sourced images, inline
+# content images, the featured image) over to R2; leave any of them unset
+# and blog media keeps behaving exactly as it always has, no R2 account
+# required to run this app locally.
+R2_BUCKET_NAME = os.environ.get('R2_BUCKET_NAME', '')
+R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID', '')
+R2_ACCESS_KEY_ID = os.environ.get('R2_ACCESS_KEY_ID', '')
+R2_SECRET_ACCESS_KEY = os.environ.get('R2_SECRET_ACCESS_KEY', '')
+# The public URL the bucket is reachable at -- a Cloudflare-dashboard custom
+# domain mapped to the bucket (recommended, e.g. "https://media.tolatiles.com"),
+# not the private R2 API endpoint below. No trailing slash.
+R2_PUBLIC_URL = os.environ.get('R2_PUBLIC_URL', '').rstrip('/')
+
+USE_R2_STORAGE = bool(R2_BUCKET_NAME and R2_ACCOUNT_ID and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_PUBLIC_URL)
+
+R2_ENDPOINT_URL = f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com' if R2_ACCOUNT_ID else ''
+R2_CUSTOM_DOMAIN = R2_PUBLIC_URL.replace('https://', '').replace('http://', '')
+
+# Single source of truth for "does this URL point at a file our blog media
+# storage hosts" (see blog/storage.py::blog_media_key_from_url) -- deliberately
+# not derived by probing the storage backend at request time.
+MEDIA_PUBLIC_URL_PREFIX = f'{R2_PUBLIC_URL}/' if USE_R2_STORAGE else MEDIA_URL
+
+# --- Financial document storage: local disk by default, private Cloudflare R2
+# bucket in production (see quotes/storage.py) ---
+# Scoped to the quotes app only (quote/invoice/receipt/estimate PDFs) -- every
+# other app is unaffected. Unlike blog media, this bucket is deliberately kept
+# PRIVATE (no custom domain, no public access): these are customer financial
+# documents, so URLs are short-lived signed S3 URLs generated on request
+# rather than permanent public links. Same Cloudflare account as blog media
+# (R2_ACCOUNT_ID above), separate bucket and separate scoped credentials.
+R2_FINANCIAL_BUCKET_NAME = os.environ.get('R2_FINANCIAL_BUCKET_NAME', '')
+R2_FINANCIAL_ACCESS_KEY_ID = os.environ.get('R2_FINANCIAL_ACCESS_KEY_ID', '')
+R2_FINANCIAL_SECRET_ACCESS_KEY = os.environ.get('R2_FINANCIAL_SECRET_ACCESS_KEY', '')
+
+USE_R2_FINANCIAL_STORAGE = bool(
+    R2_FINANCIAL_BUCKET_NAME and R2_ACCOUNT_ID
+    and R2_FINANCIAL_ACCESS_KEY_ID and R2_FINANCIAL_SECRET_ACCESS_KEY
+)
+
+# Reuses R2_ENDPOINT_URL above (same account) -- only meaningful when
+# USE_R2_FINANCIAL_STORAGE is True.
+# How long a signed PDF/receipt URL stays valid once generated, in seconds.
+# Long enough that an emailed link or an open browser tab doesn't die on you
+# mid-read, short enough that a leaked link doesn't stay live indefinitely.
+R2_FINANCIAL_URL_EXPIRE_SECONDS = int(os.environ.get('R2_FINANCIAL_URL_EXPIRE_SECONDS', 60 * 60 * 24))  # 24h
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

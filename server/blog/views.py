@@ -2,8 +2,6 @@ import html
 import os
 import re
 import uuid
-from django.conf import settings
-from django.core.files import File
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
 from django.utils import timezone
@@ -16,7 +14,15 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from config.media_utils import rename_local_media_file
+from .storage import (
+    save_media_bytes,
+    blog_media_url,
+    blog_media_key_from_url,
+    open_media_file,
+    delete_media_file,
+    rename_media_file,
+    is_local_storage,
+)
 
 from .models import BlogPost, BlogCategory
 
@@ -152,16 +158,19 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             processed_image = ImageService.process_image(image_file)
 
             # Save the processed image
-            old_path = instance.featured_image.path
+            old_name = instance.featured_image.name
             instance.featured_image.save(processed_image.name, processed_image, save=False)
             instance.save(update_fields=['featured_image'])
 
-            # Set file permissions to 644 so nginx can serve the file
-            os.chmod(instance.featured_image.path, 0o644)
+            if is_local_storage():
+                # Local disk only: nginx needs 644 to serve the file
+                # directly. R2 has no filesystem permissions -- public
+                # access is a bucket-level setting instead (blog/storage.py).
+                os.chmod(instance.featured_image.path, 0o644)
 
             # Remove old image if different
-            if os.path.exists(old_path) and old_path != instance.featured_image.path:
-                os.remove(old_path)
+            if old_name and old_name != instance.featured_image.name:
+                delete_media_file(old_name)
         except Exception as e:
             print(f"Error processing featured image: {e}")
 
@@ -291,16 +300,9 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             # Process image to WebP
             processed_image = ImageService.process_image(image_file)
 
-            # Save to media directory
-            upload_dir = os.path.join(settings.MEDIA_ROOT, 'blog', 'content')
-            os.makedirs(upload_dir, exist_ok=True)
-
-            file_path = os.path.join(upload_dir, processed_image.name)
-            with open(file_path, 'wb') as f:
-                f.write(processed_image.read())
-
-            # Generate URL
-            url = f"{settings.MEDIA_URL}blog/content/{processed_image.name}"
+            # Save to blog media storage (local disk or R2, see blog/storage.py)
+            key = save_media_bytes(f'blog/content/{processed_image.name}', processed_image.read())
+            url = blog_media_url(key)
 
             return Response({
                 'url': url,
@@ -616,14 +618,17 @@ class BlogPostViewSet(viewsets.ModelViewSet):
                 )
 
             # Never hotlink an externally-hosted image, and never share a file
-            # with another model either: 'ai' URLs are already local, blog-owned
+            # with another model either: 'ai' URLs are already our own blog-owned
             # copies, but 'gallery' candidates point straight at a GalleryImage's
-            # own file (see media_plan_service._gallery_candidates), and a raw
-            # pasted/'web' URL is someone else's file entirely -- anything not
-            # already under blog/ gets downloaded into its own independent copy
-            # here, so renaming or deleting it later can never affect (or be
-            # affected by) an unrelated GalleryImage row.
-            if entry.get('type') == 'image' and not resolved_url.startswith(f'{settings.MEDIA_URL}blog/'):
+            # own file (see media_plan_service._gallery_candidates -- Gallery
+            # stays on local disk regardless of blog's storage backend, see
+            # blog/storage.py), and a raw pasted/'web' URL is someone else's
+            # file entirely -- anything not already one of our own blog/ keys
+            # gets downloaded into its own independent copy here, so renaming
+            # or deleting it later can never affect (or be affected by) an
+            # unrelated GalleryImage row.
+            existing_key = blog_media_key_from_url(resolved_url)
+            if entry.get('type') == 'image' and not (existing_key and existing_key.startswith('blog/')):
                 from .services import download_and_save_image, WebImageDownloadError
                 try:
                     saved = download_and_save_image(resolved_url)
@@ -682,23 +687,24 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             )
 
         # Same never-hotlink rule as resolve_media_placeholder: anything not
-        # already ours gets downloaded and saved locally first.
-        if not resolved_url.startswith(settings.MEDIA_URL):
+        # already ours (a key in blog media storage -- local disk or R2, see
+        # blog/storage.py) gets downloaded and saved into our own storage first.
+        existing_key = blog_media_key_from_url(resolved_url)
+        if existing_key is None:
             from .services import download_and_save_image, WebImageDownloadError
             try:
                 saved = download_and_save_image(resolved_url)
             except WebImageDownloadError as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             resolved_url = saved['url']
+            existing_key = blog_media_key_from_url(resolved_url)
 
         # featured_image is an ImageField (a real file), not a URL string
-        # embedded in `content` -- open the local copy we just resolved to
-        # and assign it, reusing _process_featured_image for the existing
-        # WebP conversion + chmod pipeline rather than duplicating it.
-        relative_path = resolved_url[len(settings.MEDIA_URL):]
-        local_path = os.path.join(settings.MEDIA_ROOT, relative_path)
-        with open(local_path, 'rb') as f:
-            post.featured_image.save(os.path.basename(local_path), File(f), save=False)
+        # embedded in `content` -- open the copy we just resolved to and
+        # assign it, reusing _process_featured_image for the existing WebP
+        # conversion pipeline rather than duplicating it.
+        with open_media_file(existing_key) as f:
+            post.featured_image.save(os.path.basename(existing_key), f, save=False)
 
         plan['status'] = 'resolved'
         plan['resolved_source'] = resolved_source
@@ -721,8 +727,8 @@ class BlogPostViewSet(viewsets.ModelViewSet):
         update_fields = []
 
         if name and post.featured_image:
-            new_relative_path = rename_local_media_file(post.featured_image.name, name)
-            post.featured_image.name = new_relative_path
+            new_key = rename_media_file(post.featured_image.name, name)
+            post.featured_image.name = new_key
             update_fields.append('featured_image')
 
         if alt_text is not None:
@@ -782,9 +788,9 @@ class BlogPostViewSet(viewsets.ModelViewSet):
             # references it (the live content AND a pending snapshot's own
             # copy, if one exists) must be updated in lockstep, or whichever
             # copy still holds the old src would 404 the moment it's viewed.
-            relative_path = entry['resolved_url'][len(settings.MEDIA_URL):]
-            new_relative_path = rename_local_media_file(relative_path, name)
-            new_url = f'{settings.MEDIA_URL}{new_relative_path}'
+            existing_key = blog_media_key_from_url(entry['resolved_url'])
+            new_key = rename_media_file(existing_key, name)
+            new_url = blog_media_url(new_key)
             entry['resolved_url'] = new_url
 
             def _fix_src(text):

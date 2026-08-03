@@ -12,14 +12,23 @@ class FeaturedImageURLMixin:
     it since 'backend' isn't an allowed remotePattern host. Patches the
     already-serialized value rather than swapping the field type, so this
     works whether the field is read-only (List/Detail/Public) or also
-    accepts file uploads (Create)."""
+    accepts file uploads (Create).
+
+    instance.featured_image.url is relative ("/media/blog/...") on local
+    disk storage but already a full absolute URL ("https://media.tolatiles
+    .com/blog/...") on R2 (see blog/storage.py) -- only prepend
+    PUBLIC_MEDIA_BASE_URL in the relative case, or R2 URLs end up with the
+    site's own domain wrongly glued onto the front of them."""
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
         if data.get('featured_image') and instance.featured_image and request:
             if request.get_host().split(':')[0] == 'backend':
-                data['featured_image'] = f"{settings.PUBLIC_MEDIA_BASE_URL}{instance.featured_image.url}"
+                image_url = instance.featured_image.url
+                if not image_url.startswith(('http://', 'https://')):
+                    image_url = f"{settings.PUBLIC_MEDIA_BASE_URL}{image_url}"
+                data['featured_image'] = image_url
         return data
 
 

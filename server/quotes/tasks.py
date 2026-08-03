@@ -1,8 +1,7 @@
 """
 Celery tasks for quote/invoice PDF generation and email delivery.
 """
-import os
-import shutil
+import io
 import logging
 from celery import shared_task
 from django.conf import settings
@@ -10,26 +9,32 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from .storage import (
+    save_pdf_bytes,
+    read_financial_file,
+    financial_file_exists,
+    copy_financial_file,
+)
+
 logger = logging.getLogger(__name__)
 
 
-def _archive_pdf(obj, pdf_dir, base_filename):
+def _archive_pdf(obj, key_prefix, base_filename):
     """
-    If obj already has a PDF file, copy it to a versioned filename and
-    append an entry to obj.pdf_versions. Returns the updated version number.
-    Does NOT save the object — caller must save.
+    If obj already has a PDF file, copy it to a versioned key and append an
+    entry to obj.pdf_versions. Returns the updated version number. Does NOT
+    save the object -- caller must save.
     """
     if not obj.pdf_file:
         return obj.pdf_version
 
-    current_path = obj.pdf_file.path if obj.pdf_file else None
-    if current_path and os.path.exists(current_path):
+    current_key = obj.pdf_file.name if obj.pdf_file else None
+    if current_key and financial_file_exists(current_key):
         version = obj.pdf_version
         versioned_filename = f"{base_filename}_v{version}.pdf"
-        versioned_path = os.path.join(pdf_dir, versioned_filename)
+        versioned_key = f"{key_prefix}/{versioned_filename}"
         try:
-            shutil.copy2(current_path, versioned_path)
-            os.chmod(versioned_path, 0o644)
+            copy_financial_file(current_key, versioned_key)
         except Exception as exc:
             logger.warning(f"Could not archive PDF version: {exc}")
             return version
@@ -57,11 +62,8 @@ def generate_quote_pdf(self, quote_id: int) -> dict:
         quote = Quote.objects.select_related('customer').prefetch_related('line_items').get(id=quote_id)
         company = CompanySettings.get_instance()
 
-        pdf_dir = os.path.join(settings.MEDIA_ROOT, 'quotes')
-        os.makedirs(pdf_dir, exist_ok=True)
-
         # Archive existing PDF before overwriting
-        _archive_pdf(quote, pdf_dir, f"quote_{quote.reference}")
+        _archive_pdf(quote, 'quotes', f"quote_{quote.reference}")
 
         html_content = render_to_string('quotes/quote_pdf.html', {
             'quote': quote,
@@ -70,23 +72,23 @@ def generate_quote_pdf(self, quote_id: int) -> dict:
         })
 
         pdf_filename = f"quote_{quote.reference}.pdf"
-        pdf_path = os.path.join(pdf_dir, pdf_filename)
+        pdf_key = f"quotes/{pdf_filename}"
 
-        with open(pdf_path, 'wb') as pdf_file:
-            pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+        buffer = io.BytesIO()
+        pisa_status = pisa.CreatePDF(html_content, dest=buffer)
 
         if pisa_status.err:
             logger.error(f"Error generating PDF: {pisa_status.err}")
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
 
-        os.chmod(pdf_path, 0o644)
+        save_pdf_bytes(pdf_key, buffer.getvalue())
 
-        quote.pdf_file.name = f"quotes/{pdf_filename}"
+        quote.pdf_file.name = pdf_key
         quote.pdf_generated_at = timezone.now()
         quote.save(update_fields=['pdf_file', 'pdf_generated_at', 'pdf_version', 'pdf_versions'])
 
         logger.info(f"Generated PDF v{quote.pdf_version - 1} for quote {quote.reference}")
-        return {'status': 'success', 'pdf_path': pdf_path, 'reference': quote.reference}
+        return {'status': 'success', 'pdf_key': pdf_key, 'reference': quote.reference}
 
     except Quote.DoesNotExist:
         logger.error(f"Quote {quote_id} not found")
@@ -151,8 +153,9 @@ def send_quote_email(self, quote_id: int) -> dict:
         email.content_subtype = 'html'
 
         # Attach PDF
-        if quote.pdf_file and os.path.exists(quote.pdf_file.path):
-            email.attach_file(quote.pdf_file.path)
+        if quote.pdf_file and financial_file_exists(quote.pdf_file.name):
+            pdf_bytes = read_financial_file(quote.pdf_file.name)
+            email.attach(f"quote_{quote.reference}.pdf", pdf_bytes, 'application/pdf')
 
         # Send email
         email.send()
@@ -187,11 +190,8 @@ def generate_invoice_pdf(self, invoice_id: int) -> dict:
         ).get(id=invoice_id)
         company = CompanySettings.get_instance()
 
-        pdf_dir = os.path.join(settings.MEDIA_ROOT, 'invoices')
-        os.makedirs(pdf_dir, exist_ok=True)
-
         # Archive existing PDF before overwriting
-        _archive_pdf(invoice, pdf_dir, f"invoice_{invoice.reference}")
+        _archive_pdf(invoice, 'invoices', f"invoice_{invoice.reference}")
 
         html_content = render_to_string('quotes/invoice_pdf.html', {
             'invoice': invoice,
@@ -200,23 +200,23 @@ def generate_invoice_pdf(self, invoice_id: int) -> dict:
         })
 
         pdf_filename = f"invoice_{invoice.reference}.pdf"
-        pdf_path = os.path.join(pdf_dir, pdf_filename)
+        pdf_key = f"invoices/{pdf_filename}"
 
-        with open(pdf_path, 'wb') as pdf_file:
-            pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+        buffer = io.BytesIO()
+        pisa_status = pisa.CreatePDF(html_content, dest=buffer)
 
         if pisa_status.err:
             logger.error(f"Error generating PDF: {pisa_status.err}")
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
 
-        os.chmod(pdf_path, 0o644)
+        save_pdf_bytes(pdf_key, buffer.getvalue())
 
-        invoice.pdf_file.name = f"invoices/{pdf_filename}"
+        invoice.pdf_file.name = pdf_key
         invoice.pdf_generated_at = timezone.now()
         invoice.save(update_fields=['pdf_file', 'pdf_generated_at', 'pdf_version', 'pdf_versions'])
 
         logger.info(f"Generated PDF v{invoice.pdf_version - 1} for invoice {invoice.reference}")
-        return {'status': 'success', 'pdf_path': pdf_path, 'reference': invoice.reference}
+        return {'status': 'success', 'pdf_key': pdf_key, 'reference': invoice.reference}
 
     except Invoice.DoesNotExist:
         logger.error(f"Invoice {invoice_id} not found")
@@ -244,9 +244,6 @@ def generate_installment_receipt_pdf(self, installment_id: int) -> dict:
         ).prefetch_related('line_items').get(id=installment_id)
         company = CompanySettings.get_instance()
 
-        pdf_dir = os.path.join(settings.MEDIA_ROOT, 'receipts', 'installments')
-        os.makedirs(pdf_dir, exist_ok=True)
-
         html_content = render_to_string('quotes/installment_receipt_pdf.html', {
             'installment': installment,
             'invoice': installment.invoice,
@@ -254,22 +251,22 @@ def generate_installment_receipt_pdf(self, installment_id: int) -> dict:
         })
 
         pdf_filename = f"receipt_{installment.invoice.reference}_inst{installment.id}.pdf"
-        pdf_path = os.path.join(pdf_dir, pdf_filename)
+        pdf_key = f"receipts/installments/{pdf_filename}"
 
-        with open(pdf_path, 'wb') as pdf_file:
-            pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+        buffer = io.BytesIO()
+        pisa_status = pisa.CreatePDF(html_content, dest=buffer)
 
         if pisa_status.err:
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
 
-        os.chmod(pdf_path, 0o644)
+        save_pdf_bytes(pdf_key, buffer.getvalue())
 
-        installment.receipt_pdf_file.name = f"receipts/installments/{pdf_filename}"
+        installment.receipt_pdf_file.name = pdf_key
         installment.receipt_generated_at = timezone.now()
         installment.save(update_fields=['receipt_pdf_file', 'receipt_generated_at'])
 
         logger.info(f"Generated installment receipt for {installment}")
-        return {'status': 'success', 'pdf_path': pdf_path}
+        return {'status': 'success', 'pdf_key': pdf_key}
 
     except InvoiceInstallment.DoesNotExist:
         return {'status': 'error', 'reason': 'installment_not_found'}
@@ -293,9 +290,6 @@ def generate_invoice_receipt_pdf(self, invoice_id: int) -> dict:
         ).get(id=invoice_id)
         company = CompanySettings.get_instance()
 
-        pdf_dir = os.path.join(settings.MEDIA_ROOT, 'receipts', 'invoices')
-        os.makedirs(pdf_dir, exist_ok=True)
-
         html_content = render_to_string('quotes/invoice_receipt_pdf.html', {
             'invoice': invoice,
             'company': company,
@@ -303,22 +297,22 @@ def generate_invoice_receipt_pdf(self, invoice_id: int) -> dict:
         })
 
         pdf_filename = f"receipt_{invoice.reference}.pdf"
-        pdf_path = os.path.join(pdf_dir, pdf_filename)
+        pdf_key = f"receipts/invoices/{pdf_filename}"
 
-        with open(pdf_path, 'wb') as pdf_file:
-            pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+        buffer = io.BytesIO()
+        pisa_status = pisa.CreatePDF(html_content, dest=buffer)
 
         if pisa_status.err:
             return {'status': 'error', 'reason': 'pdf_generation_failed'}
 
-        os.chmod(pdf_path, 0o644)
+        save_pdf_bytes(pdf_key, buffer.getvalue())
 
-        invoice.receipt_pdf_file.name = f"receipts/invoices/{pdf_filename}"
+        invoice.receipt_pdf_file.name = pdf_key
         invoice.receipt_generated_at = timezone.now()
         invoice.save(update_fields=['receipt_pdf_file', 'receipt_generated_at'])
 
         logger.info(f"Generated invoice receipt for {invoice.reference}")
-        return {'status': 'success', 'pdf_path': pdf_path}
+        return {'status': 'success', 'pdf_key': pdf_key}
 
     except Invoice.DoesNotExist:
         return {'status': 'error', 'reason': 'invoice_not_found'}
@@ -379,8 +373,9 @@ def send_invoice_email(self, invoice_id: int) -> dict:
         email.content_subtype = 'html'
 
         # Attach PDF
-        if invoice.pdf_file and os.path.exists(invoice.pdf_file.path):
-            email.attach_file(invoice.pdf_file.path)
+        if invoice.pdf_file and financial_file_exists(invoice.pdf_file.name):
+            pdf_bytes = read_financial_file(invoice.pdf_file.name)
+            email.attach(f"invoice_{invoice.reference}.pdf", pdf_bytes, 'application/pdf')
 
         # Send email
         email.send()

@@ -8,6 +8,8 @@ from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 
+from .storage import financial_media_storage
+
 
 def generate_quote_reference():
     """Generate unique reference: YYYYMMDD-XXXXX"""
@@ -211,7 +213,7 @@ class Quote(models.Model):
     )
 
     # PDF storage with versioning
-    pdf_file = models.FileField(upload_to='quotes/', blank=True, null=True)
+    pdf_file = models.FileField(upload_to='quotes/', storage=financial_media_storage, blank=True, null=True)
     pdf_generated_at = models.DateTimeField(blank=True, null=True)
     pdf_version = models.PositiveIntegerField(default=1)
     pdf_versions = models.JSONField(default=list, blank=True)
@@ -429,13 +431,13 @@ class Invoice(models.Model):
     )
 
     # PDF storage with versioning
-    pdf_file = models.FileField(upload_to='invoices/', blank=True, null=True)
+    pdf_file = models.FileField(upload_to='invoices/', storage=financial_media_storage, blank=True, null=True)
     pdf_generated_at = models.DateTimeField(blank=True, null=True)
     pdf_version = models.PositiveIntegerField(default=1)
     pdf_versions = models.JSONField(default=list, blank=True)
 
     # Receipt storage
-    receipt_pdf_file = models.FileField(upload_to='receipts/invoices/', blank=True, null=True)
+    receipt_pdf_file = models.FileField(upload_to='receipts/invoices/', storage=financial_media_storage, blank=True, null=True)
     receipt_generated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -538,7 +540,7 @@ class InvoiceInstallment(models.Model):
     notes = models.TextField(blank=True)
 
     # Receipt PDF for this specific installment payment
-    receipt_pdf_file = models.FileField(upload_to='receipts/installments/', blank=True, null=True)
+    receipt_pdf_file = models.FileField(upload_to='receipts/installments/', storage=financial_media_storage, blank=True, null=True)
     receipt_generated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -653,7 +655,7 @@ class Estimate(models.Model):
     )
 
     # PDF
-    pdf_file = models.FileField(upload_to='estimates/', blank=True, null=True)
+    pdf_file = models.FileField(upload_to='estimates/', storage=financial_media_storage, blank=True, null=True)
     pdf_generated_at = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

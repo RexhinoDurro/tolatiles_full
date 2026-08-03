@@ -39,6 +39,17 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'img.youtube.com',
       },
+      // Blog media on Cloudflare R2 (server/blog/storage.py) -- only added
+      // if NEXT_PUBLIC_R2_MEDIA_HOSTNAME is set, so builds without R2
+      // configured yet aren't affected. Value is just the host, e.g.
+      // "media.tolatiles.com" (same domain as the backend's R2_PUBLIC_URL,
+      // no scheme, no path).
+      ...(process.env.NEXT_PUBLIC_R2_MEDIA_HOSTNAME
+        ? [{
+            protocol: 'https',
+            hostname: process.env.NEXT_PUBLIC_R2_MEDIA_HOSTNAME,
+          }]
+        : []),
     ],
   },
   async headers() {

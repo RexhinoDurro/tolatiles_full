@@ -18,3 +18,5 @@ pywebpush>=1.14
 google-generativeai>=0.3.0
 google-ads>=21.3.0
 django-celery-beat>=2.5
+django-storages[s3]==1.14.6
+boto3>=1.34,<2

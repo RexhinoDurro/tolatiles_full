@@ -1,9 +1,10 @@
-import os
 import uuid
 import base64
 import urllib.request
 import urllib.parse
 from django.conf import settings
+
+from ..storage import save_media_bytes, blog_media_url
 
 
 class ImageGenerationService:
@@ -157,17 +158,11 @@ Return ONLY the enhanced prompt, nothing else."""
             return {'error': f'Image generation failed: {str(e)}'}
 
     def _save_image(self, image_bytes, aspect_ratio):
-        """Save image bytes to file and return URL."""
+        """Save image bytes to blog media storage (local disk or R2, see
+        blog/storage.py) and return its public URL."""
         filename = f"ai_generated_{uuid.uuid4().hex[:12]}.png"
-        upload_dir = os.path.join(settings.MEDIA_ROOT, 'blog', 'ai-generated')
-        os.makedirs(upload_dir, mode=0o755, exist_ok=True)
-
-        file_path = os.path.join(upload_dir, filename)
-        with open(file_path, 'wb') as f:
-            f.write(image_bytes)
-        os.chmod(file_path, 0o644)
-
-        url = f"{settings.MEDIA_URL}blog/ai-generated/{filename}"
+        key = save_media_bytes(f'blog/ai-generated/{filename}', image_bytes)
+        url = blog_media_url(key)
 
         return {
             'url': url,
