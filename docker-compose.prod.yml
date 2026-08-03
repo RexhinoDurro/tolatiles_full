@@ -42,7 +42,12 @@ x-backend-env: &backend-env
   R2_FINANCIAL_BUCKET_NAME: ${R2_FINANCIAL_BUCKET_NAME}
   R2_FINANCIAL_ACCESS_KEY_ID: ${R2_FINANCIAL_ACCESS_KEY_ID}
   R2_FINANCIAL_SECRET_ACCESS_KEY: ${R2_FINANCIAL_SECRET_ACCESS_KEY}
-  R2_FINANCIAL_URL_EXPIRE_SECONDS: ${R2_FINANCIAL_URL_EXPIRE_SECONDS}
+  # Optional in Infisical (settings.py falls back to 86400 if truly unset) --
+  # but os.environ.get()'s default only applies when the key is absent, not
+  # present-with-an-empty-value, and Compose substitutes an unset var as ''
+  # rather than omitting the key. Needs its own fallback here or the container
+  # crash-loops on `int('')` the moment this secret isn't set.
+  R2_FINANCIAL_URL_EXPIRE_SECONDS: ${R2_FINANCIAL_URL_EXPIRE_SECONDS:-86400}
 
 services:
   backend:
