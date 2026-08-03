@@ -1042,6 +1042,7 @@ class EstimateVisitViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['deal', 'status']
+    pagination_class = None
 
     @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
     def upload_photo(self, request, pk=None):
@@ -1077,6 +1078,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['deal', 'status', 'appointment_type']
+    pagination_class = None
 
 
 # ==================== CUSTOM JOB TYPE / LEAD SOURCE VIEWSETS ====================
